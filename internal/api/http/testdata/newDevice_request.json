@@ -1,0 +1,28 @@
+{
+    "usePresets": false,
+    "userId": "someid",
+    "properties": {
+        "one": "one", 
+        "two": "two"
+    }, 
+    "description": "description",
+    "speed": {
+        "min": 1,
+        "max": 10,
+        "amplitude": 4
+    },
+    "battery": {
+        "min": 1,
+        "max": 80,
+        "chargeTime": 300
+    },
+    "elevation": {
+        "min": 1,
+        "max": 10,
+        "amplitude": 4
+    },
+    "offline": {
+        "min": 1,
+        "max": 10
+    }
+}

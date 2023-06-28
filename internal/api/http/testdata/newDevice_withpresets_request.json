@@ -1,0 +1,9 @@
+{
+    "usePresets": true,
+    "userId": "someid",
+    "properties": {
+        "one": "one", 
+        "two": "two"
+    }, 
+    "description": "description"
+}
