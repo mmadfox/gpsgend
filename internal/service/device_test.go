@@ -664,6 +664,48 @@ func TestService_PauseDevice(t *testing.T) {
 			},
 			wantErr: errors.New("not found"),
 		},
+		{
+			name: "should return error when pause process on failure",
+			newService: func(ctx context.Context, id uuid.UUID) *service.DeviceService {
+				svc, mock := newService(t)
+				dev := stubdevice.DeviceWithID(id)
+				proc, err := dev.NewProcess()
+				require.NoError(t, err)
+				require.NotNil(t, proc)
+
+				mock.deviceStorage.EXPECT().
+					FindByID(ctx, id).
+					Times(1).
+					Return(dev, nil)
+
+				mock.generator.EXPECT().
+					Lookup(dev.ID()).
+					Return(nil, nil)
+				return svc
+			},
+			wantErr: errors.New("device is nil pointer"),
+		},
+		{
+			name: "should return valid paused device",
+			newService: func(ctx context.Context, id uuid.UUID) *service.DeviceService {
+				svc, mock := newService(t)
+				dev := stubdevice.DeviceWithID(id)
+				proc, err := dev.NewProcess()
+				require.NoError(t, err)
+				require.NotNil(t, proc)
+				mock.deviceStorage.EXPECT().
+					FindByID(ctx, id).
+					Times(1).
+					Return(dev, nil)
+				mock.generator.EXPECT().
+					Lookup(dev.ID()).
+					Return(proc, nil)
+				mock.generator.EXPECT().Detach(id).Times(1)
+				mock.deviceStorage.EXPECT().Update(ctx, dev).Times(1).Return(nil)
+				return svc
+			},
+			wantErr: errors.New("device is nil pointer"),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -671,6 +713,72 @@ func TestService_PauseDevice(t *testing.T) {
 			id := uuid.New()
 			svc := tt.newService(ctx, id)
 			err := svc.PauseDevice(ctx, id)
+			if err != nil {
+				require.Equal(t, tt.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestService_ResumeDevice(t *testing.T) {
+	tests := []struct {
+		name       string
+		newService func(context.Context, uuid.UUID) *service.DeviceService
+		wantErr    error
+	}{
+		{
+			name: "should return error when device not found",
+			newService: func(ctx context.Context, id uuid.UUID) *service.DeviceService {
+				svc, mock := newService(t)
+				mock.deviceStorage.EXPECT().
+					FindByID(ctx, id).
+					Times(1).
+					Return(nil, device.ErrDeviceNotFound)
+				return svc
+			},
+			wantErr: device.ErrDeviceNotFound,
+		},
+		{
+			name: "should return error when device is running",
+			newService: func(ctx context.Context, id uuid.UUID) *service.DeviceService {
+				svc, mock := newService(t)
+				dev := stubdevice.DeviceWithID(id)
+				// start device
+				proc, err := dev.NewProcess()
+				require.NoError(t, err)
+				require.NotNil(t, proc)
+				mock.deviceStorage.EXPECT().
+					FindByID(ctx, id).
+					Times(1).
+					Return(dev, nil)
+				return svc
+			},
+			wantErr: device.ErrDeviceAlreadyRunning,
+		},
+		{
+			name: "should return error when storage failure",
+			newService: func(ctx context.Context, id uuid.UUID) *service.DeviceService {
+				svc, mock := newService(t)
+				dev := stubdevice.DeviceWithID(id)
+				mock.deviceStorage.EXPECT().
+					FindByID(ctx, id).
+					Times(1).
+					Return(dev, nil)
+				mock.generator.EXPECT().
+					Attach(gomock.Any())
+				mock.generator.EXPECT().Detach(dev.ID())
+				mock.deviceStorage.EXPECT().Update(ctx, dev).Return(errors.New("failure"))
+				return svc
+			},
+			wantErr: errors.New("failure"),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := context.Background()
+			id := uuid.New()
+			svc := tt.newService(ctx, id)
+			err := svc.ResumeDevice(ctx, id)
 			if err != nil {
 				require.Equal(t, tt.wantErr, err)
 			}

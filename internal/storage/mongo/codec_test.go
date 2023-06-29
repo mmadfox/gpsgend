@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"testing"
+	"time"
 
 	"github.com/mmadfox/gpsgend/internal/device"
 	stubdevice "github.com/mmadfox/gpsgend/tests/stubs/device"
@@ -14,6 +15,9 @@ func Test_encodeDeviceModel(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, deviceModel)
 
+	batteryChargeTime, err := time.ParseDuration(deviceModel.Battery.ChargeTime)
+	require.NoError(t, err)
+
 	require.Equal(t, dev.ID().String(), deviceModel.ID)
 	require.Equal(t, dev.UserID(), deviceModel.UserID)
 	require.Equal(t, dev.Model().String(), deviceModel.Model)
@@ -24,7 +28,7 @@ func Test_encodeDeviceModel(t *testing.T) {
 	require.Equal(t, dev.Speed().Amplitude(), deviceModel.Speed.Amplitude)
 	require.Equal(t, dev.Battery().Min(), deviceModel.Battery.Min)
 	require.Equal(t, dev.Battery().Max(), deviceModel.Battery.Max)
-	require.Equal(t, dev.Battery().ChargeTime(), deviceModel.Battery.ChargeTime)
+	require.Equal(t, dev.Battery().ChargeTime(), batteryChargeTime)
 	require.Equal(t, dev.Elevation().Min(), deviceModel.Elevation.Min)
 	require.Equal(t, dev.Elevation().Max(), deviceModel.Elevation.Max)
 	require.Equal(t, dev.Elevation().Amplitude(), deviceModel.Elevation.Amplitude)

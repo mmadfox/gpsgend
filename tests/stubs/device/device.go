@@ -22,6 +22,7 @@ func DeviceWithID(id uuid.UUID) *device.Device {
 		Battery(1, 100, time.Hour).
 		Elevation(1, 150, gpsgen.Amplitude16).
 		Offline(1, 30).
+		Snapshot(Snapshot()).
 		Routes(Routes()).
 		Sensors(Sensors()).
 		CreatedAt(time.Now().Add(-time.Hour)).
@@ -42,6 +43,7 @@ func DeviceWithoutRoutes() *device.Device {
 		Status(device.Stopped).
 		UserID(uuid.NewString()).
 		Color(Color()).
+		Snapshot(Snapshot()).
 		Model("testDevice").
 		Props(map[string]string{"foo": "bar"}).
 		Description("some description").
@@ -62,12 +64,25 @@ func DeviceWithoutRoutes() *device.Device {
 	return newDevice
 }
 
+func Snapshot() []byte {
+	proc, err := gpsgen.RandomDrone()
+	if err != nil {
+		panic(err)
+	}
+	snapshot, err := gpsgen.TakeDeviceSnapshot(proc)
+	if err != nil {
+		panic(err)
+	}
+	return snapshot
+}
+
 func Device() *device.Device {
 	newDevice, err := device.NewBuilder().
 		ID(uuid.New()).
 		Status(device.Stopped).
 		UserID(uuid.NewString()).
 		Color(Color()).
+		Snapshot(Snapshot()).
 		Model("testDevice").
 		Props(map[string]string{"foo": "bar"}).
 		Description("some description").
