@@ -122,7 +122,7 @@ func (s *storageMongoSuite) TestStorageMongoWalkByStatus() {
 func (s *storageMongoSuite) TestStorageMongoSearchWithEmptyFilter() {
 	result, err := s.deviceStorage.Search(s.ctx, device.QueryFilter{})
 	require.NoError(s.T(), err)
-	require.Equal(s.T(), len(s.devices), int(result.TotalDevices))
+	require.Equal(s.T(), len(s.devices), int(result.Meta.TotalDevices))
 	require.Equal(s.T(), len(s.devices), len(result.Devices))
 }
 
@@ -132,8 +132,8 @@ func (s *storageMongoSuite) TestStorageMongoSearchWithPaging() {
 	for i := 0; i < total; i++ {
 		numPage := i
 		result, err := s.deviceStorage.Search(s.ctx, device.QueryFilter{
-			Offset: int64(numPage),
-			Limit:  1,
+			Page:  int64(numPage),
+			Limit: 1,
 		})
 		require.NoError(s.T(), err)
 		require.Len(s.T(), result.Devices, 1)

@@ -468,3 +468,34 @@ func (l logging) RemoveSensor(ctx context.Context, deviceID uuid.UUID, sensorID 
 
 	return l.next.RemoveSensor(ctx, deviceID, sensorID)
 }
+
+func (l logging) DeviceByID(ctx context.Context, deviceID uuid.UUID) (dev *device.Device, err error) {
+	method := "call service.DeviceByID"
+	attrs := []any{
+		slog.String("deviceID", deviceID.String()),
+	}
+
+	reqID, ok := ctx.Value("requestid").(string)
+	if ok {
+		attrs = append(attrs, slog.String("requestID", reqID))
+	}
+	params := slog.Group("params", attrs...)
+
+	defer func(start time.Time) {
+		if err != nil {
+			l.logger.Error(method,
+				params,
+				slog.Duration("took", time.Since(start)),
+				"err",
+				err,
+			)
+			return
+		}
+		l.logger.Info(method,
+			params,
+			slog.Duration("took", time.Since(start)),
+		)
+	}(time.Now())
+
+	return l.next.DeviceByID(ctx, deviceID)
+}

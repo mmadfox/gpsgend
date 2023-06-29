@@ -36,11 +36,12 @@ func NewServer(
 ) *Server {
 	server := &Server{
 		handler: fiber.New(fiber.Config{
-			ServerHeader:          "gpsgend",
-			StrictRouting:         true,
-			ReadTimeout:           readTimeout,
-			WriteTimeout:          writeTimeout,
-			ErrorHandler:          errorHandler,
+			ServerHeader:  "gpsgend",
+			StrictRouting: true,
+			ReadTimeout:   readTimeout,
+			WriteTimeout:  writeTimeout,
+			ErrorHandler:  errorHandler,
+
 			DisableStartupMessage: true,
 		}),
 	}
@@ -100,6 +101,7 @@ func NewServer(
 
 	server.handler.Post("/gpsgend/v1/devices", createDeviceHandler(deviceUseCase))
 	server.handler.Patch("/gpsgend/v1/devices/:deviceID", updateDeviceHandler(deviceUseCase))
+	server.handler.Get("/gpsgend/v1/devices/:deviceID", findDeviceByIDHandler(deviceUseCase))
 	server.handler.Delete("/gpsgend/v1/devices/:deviceID", removeDeviceHandler(deviceUseCase))
 	server.handler.Patch("/gpsgend/v1/devices/:deviceID/run", runDeviceHandler(deviceUseCase))
 	server.handler.Patch("/gpsgend/v1/devices/:deviceID/stop", stopDeviceHandler(deviceUseCase))

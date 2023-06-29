@@ -133,51 +133,53 @@ func (s *Storage) WalkByStatus(ctx context.Context, ds []device.Status, fn func(
 	return nil
 }
 
-func (s *Storage) Search(ctx context.Context, f device.QueryFilter) (results device.SearchResults, err error) {
+func (s *Storage) Search(ctx context.Context, f device.QueryFilter) (result device.SearchResult, err error) {
 	filter := encodeQueryFilter(&f)
-	if f.Limit < 0 {
+	if f.Limit <= 0 {
 		f.Limit = 50
 	}
 	if f.Limit > 1000 {
 		f.Limit = 1000
 	}
 
-	if f.Offset < 0 {
-		f.Offset = 0
+	if f.Page < 0 {
+		f.Page = 0
 	}
 
 	opts := options.Find().SetLimit(f.Limit)
-
-	if f.Offset > 0 {
-		page := f.Offset * f.Limit
+	var page int64
+	if f.Page > 0 {
+		page = f.Page * f.Limit
 		opts.SetSkip(page)
 	}
 
 	count, err := s.deviceCollection.CountDocuments(ctx, filter)
 	if err != nil {
-		return results, err
+		return result, err
 	}
-	results.TotalDevices = count
+	result.Meta.TotalDevices = count
 
 	cursor, err := s.deviceCollection.Find(ctx, filter, opts)
 	if err != nil {
-		return results, err
+		return result, err
 	}
 
-	results.Devices = make([]device.DeviceView, 0, f.Limit)
+	result.Devices = make([]device.DeviceView, 0, f.Limit)
+	result.Meta.Page = f.Page
+	result.Meta.Limit = f.Limit
 
 	for {
 		if cursor.TryNext(ctx) {
 			var deviceView device.DeviceView
 			if err := cursor.Decode(&deviceView); err != nil {
-				return results, err
+				return result, err
 			}
-			results.Devices = append(results.Devices, deviceView)
+			result.Devices = append(result.Devices, deviceView)
 			continue
 		}
 
 		if err := cursor.Err(); err != nil {
-			log.Fatal(err)
+			return result, err
 		}
 
 		if cursor.ID() == 0 {
@@ -185,7 +187,9 @@ func (s *Storage) Search(ctx context.Context, f device.QueryFilter) (results dev
 		}
 	}
 
-	return results, nil
+	result.Meta.Found = int64(len(result.Devices))
+
+	return result, nil
 }
 
 func (s *Storage) EnsureIndexes() error {

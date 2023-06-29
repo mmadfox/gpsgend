@@ -2,7 +2,6 @@ package mongo
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -28,7 +27,7 @@ func encodeDevice(d *device.Device) (*deviceModel, error) {
 	model.Speed.Min = d.Speed().Min()
 	model.Speed.Max = d.Speed().Max()
 
-	model.Battery.ChargeTime = d.Battery().ChargeTime()
+	model.Battery.ChargeTime = d.Battery().ChargeTime().String()
 	model.Battery.Min = d.Battery().Min()
 	model.Battery.Max = d.Battery().Max()
 
@@ -95,10 +94,16 @@ func decodeDevice(d *deviceModel) (*device.Device, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	batteryChargeTime, err := time.ParseDuration(d.Battery.ChargeTime)
+	if err != nil {
+		return nil, err
+	}
+
 	builder.Color(color)
 	builder.Description(d.Description)
 	builder.Speed(d.Speed.Min, d.Speed.Max, d.Speed.Amplitude)
-	builder.Battery(d.Battery.Min, d.Battery.Max, d.Battery.ChargeTime)
+	builder.Battery(d.Battery.Min, d.Battery.Max, batteryChargeTime)
 	builder.Elevation(d.Elevation.Min, d.Elevation.Max, d.Elevation.Amplitude)
 	builder.Offline(d.Offline.Min, d.Offline.Max)
 	builder.Props(d.Props)
@@ -168,42 +173,40 @@ func decodeDevice(d *deviceModel) (*device.Device, error) {
 func encodeQueryFilter(qf *device.QueryFilter) bson.D {
 	filter := bson.D{}
 
-	if qf.Color != nil {
+	if qf.Model != nil {
 		filter = append(filter, bson.E{
-			Key:   "color",
-			Value: bson.M{"$in": strings.Join(*qf.Color, ",")},
+			Key: "model",
+			Value: bson.M{
+				"$regex": primitive.Regex{Pattern: "^" + *qf.Model, Options: "i"},
+			},
 		})
 	}
+
+	if qf.Status != nil {
+		filter = append(filter, bson.E{
+			Key:   "status.id",
+			Value: bson.M{"$in": *qf.Status},
+		})
+	}
+
 	if qf.ID != nil {
 		filter = append(filter, bson.E{
 			Key:   "device_id",
-			Value: bson.M{"$in": strings.Join(*qf.ID, ",")},
+			Value: bson.M{"$in": *qf.ID},
 		})
 	}
-	if qf.ProcID != nil {
+
+	if qf.User != nil {
 		filter = append(filter, bson.E{
-			Key:   "process_id",
-			Value: bson.M{"$in": strings.Join(*qf.ProcID, ",")},
+			Key:   "user_id",
+			Value: bson.M{"$in": *qf.User},
 		})
 	}
-	if qf.SensorID != nil {
+
+	if qf.Sensor != nil {
 		filter = append(filter, bson.E{
 			Key:   "sensors.id",
-			Value: bson.M{"$in": strings.Join(*qf.SensorID, ",")},
-		})
-	}
-	if qf.SensorName != nil {
-		names := *qf.SensorName
-		inOp := make([]primitive.Regex, len(names))
-		for i := 0; i < len(names); i++ {
-			inOp[i] = primitive.Regex{
-				Pattern: names[i],
-				Options: "i",
-			}
-		}
-		filter = append(filter, bson.E{
-			Key:   "sensors.name",
-			Value: bson.M{"$in": inOp},
+			Value: bson.M{"$in": *qf.Sensor},
 		})
 	}
 

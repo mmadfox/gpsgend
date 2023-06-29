@@ -36,10 +36,10 @@ func (m *MockQuery) EXPECT() *MockQueryMockRecorder {
 }
 
 // Search mocks base method.
-func (m *MockQuery) Search(ctx context.Context, f device.QueryFilter) (device.SearchResults, error) {
+func (m *MockQuery) Search(ctx context.Context, f device.QueryFilter) (device.SearchResult, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Search", ctx, f)
-	ret0, _ := ret[0].(device.SearchResults)
+	ret0, _ := ret[0].(device.SearchResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

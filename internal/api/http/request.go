@@ -16,11 +16,11 @@ import (
 
 const (
 	deviceParamName     = "deviceID"
+	sensorParamName     = "sensorID"
 	routeParamName      = "routeID"
 	userParamName       = "userID"
-	sensorParamName     = "sensorID"
 	processParamName    = "processID"
-	statusParamName     = "statusID"
+	statusParamName     = "status"
 	modelParamName      = "model"
 	colorParamName      = "color"
 	speedFromParamName  = "speed:from"
@@ -143,13 +143,42 @@ func (r *updateDeviceRequest) ToUpdateDeviceParams() device.UpdateDeviceParams {
 	return params
 }
 
-func decodeDeviceQueryFilter(c *fiber.Ctx) (qf device.QueryFilter, err error) {
-	qf.ID = stringQueryParam(c, deviceParamName)
-	qf.ProcID = stringQueryParam(c, processParamName)
-	qf.SensorID = stringQueryParam(c, sensorParamName)
-	qf.Color = stringQueryParam(c, colorParamName)
-	qf.Model = stringQueryParam(c, modelParamName)
-	qf.Status = intQueryParam(c, statusParamName)
+type queryer interface {
+	Query(key string, defaultValue ...string) string
+}
+
+func decodeDeviceQueryFilter(c queryer) (qf device.QueryFilter, err error) {
+	qf.ID = stringQueryParam(c, "device")
+	qf.Sensor = stringQueryParam(c, "sensor")
+	qf.User = stringQueryParam(c, "user")
+	qf.Status = intQueryParam(c, "status")
+
+	if modelParam := strings.TrimSpace(c.Query("model")); len(modelParam) > 0 && len(modelParam) < 512 {
+		qf.Model = &modelParam
+	}
+
+	if limitParam := c.Query(limitParamName); len(limitParam) > 0 {
+		limit, err := strconv.ParseInt(limitParam, 10, 64)
+		if err != nil {
+			return qf, fmt.Errorf("limit param decode error: %w", errDecodeRequest)
+		}
+		if limit < 0 {
+			limit = 0
+		}
+		qf.Limit = limit
+	}
+
+	if pageParam := c.Query(pageParamName); len(pageParam) > 0 {
+		page, err := strconv.ParseInt(pageParam, 10, 64)
+		if err != nil {
+			return qf, fmt.Errorf("page param decode error: %w", errDecodeRequest)
+		}
+		if page < 0 {
+			page = 0
+		}
+		qf.Page = page
+	}
+
 	return
 }
 
@@ -240,30 +269,54 @@ func decodeUpdateDeviceRequest(c *fiber.Ctx) (*updateDeviceRequest, error) {
 	).Decode(req)
 }
 
-func stringQueryParam(c *fiber.Ctx, name string) *[]string {
-	param := c.Query(name)
-	param = strings.TrimSpace(param)
-	if len(param) == 0 {
-		return nil
-	}
-	result := strings.Split(param, ",")
-	return &result
-}
-
-func intQueryParam(c *fiber.Ctx, name string) *[]int {
+func stringQueryParam(c queryer, name string) *[]string {
 	param := c.Query(name)
 	param = strings.TrimSpace(param)
 	if len(param) == 0 {
 		return nil
 	}
 	list := strings.Split(param, ",")
-	result := make([]int, len(list))
+	result := make([]string, 0, len(list))
 	for i := 0; i < len(list); i++ {
-		p, err := strconv.Atoi(list[i])
+		item := strings.TrimSpace(list[i])
+		if len(item) == 0 {
+			continue
+		}
+		if len(item) > 512 {
+			continue
+		}
+		result = append(result, item)
+	}
+	if len(result) == 0 {
+		return nil
+	}
+	return &result
+}
+
+func intQueryParam(c queryer, name string) *[]int {
+	param := c.Query(name)
+	param = strings.TrimSpace(param)
+	if len(param) == 0 {
+		return nil
+	}
+	list := strings.Split(param, ",")
+	result := make([]int, 0, len(list))
+	for i := 0; i < len(list); i++ {
+		item := strings.TrimSpace(list[i])
+		if len(item) == 0 {
+			continue
+		}
+		if len(item) > 128 {
+			continue
+		}
+		p, err := strconv.Atoi(item)
 		if err != nil {
 			continue
 		}
-		result[i] = p
+		result = append(result, p)
+	}
+	if len(result) == 0 {
+		return nil
 	}
 	return &result
 }

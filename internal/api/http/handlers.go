@@ -44,6 +44,22 @@ func createDeviceHandler(duc device.UseCase) fiber.Handler {
 	}
 }
 
+func findDeviceByIDHandler(duc device.UseCase) fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		deviceID, err := decodeDeviceID(ctx)
+		if err != nil {
+			return err
+		}
+
+		device, err := duc.DeviceByID(ctx.Context(), deviceID)
+		if err != nil {
+			return err
+		}
+
+		return ctx.JSON(toDeviceModel(device))
+	}
+}
+
 func updateDeviceHandler(duc device.UseCase) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		req, err := decodeUpdateDeviceRequest(ctx)
@@ -402,20 +418,16 @@ func randomRouteHandler() fiber.Handler {
 
 func searchDevicesHandler(deviceQuery device.Query) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-		// deviceID, err := decodeDeviceID(ctx)
-		// if err != nil {
-		// 	return err
-		// }
-		// routeID, err := decodeRouteID(ctx)
-		// if err != nil {
-		// 	return err
-		// }
+		qf, err := decodeDeviceQueryFilter(ctx)
+		if err != nil {
+			return fmt.Errorf("query filter decode error: %w", err)
+		}
 
-		// if err := duc.RemoveRoute(ctx.Context(), deviceID, routeID); err != nil {
-		// 	return err
-		// }
+		result, err := deviceQuery.Search(ctx.Context(), qf)
+		if err != nil {
+			return err
+		}
 
-		// return writeSuccessResponse(ctx)
-		return nil
+		return ctx.JSON(result)
 	}
 }

@@ -62,7 +62,8 @@ func main() {
 		logger.Error("ensure mongodb indexes", "err", err)
 		os.Exit(1)
 	}
-	query := deviceStorage
+
+	deviceQuery := service.NewDeviceQuery(deviceStorage, logger)
 	devicePub := publisher.New(logger)
 
 	deviceService := service.NewDeviceService(
@@ -76,9 +77,9 @@ func main() {
 	}
 	defer deviceService.Close(ctx)
 
-	var useCase device.UseCase
+	var deviceUseCase device.UseCase
 	{
-		useCase = service.WithLogging(logger)(deviceService)
+		deviceUseCase = service.WithLogging(logger)(deviceService)
 	}
 
 	dataGenerator.Run()
@@ -87,7 +88,7 @@ func main() {
 
 	var g run.Group
 	{
-		httpSrv := apihttp.NewServer(useCase, query, devicePub, logger)
+		httpSrv := apihttp.NewServer(deviceUseCase, deviceQuery, devicePub, logger)
 		g.Add(func() error {
 			addr := conf.API.HTTP.Addr
 			logger.Info("HTTP API started", "addr", addr)

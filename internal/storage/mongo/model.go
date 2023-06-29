@@ -1,7 +1,5 @@
 package mongo
 
-import "time"
-
 type deviceModel struct {
 	ID          string `bson:"device_id,omitempty"`
 	UserID      string `bson:"user_id"`
@@ -14,9 +12,9 @@ type deviceModel struct {
 		Amplitude int     `bson:"amplitude"`
 	} `bson:"speed"`
 	Battery struct {
-		Min        float64       `bson:"min"`
-		Max        float64       `bson:"max"`
-		ChargeTime time.Duration `bson:"charge_time"`
+		Min        float64 `bson:"min"`
+		Max        float64 `bson:"max"`
+		ChargeTime string  `bson:"charge_time"`
 	} `bson:"battery" `
 	Elevation struct {
 		Min       float64 `bson:"min"`

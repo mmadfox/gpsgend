@@ -27,7 +27,7 @@ func toDeviceModel(dev *device.Device) *deviceModel {
 	battery := dev.Battery()
 	model.Battery.Min = battery.Min()
 	model.Battery.Max = battery.Max()
-	model.Battery.ChargeTime = battery.ChargeTime()
+	model.Battery.ChargeTime = battery.ChargeTime().String()
 
 	elevation := dev.Elevation()
 	model.Elevation.Min = elevation.Min()

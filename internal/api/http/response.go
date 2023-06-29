@@ -72,6 +72,13 @@ var errorsIndex = map[error]int{
 }
 
 func errorHandler(ctx *fiber.Ctx, err error) error {
+	ctx.Set(fiber.HeaderContentType, fiber.MIMEApplicationJSONCharsetUTF8)
+
+	if stdErr, ok := err.(*fiber.Error); ok {
+		ctx.Status(stdErr.Code)
+		return ctx.JSON(stdErr)
+	}
+
 	httpErr := fiber.ErrInternalServerError
 	for k, v := range errorsIndex {
 		if errors.Is(err, k) {
@@ -79,7 +86,7 @@ func errorHandler(ctx *fiber.Ctx, err error) error {
 			break
 		}
 	}
-	ctx.Set(fiber.HeaderContentType, fiber.MIMEApplicationJSONCharsetUTF8)
+
 	ctx.Status(httpErr.Code)
 	return ctx.JSON(httpErr)
 }

@@ -2,12 +2,10 @@ package device
 
 import (
 	"context"
-	"time"
 )
 
 type DeviceView struct {
 	ID          string `json:"device_id" bson:"device_id,omitempty"`
-	ProcID      string `json:"process_id" bson:"process_id"`
 	UserID      string `json:"user_id" bson:"user_id"`
 	Model       string `json:"model" bson:"model"`
 	Color       string `json:"color" bson:"color"`
@@ -18,9 +16,9 @@ type DeviceView struct {
 		Amplitude int     `json:"amplitude" bson:"amplitude"`
 	} `json:"speed" bson:"speed"`
 	Battery struct {
-		Min        float64       `json:"min" bson:"min"`
-		Max        float64       `json:"max" bson:"max"`
-		ChargeTime time.Duration `json:"chargeTime" bson:"charge_time"`
+		Min        float64 `json:"min" bson:"min"`
+		Max        float64 `json:"max" bson:"max"`
+		ChargeTime string  `json:"chargeTime" bson:"charge_time"`
 	} `json:"battery" bson:"battery"`
 	Elevation struct {
 		Min       float64 `json:"min" bson:"min"`
@@ -44,26 +42,25 @@ type DeviceView struct {
 }
 
 type Query interface {
-	Search(ctx context.Context, f QueryFilter) (SearchResults, error)
+	Search(ctx context.Context, f QueryFilter) (SearchResult, error)
 }
 
-type SearchResults struct {
-	TotalDevices int64
-	Devices      []DeviceView
+type SearchResult struct {
+	Meta struct {
+		TotalDevices int64 `json:"total"`
+		Found        int64 `json:"found"`
+		Page         int64 `json:"page"`
+		Limit        int64 `json:"limit"`
+	} `json:"meta"`
+	Devices []DeviceView `json:"devices"`
 }
 
 type QueryFilter struct {
-	ID         *[]string
-	ProcID     *[]string
-	UserID     *[]string
-	SensorID   *[]string
-	SensorName *[]string
-	Model      *[]string
-	Color      *[]string
-	Status     *[]int
-	SortField  *string
-	SortVector *int
-
+	Model  *string
+	ID     *[]string
+	Sensor *[]string
+	User   *[]string
+	Status *[]int
 	Limit  int64
-	Offset int64
+	Page   int64
 }

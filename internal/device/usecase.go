@@ -23,6 +23,7 @@ type UseCase interface {
 	Sensors(ctx context.Context, deviceID uuid.UUID) ([]types.Sensor, error)
 	AddSensor(ctx context.Context, deviceID uuid.UUID, p AddSensorParams) ([]types.Sensor, error)
 	RemoveSensor(ctx context.Context, deviceID uuid.UUID, sensorID uuid.UUID) error
+	DeviceByID(ctx context.Context, deviceID uuid.UUID) (*Device, error)
 }
 
 type Middleware func(UseCase) UseCase

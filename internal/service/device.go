@@ -363,10 +363,6 @@ func (s *DeviceService) RemoveSensor(ctx context.Context, deviceID uuid.UUID, se
 	return s.deviceStorage.Update(ctx, dev)
 }
 
-func (s *DeviceService) SearchDevices(ctx context.Context, f device.QueryFilter) (device.SearchResults, error) {
-	return device.SearchResults{}, nil
-}
-
 func (s *DeviceService) Bootstrap(ctx context.Context) error {
 	status := []device.Status{device.Stored}
 	return s.deviceStorage.WalkByStatus(ctx, status,

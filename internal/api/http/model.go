@@ -1,7 +1,5 @@
 package http
 
-import "time"
-
 var zeroSensors = []sensorModel{}
 
 type deviceModel struct {
@@ -20,9 +18,9 @@ type deviceModel struct {
 		Amplitude int     `json:"amplitude"`
 	} `json:"speed"`
 	Battery struct {
-		Max        float64       `json:"max"`
-		Min        float64       `json:"min"`
-		ChargeTime time.Duration `json:"chargeTime"`
+		Max        float64 `json:"max"`
+		Min        float64 `json:"min"`
+		ChargeTime string  `json:"chargeTime"`
 	} `json:"battery"`
 	Elevation struct {
 		Max       float64 `json:"max"`
