@@ -18,6 +18,7 @@ var (
 	ErrTrackerNotRunning       = errors.New("gpsgend/generator: tracker not running")
 	ErrTrackerNotPaused        = errors.New("gpsgend/generator: tracker not paused")
 	ErrTrackerOff              = errors.New("gpsgend/generator: tracker is off")
+	ErrParamsEmpty             = errors.New("gpsgend/generator: params empty")
 )
 
 func errTrackerOff(t *Tracker) error {

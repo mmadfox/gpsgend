@@ -62,9 +62,7 @@ func (g *Generator) NewTracker(ctx context.Context, opts NewTrackerOptions) (*Tr
 }
 
 func (g *Generator) RemoveTracker(ctx context.Context, trackID types.ID) error {
-	if g.processes.HasTracker(trackID.String()) {
-		_ = g.processes.Detach(trackID.String())
-	}
+	g.processes.Detach(trackID.String())
 	return g.storage.Delete(ctx, trackID)
 }
 
@@ -74,7 +72,7 @@ func (g *Generator) UpdateTracker(
 	opts UpdateTrackerOptions,
 ) error {
 	if opts.isEmpty() {
-		return nil
+		return ErrParamsEmpty
 	}
 
 	if err := opts.validate(); err != nil {
