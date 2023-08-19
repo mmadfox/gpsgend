@@ -11,6 +11,7 @@ type DeviceStatus gpsgen.Status
 const (
 	Running = DeviceStatus(gpsgen.Running)
 	Stopped = DeviceStatus(gpsgen.Stopped)
+	Paused  = DeviceStatus(gpsgen.Stopped + 1)
 )
 
 func ParseDeviceStatus(status int) (DeviceStatus, error) {

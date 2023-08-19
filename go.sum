@@ -42,6 +42,8 @@ github.com/lucasb-eyer/go-colorful v1.2.0 h1:1nnpGOrhyZZuNyfu1QjKiUICQ74+3FNCN69
 github.com/lucasb-eyer/go-colorful v1.2.0/go.mod h1:R4dSotOR9KMtayYi1e77YzuveK+i7ruzyGqttikkLy0=
 github.com/mmadfox/go-gpsgen v0.2.1-0.20230819071210-f60b50736add h1:8X23CtZp/MmlssW1D1NQf8wbgQ8eO2I4Hw0N8SB3M4M=
 github.com/mmadfox/go-gpsgen v0.2.1-0.20230819071210-f60b50736add/go.mod h1:7bpz8FPJh0zxtSqSkAtydRoZrjPXRa29/JT6n4DaKrU=
+github.com/mmadfox/go-gpsgen v0.2.1-0.20230819121240-143682c9c64a h1:hTWkS9Ub64uk4DrBL8o9ByM71509YDeWLQQSCa0Oza4=
+github.com/mmadfox/go-gpsgen v0.2.1-0.20230819121240-143682c9c64a/go.mod h1:7bpz8FPJh0zxtSqSkAtydRoZrjPXRa29/JT6n4DaKrU=
 github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe/go.mod h1:wL8QJuTMNUDYhXwkmfOly8iTdp5TEcJFWZD2D7SIkUc=
 github.com/paulmach/orb v0.10.0 h1:guVYVqzxHE/CQ1KpfGO077TR0ATHSNjp4s6XGLn3W9s=
 github.com/paulmach/orb v0.10.0/go.mod h1:5mULz1xQfs3bmQm63QEJA6lNGujuRafwA5S/EnuLaLU=

@@ -3,7 +3,7 @@ package generator
 import (
 	"context"
 
-	"github.com/mmadfox/go-gpsgen/navigator"
+	"github.com/mmadfox/go-gpsgen"
 	"github.com/mmadfox/go-gpsgen/proto"
 	"github.com/mmadfox/gpsgend/internal/types"
 )
@@ -86,43 +86,18 @@ func (g *Generator) UpdateTracker(
 		return err
 	}
 
-	if opts.Color != nil {
-		tracker.ChangeColor(*opts.Color)
-	}
-	if opts.Descr != nil {
-		tracker.ChangeDescription(*opts.Descr)
-	}
-	if opts.Model != nil {
-		tracker.ChangeModel(*opts.Model)
-	}
-	if opts.UserID != nil {
-		tracker.ChangeUserID(*opts.UserID)
-	}
-
-	if err := g.storage.Update(ctx, tracker); err != nil {
+	trackerUpdatedOk, err := tracker.UpdateInfo(opts)
+	if err != nil {
 		return err
 	}
 
-	if !tracker.IsRunning() {
-		return nil
-	}
-
-	proc, ok := g.processes.Lookup(trackerID.String())
-	if ok {
-		if opts.Color != nil {
-			proc.SetColor((*opts.Color).RGB())
-		}
-		if opts.Descr != nil {
-			proc.SetDescription((*opts.Descr).String())
-		}
-		if opts.Model != nil {
-			proc.SetModel((*opts.Model).String())
-		}
-		if opts.UserID != nil {
-			proc.SetUserID((*opts.UserID).String())
+	if trackerUpdatedOk {
+		if err := g.storage.Update(ctx, tracker); err != nil {
+			return err
 		}
 	}
 
+	g.updateTrackerProcess(trackerID.String(), opts)
 	return nil
 }
 
@@ -145,10 +120,6 @@ func (g *Generator) StartTracker(ctx context.Context, trackerID types.ID) error 
 	tracker, err := g.storage.FindTracker(ctx, trackerID)
 	if err != nil {
 		return err
-	}
-
-	if tracker.HasNoRoutes() {
-		return ErrNoRoutes
 	}
 
 	newProc, err := tracker.NewProcess()
@@ -174,16 +145,13 @@ func (g *Generator) StopTracker(ctx context.Context, trackerID types.ID) error {
 		return err
 	}
 
-	if g.processes.HasTracker(trackerID.String()) {
-		g.processes.Detach(trackerID.String())
-	}
+	defer func() {
+		_ = g.processes.Detach(trackerID.String())
+	}()
 
-	isNotRunning := !tracker.IsRunning()
-	if isNotRunning {
-		return ErrTrackerIsAlreadyStopped
+	if err := tracker.Stop(); err != nil {
+		return err
 	}
-
-	tracker.Stop()
 
 	return g.storage.Update(ctx, tracker)
 }
@@ -201,7 +169,7 @@ func (g *Generator) TrackerState(ctx context.Context, trackerID types.ID) (*prot
 	return proc.State(), nil
 }
 
-func (g *Generator) AddRoutes(ctx context.Context, trackerID types.ID, newRoutes []*navigator.Route) error {
+func (g *Generator) AddRoutes(ctx context.Context, trackerID types.ID, newRoutes []*gpsgen.Route) error {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return err
 	}
@@ -224,7 +192,6 @@ func (g *Generator) AddRoutes(ctx context.Context, trackerID types.ID, newRoutes
 	if ok {
 		proc.ResetRoutes()
 		proc.AddRoute(currRoutes...)
-		proc.Update()
 	}
 
 	return nil
@@ -254,18 +221,15 @@ func (g *Generator) RemoveRoute(ctx context.Context, trackerID types.ID, routeID
 
 	proc, ok := g.processes.Lookup(trackerID.String())
 	if ok {
-		switch tracker.HasNoRoutes() {
-		case false:
-			proc.RemoveRoute(routeID.String())
-			proc.Update()
-		case true:
+		proc.RemoveRoute(routeID.String())
+		if tracker.HasNoRoutes() {
 			g.processes.Detach(trackerID.String())
 		}
 	}
 	return nil
 }
 
-func (g *Generator) Routes(ctx context.Context, trackerID, routeID types.ID) ([]*navigator.Route, error) {
+func (g *Generator) Routes(ctx context.Context, trackerID, routeID types.ID) ([]*gpsgen.Route, error) {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return nil, err
 	}
@@ -282,12 +246,40 @@ func (g *Generator) Routes(ctx context.Context, trackerID, routeID types.ID) ([]
 	return tracker.Routes()
 }
 
-func (g *Generator) RouteAt(ctx context.Context, trackerID types.ID, routeIndex int) (*navigator.Route, error) {
-	return nil, nil
+func (g *Generator) RouteAt(ctx context.Context, trackerID types.ID, routeIndex int) (*gpsgen.Route, error) {
+	if err := validateType(trackerID, "tracker.id"); err != nil {
+		return nil, err
+	}
+
+	tracker, err := g.storage.FindTracker(ctx, trackerID)
+	if err != nil {
+		return nil, err
+	}
+
+	route, err := tracker.RouteAt(routeIndex)
+	if err != nil {
+		return nil, err
+	}
+
+	return route, nil
 }
 
-func (g *Generator) RouteByID(ctx context.Context, trackerID, routeID types.ID) (*navigator.Route, error) {
-	return nil, nil
+func (g *Generator) RouteByID(ctx context.Context, trackerID, routeID types.ID) (*gpsgen.Route, error) {
+	if err := validateType(trackerID, "tracker.id"); err != nil {
+		return nil, err
+	}
+
+	tracker, err := g.storage.FindTracker(ctx, trackerID)
+	if err != nil {
+		return nil, err
+	}
+
+	route, err := tracker.RouteByID(routeID)
+	if err != nil {
+		return nil, err
+	}
+
+	return route, nil
 }
 
 func (g *Generator) ResetRoutes(ctx context.Context, trackerID types.ID) (bool, error) {
@@ -300,7 +292,10 @@ func (g *Generator) ResetRoutes(ctx context.Context, trackerID types.ID) (bool, 
 		return false, err
 	}
 
-	tracker.ResetRoutes()
+	if err := tracker.ResetRoutes(); err != nil {
+		return false, err
+	}
+
 	if err := g.storage.Update(ctx, tracker); err != nil {
 		return false, err
 	}
@@ -442,4 +437,150 @@ func (g *Generator) MoveToSegment(ctx context.Context, trackerID types.ID, route
 	next := proc.MoveToSegment(routeIndex, trackIndex, segmentIndex)
 
 	return types.NavigatorFromProc(proc), next, nil
+}
+
+func (g *Generator) AddSensor(ctx context.Context, trackerID types.ID, sensor *gpsgen.Sensor) error {
+	if err := validateType(trackerID, "tracker.id"); err != nil {
+		return err
+	}
+
+	tracker, err := g.storage.FindTracker(ctx, trackerID)
+	if err != nil {
+		return err
+	}
+
+	if err := tracker.AddSensor(sensor); err != nil {
+		return err
+	}
+
+	if err := g.storage.Update(ctx, tracker); err != nil {
+		return err
+	}
+
+	proc, ok := g.processes.Lookup(trackerID.String())
+	if ok {
+		proc.AddSensor(sensor)
+	}
+
+	return nil
+}
+
+func (g *Generator) RemoveSensor(ctx context.Context, trackerID types.ID, sensorID types.ID) (bool, error) {
+	if err := validateType(trackerID, "tracker.id"); err != nil {
+		return false, err
+	}
+	if err := validateType(sensorID, "sensor.id"); err != nil {
+		return false, err
+	}
+
+	tracker, err := g.storage.FindTracker(ctx, trackerID)
+	if err != nil {
+		return false, err
+	}
+
+	if err := tracker.RemoveSensorByID(sensorID); err != nil {
+		return false, nil
+	}
+
+	if err := g.storage.Update(ctx, tracker); err != nil {
+		return false, err
+	}
+
+	proc, ok := g.processes.Lookup(trackerID.String())
+	if ok {
+		proc.RemoveSensor(sensorID.String())
+	}
+
+	return false, nil
+}
+
+func (g *Generator) Sensors(ctx context.Context, trackerID types.ID) ([]*gpsgen.Sensor, error) {
+	if err := validateType(trackerID, "tracker.id"); err != nil {
+		return nil, err
+	}
+
+	tracker, err := g.storage.FindTracker(ctx, trackerID)
+	if err != nil {
+		return nil, err
+	}
+
+	return tracker.Sensors(), nil
+}
+
+func (g *Generator) Shutdown(ctx context.Context, trackerID types.ID) error {
+	if err := validateType(trackerID, "tracker.id"); err != nil {
+		return err
+	}
+
+	tracker, err := g.storage.FindTracker(ctx, trackerID)
+	if err != nil {
+		return err
+	}
+
+	isNotRunning := tracker.IsRunning()
+	if isNotRunning {
+		return ErrTrackerNotRunning
+	}
+
+	invalidProc := false
+	proc, ok := g.processes.Lookup(trackerID.String())
+	if ok {
+		tracker.TakeSnapshot(proc)
+		g.processes.Detach(proc.ID())
+	} else {
+		invalidProc = true
+		tracker.ResetStatus()
+	}
+
+	if err := g.storage.Update(ctx, tracker); err != nil {
+		return err
+	}
+
+	if invalidProc {
+		return ErrTrackerNotRunning
+	}
+
+	return nil
+}
+
+func (g *Generator) Resume(ctx context.Context, trackerID types.ID) error {
+	if err := validateType(trackerID, "tracker.id"); err != nil {
+		return err
+	}
+
+	tracker, err := g.storage.FindTracker(ctx, trackerID)
+	if err != nil {
+		return err
+	}
+
+	proc, err := tracker.FromSnapshot()
+	if err != nil {
+		return err
+	}
+
+	if err := g.storage.Update(ctx, tracker); err != nil {
+		return err
+	}
+
+	g.processes.Attach(proc)
+	return nil
+}
+
+func (g *Generator) updateTrackerProcess(trackerID string, opts UpdateTrackerOptions) {
+	proc, ok := g.processes.Lookup(trackerID)
+	if !ok {
+		return
+	}
+	if opts.Color != nil {
+		proc.SetColor((*opts.Color).RGB())
+	}
+	if opts.Descr != nil {
+		proc.SetDescription((*opts.Descr).String())
+	}
+	if opts.Model != nil {
+		proc.SetModel((*opts.Model).String())
+	}
+	if opts.UserID != nil {
+		proc.SetUserID((*opts.UserID).String())
+	}
 }

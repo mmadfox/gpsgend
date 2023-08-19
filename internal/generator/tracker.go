@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/mmadfox/go-gpsgen"
-	"github.com/mmadfox/go-gpsgen/navigator"
 	"github.com/mmadfox/go-gpsgen/properties"
 	"github.com/mmadfox/gpsgend/internal/types"
 )
@@ -43,6 +42,10 @@ func (t *Tracker) IsRunning() bool {
 	return t.status == types.Running
 }
 
+func (t *Tracker) IsTrackerOff() bool {
+	return t.status == types.Paused
+}
+
 func (t *Tracker) Model() types.Model {
 	return t.model
 }
@@ -55,9 +58,37 @@ func (t *Tracker) HasNoRoutes() bool {
 	return t.numRoutes == 0
 }
 
+func (t *Tracker) UpdateInfo(opts UpdateTrackerOptions) (bool, error) {
+	if t.status == types.Paused {
+		return false, errTrackerOff(t)
+	}
+
+	if opts.Color != nil {
+		t.color = *opts.Color
+	}
+
+	if opts.Descr != nil {
+		t.description = *opts.Descr
+	}
+
+	if opts.Model != nil {
+		t.model = *opts.Model
+	}
+
+	if opts.UserID != nil {
+		t.userID = *opts.UserID
+	}
+
+	return true, nil
+}
+
 func (t *Tracker) NewProcess() (newProc *gpsgen.Device, err error) {
 	if t.numRoutes == 0 {
 		return nil, ErrTrackerHasNoRoutes
+	}
+
+	if t.status == types.Paused {
+		return nil, errTrackerOff(t)
 	}
 
 	opts := gpsgen.NewDeviceOptions()
@@ -107,37 +138,27 @@ func (t *Tracker) NewProcess() (newProc *gpsgen.Device, err error) {
 	return
 }
 
-func (t *Tracker) Stop() {
+func (t *Tracker) Stop() error {
+	if t.status == types.Stopped {
+		return errTrackerOff(t)
+	}
+	if t.status == types.Stopped {
+		return ErrTrackerIsAlreadyStopped
+	}
 	t.status = types.Stopped
-}
-
-func (t *Tracker) ChangeModel(m types.Model) {
-	t.model = m
+	return nil
 }
 
 func (t *Tracker) Color() types.Color {
 	return t.color
 }
 
-func (t *Tracker) ChangeColor(c types.Color) bool {
-	t.color = c
-	return true
-}
-
 func (t *Tracker) Description() types.Description {
 	return t.description
 }
 
-func (t *Tracker) ChangeDescription(d types.Description) {
-	t.description = d
-}
-
 func (t *Tracker) UserID() types.CustomID {
 	return t.userID
-}
-
-func (t *Tracker) ChangeUserID(cid types.CustomID) {
-	t.userID = cid
 }
 
 func (t *Tracker) Speed() types.Speed {
@@ -160,41 +181,126 @@ func (t *Tracker) SkipOffline() bool {
 	return t.skipOffline
 }
 
-func (t *Tracker) AddRoutes(newRoutes []*navigator.Route) ([]*navigator.Route, error) {
+func (t *Tracker) AddRoute(route *gpsgen.Route) ([]*gpsgen.Route, error) {
+	return t.AddRoutes([]*gpsgen.Route{route})
+}
+
+func (t *Tracker) AddRoutes(newRoutes []*gpsgen.Route) ([]*gpsgen.Route, error) {
+	if t.status == types.Paused {
+		return nil, errTrackerOff(t)
+	}
 	if len(newRoutes) == 0 {
 		return nil, ErrNoRoutes
 	}
-
 	if err := t.validateRoutes(newRoutes); err != nil {
 		return nil, err
 	}
-
 	return t.appendRoutes(newRoutes)
 }
 
 func (t *Tracker) RemoveRoute(routeID types.ID) error {
-	return nil
+	if t.status == types.Paused {
+		return errTrackerOff(t)
+	}
+
+	if t.numRoutes == 0 {
+		return ErrNoRoutes
+	}
+
+	routes, err := gpsgen.DecodeRoutes(t.routesSnapshot)
+	if err != nil {
+		return err
+	}
+
+	var ok bool
+	rid := routeID.String()
+	for i := 0; i < len(routes); i++ {
+		if routes[i].ID() == rid {
+			routes = append(routes[:i], routes[i+1:]...)
+			ok = true
+			break
+		}
+	}
+
+	if ok {
+		t.numRoutes = len(routes)
+		if t.numRoutes > 0 {
+			data, err := gpsgen.EncodeRoutes(routes)
+			if err != nil {
+				return err
+			}
+			t.routesSnapshot = data
+		} else {
+			t.routesSnapshot = make(types.Raw, 0)
+		}
+		return nil
+	}
+
+	return fmt.Errorf("%w Tracker{ID:%s}",
+		ErrRouteNotFound, t.id)
 }
 
-func (t *Tracker) ResetRoutes() {
+func (t *Tracker) RouteAt(index int) (*gpsgen.Route, error) {
+	if index <= 0 || index > t.numRoutes {
+		return nil, fmt.Errorf("%w by index for Tracker{ID:%s}",
+			ErrRouteNotFound, t.id)
+	}
+
+	routes, err := gpsgen.DecodeRoutes(t.routesSnapshot)
+	if err != nil {
+		return nil, err
+	}
+
+	return routes[index-1], nil
+}
+
+func (t *Tracker) RouteByID(routeID types.ID) (route *gpsgen.Route, err error) {
+	if t.numRoutes == 0 {
+		return nil, ErrNoRoutes
+	}
+
+	routes, err := gpsgen.DecodeRoutes(t.routesSnapshot)
+	if err != nil {
+		return nil, err
+	}
+
+	rid := routeID.String()
+	for i := 0; i < len(routes); i++ {
+		if routes[i].ID() == rid {
+			route = routes[i]
+			break
+		}
+	}
+	if route == nil {
+		err = fmt.Errorf("%w by id Tracker{ID:%s}",
+			ErrRouteNotFound, t.id)
+	}
+	return
+}
+
+func (t *Tracker) ResetRoutes() error {
+	if t.status == types.Paused {
+		return errTrackerOff(t)
+	}
 	t.numRoutes = 0
 	t.routesSnapshot = make(types.Raw, 0)
+	return nil
 }
 
 func (t *Tracker) NumRoutes() int {
 	return t.numRoutes
 }
 
-func (t *Tracker) Routes() ([]*navigator.Route, error) {
+func (t *Tracker) Routes() ([]*gpsgen.Route, error) {
 	if t.numRoutes == 0 {
-		return []*navigator.Route{}, nil
+		return []*gpsgen.Route{}, nil
 	}
 	return gpsgen.DecodeRoutes(t.routesSnapshot)
 }
 
-func (t *Tracker) appendRoutes(newRoutes []*navigator.Route) ([]*navigator.Route, error) {
+func (t *Tracker) appendRoutes(newRoutes []*gpsgen.Route) ([]*gpsgen.Route, error) {
 	seen := make(map[string]struct{})
-	new := make([]*navigator.Route, 0, len(newRoutes)+t.numRoutes)
+	new := make([]*gpsgen.Route, 0, len(newRoutes)+t.numRoutes)
 
 	if t.numRoutes > 0 {
 		prevRoutes, err := gpsgen.DecodeRoutes(t.routesSnapshot)
@@ -232,7 +338,7 @@ func (t *Tracker) appendRoutes(newRoutes []*navigator.Route) ([]*navigator.Route
 	return new, nil
 }
 
-func (t *Tracker) validateRoutes(routes []*navigator.Route) error {
+func (t *Tracker) validateRoutes(routes []*gpsgen.Route) error {
 	if t.numRoutes+len(routes) > MaxRoutesPerTracker {
 		return ErrMaxNumRoutesExceeded
 	}
@@ -258,4 +364,43 @@ loop:
 	}
 
 	return err
+}
+
+func (t *Tracker) AddSensor(sensor *gpsgen.Sensor) error {
+	if t.status == types.Paused {
+		return errTrackerOff(t)
+	}
+	return nil
+}
+
+func (t *Tracker) RemoveSensorByID(id types.ID) error {
+	if t.status == types.Paused {
+		return errTrackerOff(t)
+	}
+	return nil
+}
+
+func (t *Tracker) Sensors() []*gpsgen.Sensor {
+	return nil
+}
+
+func (t *Tracker) ResetStatus() {
+	t.status = types.Stopped
+}
+
+func (t *Tracker) TakeSnapshot(tracker *gpsgen.Device) error {
+	data, err := gpsgen.EncodeTracker(tracker)
+	if err != nil {
+		return err
+	}
+	t.snapshot = data
+	t.status = types.Paused
+	return nil
+}
+
+func (t *Tracker) FromSnapshot() (*gpsgen.Device, error) {
+	if t.status != types.Paused || len(t.snapshot) == 0 {
+		return nil, ErrTrackerNotPaused
+	}
+	return nil, nil
 }

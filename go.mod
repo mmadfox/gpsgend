@@ -10,7 +10,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.3.0
 	github.com/lucasb-eyer/go-colorful v1.2.0
-	github.com/mmadfox/go-gpsgen v0.2.1-0.20230819071210-f60b50736add
+	github.com/mmadfox/go-gpsgen v0.2.1-0.20230819121240-143682c9c64a
 	github.com/stretchr/testify v1.8.4
 	github.com/valyala/fasthttp v1.48.0
 	google.golang.org/protobuf v1.30.0
