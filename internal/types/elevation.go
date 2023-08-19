@@ -3,7 +3,7 @@ package types
 import (
 	"fmt"
 
-	"github.com/mmadfox/go-gpsgen"
+	"github.com/mmadfox/go-gpsgen/types"
 )
 
 const (
@@ -15,11 +15,12 @@ type Elevation struct {
 	min       float64
 	max       float64
 	amplitude int
+	mode      types.SensorMode
 }
 
-func NewElevation(min float64, max float64, amplitude int) (Elevation, error) {
-	elevation := Elevation{min: min, max: max, amplitude: amplitude}
-	if err := elevation.validate(); err != nil {
+func ParseElevation(min, max float64, amplitude int, mode types.SensorMode) (Elevation, error) {
+	elevation := Elevation{min: min, max: max, amplitude: amplitude, mode: mode}
+	if err := elevation.Validate(); err != nil {
 		return Elevation{}, err
 	}
 	return elevation, nil
@@ -42,7 +43,11 @@ func (e Elevation) Amplitude() int {
 	return e.amplitude
 }
 
-func (e Elevation) validate() error {
+func (e Elevation) Mode() types.SensorMode {
+	return e.mode
+}
+
+func (e Elevation) Validate() error {
 	if e.min < MinElevationValue {
 		return ErrInvalidMinValue
 	}
@@ -52,10 +57,10 @@ func (e Elevation) validate() error {
 	if e.min > e.max {
 		return ErrInvalidRangeValue
 	}
-	if e.amplitude < gpsgen.Amplitude4 {
+	if e.amplitude < 4 {
 		return ErrInvalidMinAmplitude
 	}
-	if e.amplitude > gpsgen.Amplitude512 {
+	if e.amplitude > 512 {
 		return ErrInvalidMaxAmplitude
 	}
 	return nil

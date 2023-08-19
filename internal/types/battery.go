@@ -18,13 +18,13 @@ type Battery struct {
 	chargeTime time.Duration
 }
 
-func NewBattery(min float64, max float64, chargeTime time.Duration) (Battery, error) {
+func ParseBattery(min float64, max float64, chargeTime time.Duration) (Battery, error) {
 	battery := Battery{
 		min:        min,
 		max:        max,
 		chargeTime: chargeTime,
 	}
-	if err := battery.validate(); err != nil {
+	if err := battery.Validate(); err != nil {
 		return Battery{}, err
 	}
 	return battery, nil
@@ -47,7 +47,7 @@ func (b Battery) ChargeTime() time.Duration {
 	return b.chargeTime
 }
 
-func (b Battery) validate() error {
+func (b Battery) Validate() error {
 	if b.min < MinBatteryValue {
 		return ErrInvalidMinValue
 	}

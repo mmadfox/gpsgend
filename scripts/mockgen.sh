@@ -1,11 +1,8 @@
 #!/bin/bash
 
 declare -a files=(
-    "internal/device/storage.go"
-    "internal/device/query.go"
-    "internal/device/generator.go"
-    "internal/device/publisher.go"
-    "internal/device/usecase.go"
+    "internal/generator/storage.go"
+    "internal/generator/processes.go"
 )
 
 path="$(pwd)"

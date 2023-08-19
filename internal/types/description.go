@@ -13,15 +13,15 @@ func (d Description) String() string {
 	return d.val
 }
 
-func NewDescription(val string) (Description, error) {
+func ParseDescription(val string) (Description, error) {
 	descr := Description{val: val}
-	if err := descr.validate(); err != nil {
+	if err := descr.Validate(); err != nil {
 		return Description{}, err
 	}
 	return descr, nil
 }
 
-func (d Description) validate() error {
+func (d Description) Validate() error {
 	if len(d.val) < MinDescriptionValue {
 		return ErrInvalidMinValue
 	}

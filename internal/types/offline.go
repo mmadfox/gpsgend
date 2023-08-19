@@ -12,9 +12,9 @@ type Offline struct {
 	max int
 }
 
-func NewOffline(min int, max int) (Offline, error) {
+func ParseOffline(min int, max int) (Offline, error) {
 	offline := Offline{min: min, max: max}
-	if err := offline.validate(); err != nil {
+	if err := offline.Validate(); err != nil {
 		return Offline{}, err
 	}
 	return offline, nil
@@ -32,7 +32,7 @@ func (o Offline) Max() int {
 	return o.max
 }
 
-func (o Offline) validate() error {
+func (o Offline) Validate() error {
 	if o.min < MinOfflineValue {
 		return ErrInvalidMinValue
 	}

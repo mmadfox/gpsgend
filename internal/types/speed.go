@@ -2,8 +2,6 @@ package types
 
 import (
 	"fmt"
-
-	"github.com/mmadfox/go-gpsgen"
 )
 
 const (
@@ -17,9 +15,9 @@ type Speed struct {
 	amplitude int
 }
 
-func NewSpeed(min float64, max float64, amplitude int) (Speed, error) {
+func ParseSpeed(min float64, max float64, amplitude int) (Speed, error) {
 	speed := Speed{min: min, max: max, amplitude: amplitude}
-	if err := speed.validate(); err != nil {
+	if err := speed.Validate(); err != nil {
 		return Speed{}, err
 	}
 	return speed, nil
@@ -42,7 +40,7 @@ func (s Speed) Amplitude() int {
 	return s.amplitude
 }
 
-func (s Speed) validate() error {
+func (s Speed) Validate() error {
 	if s.min < MinSpeedValue {
 		return ErrInvalidMinValue
 	}
@@ -52,10 +50,10 @@ func (s Speed) validate() error {
 	if s.min > s.max {
 		return ErrInvalidRangeValue
 	}
-	if s.amplitude < gpsgen.Amplitude4 {
+	if s.amplitude < 4 {
 		return ErrInvalidMinAmplitude
 	}
-	if s.amplitude > gpsgen.Amplitude512 {
+	if s.amplitude > 512 {
 		return ErrInvalidMaxAmplitude
 	}
 	return nil
