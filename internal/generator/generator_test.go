@@ -3,13 +3,16 @@ package generator_test
 import (
 	"context"
 	"errors"
+	"reflect"
 	"testing"
 	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/mmadfox/go-gpsgen"
+	"github.com/mmadfox/go-gpsgen/navigator"
 	"github.com/mmadfox/go-gpsgen/properties"
+	"github.com/mmadfox/go-gpsgen/proto"
 	stdtypes "github.com/mmadfox/go-gpsgen/types"
 	"github.com/mmadfox/gpsgend/internal/generator"
 	"github.com/mmadfox/gpsgend/internal/types"
@@ -88,6 +91,14 @@ func customIDPtrType(t *testing.T, val string) *types.CustomID {
 func descrPtrType(t *testing.T, val string) *types.Description {
 	descr := descrType(t, val)
 	return &descr
+}
+
+func s2id(id string) types.ID {
+	uid, err := types.ParseID(id)
+	if err != nil {
+		panic(err)
+	}
+	return uid
 }
 
 func TestGenerator_NewTracker(t *testing.T) {
@@ -327,7 +338,7 @@ func TestGenerator_UpdateTracker(t *testing.T) {
 			fields: mocks{
 				storage: func() *mockgenerator.MockStorage {
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackNotFound)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
 					return mock
 				},
 				processes: func() *mockgenerator.MockProcesses {
@@ -478,6 +489,2401 @@ func TestGenerator_FindTracker(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Generator.FindTracker() error = %v, wantErr %v", err, tt.wantErr)
 				return
+			}
+		})
+	}
+}
+
+func TestGenerator_StartTracker(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	type args struct {
+		ctx       context.Context
+		trackerID types.ID
+	}
+	tests := []struct {
+		name   string
+		fields mocks
+		args   args
+		want   error
+	}{
+		{
+			name: "should return error when trackerID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.ID{},
+			},
+			want: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when tracker is running",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().HasTracker(gomock.Any()).Times(1).Return(true)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.NewID(),
+			},
+			want: generator.ErrTrackerIsAlreadyRunning,
+		},
+		{
+			name: "should return error when tracker not found",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().HasTracker(gomock.Any()).Times(1).Return(false)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.NewID(),
+			},
+			want: generator.ErrTrackerNotFound,
+		},
+		{
+			name: "should return error when tracker is paused",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Paused)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().HasTracker(gomock.Any()).Times(1).Return(false)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.NewID(),
+			},
+			want: generator.ErrTrackerOff,
+		},
+		{
+			name: "should return error when tracker is running",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Running)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().HasTracker(gomock.Any()).Times(1).Return(false)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.NewID(),
+			},
+			want: generator.ErrTrackerIsAlreadyRunning,
+		},
+		{
+			name: "should return error when tracker without routes",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := new(generator.Tracker)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().HasTracker(gomock.Any()).Times(1).Return(false)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.NewID(),
+			},
+			want: generator.ErrTrackerHasNoRoutes,
+		},
+		{
+			name: "should return error when tracker params are invalid",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := new(generator.Tracker)
+					trk.AddRoute(gpsgen.RandomRouteForMoscow())
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().HasTracker(gomock.Any()).Times(1).Return(false)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.NewID(),
+			},
+			want: stdtypes.ErrMinAmplitude,
+		},
+		{
+			name: "should return error when tracker storage.Update failure",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Stopped)
+					trk.AddRoute(gpsgen.RandomRouteForMoscow())
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Update(gomock.Any(), trk).Return(generator.ErrInvalidTrackerVersion)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().HasTracker(gomock.Any()).Times(1).Return(false)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.NewID(),
+			},
+			want: generator.ErrInvalidTrackerVersion,
+		},
+		{
+			name: "should return error when tracker storage.Update failure",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Stopped)
+					trk.AddRoute(gpsgen.RandomRouteForMoscow())
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Update(gomock.Any(), trk).Return(nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().HasTracker(gomock.Any()).Times(1).Return(false)
+					mock.EXPECT().Attach(gomock.Any()).Times(1)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.NewID(),
+			},
+			want: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			if err := g.StartTracker(tt.args.ctx, tt.args.trackerID); !errors.Is(err, tt.want) {
+				t.Errorf("Generator.StartTracker() error = %v, wantErr %v", err, tt.want)
+			}
+		})
+	}
+}
+
+func makeValidTracker(t *testing.T, status types.DeviceStatus) *generator.Tracker {
+	builder := generator.NewTrackerBuilder()
+	builder.Speed(speedType(t, 1, 5, 8))
+	builder.Battery(batteryType(t, 0, 100, time.Hour))
+	builder.Offline(offlineType(t, 1, 300))
+	builder.Elevation(elevationType(t, 1, 300, 8, stdtypes.WithSensorStartMode))
+	builder.Status(status)
+	builder.Color(colorType(t, "#000000"))
+	builder.Model(modelType(t, "Tracker-ty19"))
+	builder.Props(properties.Properties{"foo": "foo"})
+	tracker, err := builder.Build()
+	require.NoError(t, err)
+	tracker.AddRoute(gpsgen.RandomRouteForMoscow())
+	tracker.AddRoute(gpsgen.RandomRouteForMoscow())
+	tracker.AddRoute(gpsgen.RandomRouteForMoscow())
+	tracker.AddRoute(gpsgen.RandomRouteForMoscow())
+	s1, err := gpsgen.NewSensor("s1", 1, 10, 8, stdtypes.WithSensorEndMode)
+	require.NoError(t, err)
+	tracker.AddSensor(s1)
+	return tracker
+}
+
+func TestGenerator_StopTracker(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	type args struct {
+		ctx       context.Context
+		trackerID types.ID
+	}
+	tests := []struct {
+		name   string
+		fields mocks
+		args   args
+		want   error
+	}{
+		{
+			name: "should return error when trackerID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.ID{},
+			},
+			want: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when tracker not found",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.NewID(),
+			},
+			want: generator.ErrTrackerNotFound,
+		},
+		{
+			name: "should return error when tracker is paused",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Paused)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.NewID(),
+			},
+			want: generator.ErrTrackerOff,
+		},
+		{
+			name: "should return error when tracker is stopped",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Stopped)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.NewID(),
+			},
+			want: generator.ErrTrackerIsAlreadyStopped,
+		},
+		{
+			name: "should return error when tracker storage.Update failure",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Running)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Update(gomock.Any(), trk).Return(generator.ErrInvalidTrackerVersion)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().Detach(gomock.Any()).Times(1)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.NewID(),
+			},
+			want: generator.ErrInvalidTrackerVersion,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			if err := g.StopTracker(tt.args.ctx, tt.args.trackerID); !errors.Is(err, tt.want) {
+				t.Errorf("Generator.StopTracker() error = %v, wantErr %v", err, tt.want)
+			}
+		})
+	}
+}
+
+func TestGenerator_TrackerState(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	type args struct {
+		ctx       context.Context
+		trackerID types.ID
+	}
+
+	tracker := gpsgen.NewAnimalTracker()
+	tracker.AddRoute(gpsgen.RandomRouteForNewYork())
+	tracker.DestinationTo(100)
+
+	tests := []struct {
+		name    string
+		fields  mocks
+		args    args
+		want    *proto.Device
+		wantErr error
+	}{
+		{
+			name: "should return error when trackerID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when tracker not running",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().Lookup(gomock.Any()).Return(nil, false)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.NewID(),
+			},
+			wantErr: generator.ErrTrackerNotRunning,
+		},
+		{
+			name: "should return device state when all params are valid",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().Lookup(gomock.Any()).Return(tracker, true)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.NewID(),
+			},
+			want: tracker.State(),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			got, err := g.TrackerState(tt.args.ctx, tt.args.trackerID)
+			if !errors.Is(err, tt.wantErr) {
+				t.Errorf("Generator.TrackerState() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Generator.TrackerState() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGenerator_AddRoutes(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	type args struct {
+		ctx       context.Context
+		trackerID types.ID
+		newRoutes []*gpsgen.Route
+	}
+	tests := []struct {
+		name    string
+		fields  mocks
+		args    args
+		wantErr error
+	}{
+		{
+			name: "should return error when trackerID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when tracker not found",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.NewID(),
+			},
+			wantErr: generator.ErrTrackerNotFound,
+		},
+		{
+			name: "should return error when tracker is paused",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Paused)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.NewID(),
+			},
+			wantErr: generator.ErrTrackerOff,
+		},
+		{
+			name: "should return error when routes list are emty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Running)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.NewID(),
+				newRoutes: []*gpsgen.Route{},
+			},
+			wantErr: generator.ErrNoRoutes,
+		},
+		{
+			name: "should return error when storage.Update failure",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Running)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Update(gomock.Any(), gomock.Any()).Return(generator.ErrInvalidTrackerVersion)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.NewID(),
+				newRoutes: []*gpsgen.Route{
+					gpsgen.RandomRouteForNewYork(),
+				},
+			},
+			wantErr: generator.ErrInvalidTrackerVersion,
+		},
+		{
+			name: "should not return error when all params are valid",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Running)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Update(gomock.Any(), gomock.Any()).Return(nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().Lookup(gomock.All()).Return(gpsgen.NewTracker(), true)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.NewID(),
+				newRoutes: []*gpsgen.Route{
+					gpsgen.RandomRouteForNewYork(),
+				},
+			},
+			wantErr: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			if err := g.AddRoutes(tt.args.ctx, tt.args.trackerID, tt.args.newRoutes); !errors.Is(err, tt.wantErr) {
+				t.Errorf("Generator.AddRoutes() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestGenerator_RemoveRoute(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	type args struct {
+		ctx       context.Context
+		trackerID types.ID
+		routeID   types.ID
+	}
+
+	expectedTrackerID := types.NewID()
+	expectedRoute := gpsgen.RandomRouteForNewYork()
+
+	tests := []struct {
+		name    string
+		fields  mocks
+		args    args
+		wantErr error
+	}{
+		{
+			name: "should return error when trackerID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when routeID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				routeID:   types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when tracker not found",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				routeID:   s2id(expectedRoute.ID()),
+			},
+			wantErr: generator.ErrTrackerNotFound,
+		},
+		{
+			name: "should return error when tracker is paused",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Paused)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				routeID:   s2id(expectedRoute.ID()),
+			},
+			wantErr: generator.ErrTrackerOff,
+		},
+		{
+			name: "should return error when storage.Update failure",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Running)
+					trk.AddRoute(expectedRoute)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Update(gomock.Any(), gomock.Any()).Return(generator.ErrInvalidTrackerVersion)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				routeID:   s2id(expectedRoute.ID()),
+			},
+			wantErr: generator.ErrInvalidTrackerVersion,
+		},
+		{
+			name: "should not return error when all params are valid",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := new(generator.Tracker)
+					trk.AddRoute(expectedRoute)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Update(gomock.Any(), gomock.Any()).Times(1).Return(nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					proc := gpsgen.NewAnimalTracker()
+					proc.AddRoute(expectedRoute)
+					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(proc, true)
+					mock.EXPECT().Detach(expectedTrackerID.String()).Times(1)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				routeID:   s2id(expectedRoute.ID()),
+			},
+			wantErr: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			if err := g.RemoveRoute(tt.args.ctx, tt.args.trackerID, tt.args.routeID); !errors.Is(err, tt.wantErr) {
+				t.Errorf("Generator.RemoveRoute() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestGenerator_Routes(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	type args struct {
+		ctx       context.Context
+		trackerID types.ID
+		routeID   types.ID
+	}
+
+	expectedTrackerID := types.NewID()
+	expectedRoute := gpsgen.RandomRouteForNewYork()
+
+	tests := []struct {
+		name    string
+		fields  mocks
+		args    args
+		want    []*gpsgen.Route
+		wantErr error
+	}{
+		{
+			name: "should return error when trackerID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when routeID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				routeID:   types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when tracker not found",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				routeID:   s2id(expectedRoute.ID()),
+			},
+			wantErr: generator.ErrTrackerNotFound,
+		},
+		{
+			name: "should not return error when all params are valid",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := new(generator.Tracker)
+					trk.AddRoute(expectedRoute)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				routeID:   s2id(expectedRoute.ID()),
+			},
+			want:    []*gpsgen.Route{expectedRoute},
+			wantErr: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			got, err := g.Routes(tt.args.ctx, tt.args.trackerID, tt.args.routeID)
+			if !errors.Is(err, tt.wantErr) {
+				t.Errorf("Generator.Routes() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Generator.Routes() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGenerator_RouteAt(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	expectedTrackerID := types.NewID()
+	expectedRoute := gpsgen.RandomRouteForParis()
+
+	type args struct {
+		ctx        context.Context
+		trackerID  types.ID
+		routeIndex int
+	}
+	tests := []struct {
+		name    string
+		fields  mocks
+		args    args
+		want    *gpsgen.Route
+		wantErr error
+	}{
+		{
+			name: "should return error when trackerID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when tracker not found",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:        context.Background(),
+				trackerID:  expectedTrackerID,
+				routeIndex: -1,
+			},
+			wantErr: generator.ErrTrackerNotFound,
+		},
+		{
+			name: "should return error when route not found",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := new(generator.Tracker)
+					trk.AddRoute(expectedRoute)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:        context.Background(),
+				trackerID:  expectedTrackerID,
+				routeIndex: -1,
+			},
+			wantErr: generator.ErrRouteNotFound,
+		},
+		{
+			name: "should not return error when all params are valid",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := new(generator.Tracker)
+					trk.AddRoute(expectedRoute)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:        context.Background(),
+				trackerID:  expectedTrackerID,
+				routeIndex: 1,
+			},
+			wantErr: nil,
+			want:    expectedRoute,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			got, err := g.RouteAt(tt.args.ctx, tt.args.trackerID, tt.args.routeIndex)
+			if !errors.Is(err, tt.wantErr) {
+				t.Errorf("Generator.RouteAt() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Generator.RouteAt() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGenerator_RouteByID(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	expectedTrackerID := types.NewID()
+	expectedRoute := gpsgen.RandomRouteForParis()
+
+	type args struct {
+		ctx       context.Context
+		trackerID types.ID
+		routeID   types.ID
+	}
+	tests := []struct {
+		name    string
+		fields  mocks
+		args    args
+		want    *gpsgen.Route
+		wantErr error
+	}{
+		{
+			name: "should return error when trackerID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when routeID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				routeID:   types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when tracker not found",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				routeID:   s2id(expectedRoute.ID()),
+			},
+			wantErr: generator.ErrTrackerNotFound,
+		},
+		{
+			name: "should return error when route not found",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := new(generator.Tracker)
+					trk.AddRoute(expectedRoute)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				routeID:   types.NewID(),
+			},
+			wantErr: generator.ErrRouteNotFound,
+		},
+		{
+			name: "should not return error when all params are valid",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := new(generator.Tracker)
+					trk.AddRoute(expectedRoute)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				routeID:   s2id(expectedRoute.ID()),
+			},
+			wantErr: nil,
+			want:    expectedRoute,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			got, err := g.RouteByID(tt.args.ctx, tt.args.trackerID, tt.args.routeID)
+			if !errors.Is(err, tt.wantErr) {
+				t.Errorf("Generator.RouteByID() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Generator.RouteByID() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGenerator_ResetRoutes(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	expectedTrackerID := types.NewID()
+	expectedRoute := gpsgen.RandomRouteForParis()
+
+	type args struct {
+		ctx       context.Context
+		trackerID types.ID
+		routeID   types.ID
+	}
+	tests := []struct {
+		name    string
+		fields  mocks
+		args    args
+		want    bool
+		wantErr error
+	}{
+		{
+			name: "should return error when trackerID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when tracker not found",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				routeID:   s2id(expectedRoute.ID()),
+			},
+			wantErr: generator.ErrTrackerNotFound,
+		},
+		{
+			name: "should return error when tracker is paused",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Paused)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				routeID:   s2id(expectedRoute.ID()),
+			},
+			wantErr: generator.ErrTrackerOff,
+		},
+		{
+			name: "should return error when storage.Update failure",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Running)
+					trk.AddRoute(expectedRoute)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Update(gomock.Any(), gomock.Any()).Return(generator.ErrInvalidTrackerVersion)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				routeID:   s2id(expectedRoute.ID()),
+			},
+			wantErr: generator.ErrInvalidTrackerVersion,
+		},
+		{
+			name: "should not return error when all params are valid",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := new(generator.Tracker)
+					trk.AddRoute(expectedRoute)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Update(gomock.Any(), trk).Return(nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					proc := gpsgen.NewBicycleTracker()
+					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(proc, true)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				routeID:   s2id(expectedRoute.ID()),
+			},
+			wantErr: nil,
+			want:    true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			got, err := g.ResetRoutes(tt.args.ctx, tt.args.trackerID)
+			if !errors.Is(err, tt.wantErr) {
+				t.Errorf("Generator.ResetRoutes() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Generator.ResetRoutes() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGenerator_ResetNavigator(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	expectedTrackerID := types.NewID()
+
+	type args struct {
+		ctx       context.Context
+		trackerID types.ID
+	}
+	tests := []struct {
+		name    string
+		fields  mocks
+		args    args
+		wantErr error
+	}{
+		{
+			name: "should return error when trackerID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when tracker not found",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(nil, false)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+			},
+			wantErr: generator.ErrTrackerNotRunning,
+		},
+		{
+			name: "should not return error when all params are valid",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					proc := gpsgen.NewAnimalTracker()
+					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(proc, true)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+			},
+			wantErr: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			if err := g.ResetNavigator(tt.args.ctx, tt.args.trackerID); !errors.Is(err, tt.wantErr) {
+				t.Errorf("Generator.ResetNavigator() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestGenerator_ToNextRoute(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	expectedTrackerID := types.NewID()
+	opts := gpsgen.NewDeviceOptions()
+	opts.Navigator.SkipOffline = true
+	expectedProc, err := gpsgen.NewDevice(opts)
+	require.NoError(t, err)
+	expectedProc.AddRoute(gpsgen.RandomRouteForMoscow())
+	expectedProc.AddRoute(gpsgen.RandomRouteForMoscow())
+
+	type args struct {
+		ctx       context.Context
+		trackerID types.ID
+	}
+
+	tests := []struct {
+		name    string
+		fields  mocks
+		args    args
+		want    func() types.Navigator
+		want1   bool
+		wantErr error
+	}{
+		{
+			name: "should return error when trackerID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when tracker not found",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(nil, false)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+			},
+			wantErr: generator.ErrTrackerNotRunning,
+		},
+		{
+			name: "should not return error when all params are valid",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(expectedProc, true)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+			},
+			wantErr: nil,
+			want1:   true,
+			want: func() types.Navigator {
+				return types.NavigatorFromProc(expectedProc)
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			got, got1, err := g.ToNextRoute(tt.args.ctx, tt.args.trackerID)
+			if !errors.Is(err, tt.wantErr) {
+				t.Errorf("Generator.ToNextRoute() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if tt.want != nil && !reflect.DeepEqual(got, tt.want()) {
+				t.Errorf("Generator.ToNextRoute() got = %v, want %v", got, tt.want())
+			}
+			if got1 != tt.want1 {
+				t.Errorf("Generator.ToNextRoute() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
+
+func TestGenerator_ToPrevRoute(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	expectedTrackerID := types.NewID()
+	opts := gpsgen.NewDeviceOptions()
+	opts.Navigator.SkipOffline = true
+	expectedProc, err := gpsgen.NewDevice(opts)
+	require.NoError(t, err)
+	expectedProc.AddRoute(gpsgen.RandomRouteForMoscow())
+	expectedProc.AddRoute(gpsgen.RandomRouteForMoscow())
+	expectedProc.MoveToRoute(1)
+
+	type args struct {
+		ctx       context.Context
+		trackerID types.ID
+	}
+
+	tests := []struct {
+		name    string
+		fields  mocks
+		args    args
+		want    func() types.Navigator
+		want1   bool
+		wantErr error
+	}{
+		{
+			name: "should return error when trackerID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when tracker not found",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(nil, false)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+			},
+			wantErr: generator.ErrTrackerNotRunning,
+		},
+		{
+			name: "should not return error when all params are valid",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(expectedProc, true)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+			},
+			wantErr: nil,
+			want1:   true,
+			want: func() types.Navigator {
+				return types.NavigatorFromProc(expectedProc)
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			got, got1, err := g.ToPrevRoute(tt.args.ctx, tt.args.trackerID)
+			if !errors.Is(err, tt.wantErr) {
+				t.Errorf("Generator.ToPrevRoute() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if tt.want != nil && !reflect.DeepEqual(got, tt.want()) {
+				t.Errorf("Generator.ToPrevRoute() got = %v, want %v", got, tt.want())
+			}
+			if got1 != tt.want1 {
+				t.Errorf("Generator.ToPrevRoute() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
+
+func TestGenerator_MoveToRoute(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	expectedTrackerID := types.NewID()
+	opts := gpsgen.NewDeviceOptions()
+	opts.Navigator.SkipOffline = true
+	expectedProc, err := gpsgen.NewDevice(opts)
+	require.NoError(t, err)
+	expectedProc.AddRoute(gpsgen.RandomRouteForMoscow())
+	expectedProc.AddRoute(gpsgen.RandomRouteForMoscow())
+
+	type args struct {
+		ctx        context.Context
+		trackerID  types.ID
+		routeIndex int
+	}
+
+	tests := []struct {
+		name    string
+		fields  mocks
+		args    args
+		want    func() types.Navigator
+		want1   bool
+		wantErr error
+	}{
+		{
+			name: "should return error when trackerID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when tracker not found",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(nil, false)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+			},
+			wantErr: generator.ErrTrackerNotRunning,
+		},
+		{
+			name: "should not return error when all params are valid",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(expectedProc, true)
+					return mock
+				},
+			},
+			args: args{
+				ctx:        context.Background(),
+				trackerID:  expectedTrackerID,
+				routeIndex: 1,
+			},
+			wantErr: nil,
+			want1:   true,
+			want: func() types.Navigator {
+				return types.NavigatorFromProc(expectedProc)
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			got, got1, err := g.MoveToRoute(tt.args.ctx, tt.args.trackerID, tt.args.routeIndex)
+			if !errors.Is(err, tt.wantErr) {
+				t.Errorf("Generator.MoveToRoute() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if tt.want != nil && !reflect.DeepEqual(got, tt.want()) {
+				t.Errorf("Generator.MoveToRoute() got = %v, want %v", got, tt.want())
+			}
+			if got1 != tt.want1 {
+				t.Errorf("Generator.MoveToRoute() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
+
+func TestGenerator_MoveToRouteByID(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	expectedTrackerID := types.NewID()
+	opts := gpsgen.NewDeviceOptions()
+	opts.Navigator.SkipOffline = true
+	expectedProc, err := gpsgen.NewDevice(opts)
+	require.NoError(t, err)
+	expectedProc.AddRoute(gpsgen.RandomRouteForMoscow())
+	r2 := gpsgen.RandomRouteForMoscow()
+	expectedProc.AddRoute(r2)
+
+	type args struct {
+		ctx       context.Context
+		trackerID types.ID
+		routeID   types.ID
+	}
+
+	tests := []struct {
+		name    string
+		fields  mocks
+		args    args
+		want    func() types.Navigator
+		want1   bool
+		wantErr error
+	}{
+		{
+			name: "should return error when trackerID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when routeID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				routeID:   types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when tracker not found",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(nil, false)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				routeID:   s2id(r2.ID()),
+			},
+			wantErr: generator.ErrTrackerNotRunning,
+		},
+		{
+			name: "should not return error when all params are valid",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(expectedProc, true)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				routeID:   s2id(r2.ID()),
+			},
+			wantErr: nil,
+			want1:   true,
+			want: func() types.Navigator {
+				return types.NavigatorFromProc(expectedProc)
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			got, got1, err := g.MoveToRouteByID(tt.args.ctx, tt.args.trackerID, tt.args.routeID)
+			if !errors.Is(err, tt.wantErr) {
+				t.Errorf("Generator.MoveToRouteByID() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if tt.want != nil && !reflect.DeepEqual(got, tt.want()) {
+				t.Errorf("Generator.MoveToRouteByID() got = %v, want %v", got, tt.want())
+			}
+			if got1 != tt.want1 {
+				t.Errorf("Generator.MoveToRouteByIDs() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
+
+func TestGenerator_MoveToTrack(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	expectedTrackerID := types.NewID()
+	opts := gpsgen.NewDeviceOptions()
+	opts.Navigator.SkipOffline = true
+	expectedProc, err := gpsgen.NewDevice(opts)
+	require.NoError(t, err)
+	expectedProc.AddRoute(gpsgen.RandomRouteForMoscow())
+	r2 := gpsgen.RandomRouteForMoscow()
+	expectedProc.AddRoute(r2)
+
+	type args struct {
+		ctx        context.Context
+		trackerID  types.ID
+		routeIndex int
+		trackIndex int
+	}
+
+	tests := []struct {
+		name    string
+		fields  mocks
+		args    args
+		want    func() types.Navigator
+		want1   bool
+		wantErr error
+	}{
+		{
+			name: "should return error when trackerID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when tracker not found",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(nil, false)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+			},
+			wantErr: generator.ErrTrackerNotRunning,
+		},
+		{
+			name: "should not return error when all params are valid",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(expectedProc, true)
+					return mock
+				},
+			},
+			args: args{
+				ctx:        context.Background(),
+				trackerID:  expectedTrackerID,
+				routeIndex: 1,
+				trackIndex: 1,
+			},
+			wantErr: nil,
+			want1:   true,
+			want: func() types.Navigator {
+				return types.NavigatorFromProc(expectedProc)
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			got, got1, err := g.MoveToTrack(tt.args.ctx, tt.args.trackerID, tt.args.routeIndex, tt.args.trackIndex)
+			if !errors.Is(err, tt.wantErr) {
+				t.Errorf("Generator.MoveToTrack() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if tt.want != nil && !reflect.DeepEqual(got, tt.want()) {
+				t.Errorf("Generator.MoveToTrack() got = %v, want %v", got, tt.want())
+			}
+			if got1 != tt.want1 {
+				t.Errorf("Generator.MoveToTrack() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
+
+func TestGenerator_MoveToTrackByID(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	opts := gpsgen.NewDeviceOptions()
+	opts.Navigator.SkipOffline = true
+	expectedProc, err := gpsgen.NewDevice(opts)
+	require.NoError(t, err)
+	expectedProc.AddRoute(gpsgen.RandomRouteForMoscow())
+	r2 := gpsgen.RandomRouteForMoscow()
+	expectedProc.AddRoute(r2)
+
+	expectedTrackerID := types.NewID()
+	expectedRouteID := s2id(r2.ID())
+	expectedTrackID := s2id(r2.TrackAt(1).ID())
+
+	type args struct {
+		ctx       context.Context
+		trackerID types.ID
+		routeID   types.ID
+		trackID   types.ID
+	}
+
+	tests := []struct {
+		name    string
+		fields  mocks
+		args    args
+		want    func() types.Navigator
+		want1   bool
+		wantErr error
+	}{
+		{
+			name: "should return error when trackerID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when routeID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				routeID:   types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when trackID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				routeID:   expectedRouteID,
+				trackID:   types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when tracker not found",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(nil, false)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				routeID:   expectedRouteID,
+				trackID:   expectedTrackID,
+			},
+			wantErr: generator.ErrTrackerNotRunning,
+		},
+		{
+			name: "should not return error when all params are valid",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(expectedProc, true)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				routeID:   expectedRouteID,
+				trackID:   expectedTrackID,
+			},
+			wantErr: nil,
+			want1:   true,
+			want: func() types.Navigator {
+				return types.NavigatorFromProc(expectedProc)
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			got, got1, err := g.MoveToTrackByID(tt.args.ctx, tt.args.trackerID, tt.args.routeID, tt.args.trackID)
+			if !errors.Is(err, tt.wantErr) {
+				t.Errorf("Generator.MoveToTrackByID() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if tt.want != nil && !reflect.DeepEqual(got, tt.want()) {
+				t.Errorf("Generator.MoveToTrackByID() got = %v, want %v", got, tt.want())
+			}
+			if got1 != tt.want1 {
+				t.Errorf("Generator.MoveToTrackByID() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
+
+func TestGenerator_MoveToSegment(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	opts := gpsgen.NewDeviceOptions()
+	opts.Navigator.SkipOffline = true
+	expectedProc, err := gpsgen.NewDevice(opts)
+	require.NoError(t, err)
+	r1 := navigator.RouteFromTracks(track300m1segment)
+	expectedProc.AddRoute(r1)
+	r2 := navigator.RouteFromTracks(track300m1segment, track300m1segment)
+	expectedProc.AddRoute(r2)
+
+	expectedTrackerID := types.NewID()
+
+	type args struct {
+		ctx          context.Context
+		trackerID    types.ID
+		routeIndex   int
+		trackIndex   int
+		segmentIndex int
+	}
+
+	tests := []struct {
+		name    string
+		fields  mocks
+		args    args
+		want    func() types.Navigator
+		want1   bool
+		wantErr error
+	}{
+		{
+			name: "should return error when trackerID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when tracker not found",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(nil, false)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+			},
+			wantErr: generator.ErrTrackerNotRunning,
+		},
+		{
+			name: "should not return error when all params are valid",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(expectedProc, true)
+					return mock
+				},
+			},
+			args: args{
+				ctx:          context.Background(),
+				trackerID:    expectedTrackerID,
+				routeIndex:   1,
+				trackIndex:   1,
+				segmentIndex: 0,
+			},
+			wantErr: nil,
+			want1:   true,
+			want: func() types.Navigator {
+				return types.NavigatorFromProc(expectedProc)
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			got, got1, err := g.MoveToSegment(tt.args.ctx, tt.args.trackerID, tt.args.routeIndex, tt.args.trackIndex, tt.args.segmentIndex)
+			if !errors.Is(err, tt.wantErr) {
+				t.Errorf("Generator.MoveToSegment() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if tt.want != nil && !reflect.DeepEqual(got, tt.want()) {
+				t.Errorf("Generator.MoveToSegment() got = %v, want %v", got, tt.want())
+			}
+			if got1 != tt.want1 {
+				t.Errorf("Generator.MoveToSegment() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
+
+func TestGenerator_AddSensor(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	expectedTrackerID := types.NewID()
+
+	type args struct {
+		ctx       context.Context
+		trackerID types.ID
+		sensor    *gpsgen.Sensor
+	}
+	tests := []struct {
+		name    string
+		fields  mocks
+		args    args
+		wantErr error
+	}{
+		{
+			name: "should return error when trackerID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when tracker not found",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Return(nil, generator.ErrTrackerNotFound)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+			},
+			wantErr: generator.ErrTrackerNotFound,
+		},
+		{
+			name: "should return error when tracker is paused",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Paused)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Return(trk, nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+			},
+			wantErr: generator.ErrTrackerOff,
+		},
+		{
+			name: "should return error when storage.Update failure",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Running)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
+					mock.EXPECT().Update(gomock.Any(), trk).Times(1).Return(generator.ErrInvalidTrackerVersion)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+			},
+			wantErr: generator.ErrInvalidTrackerVersion,
+		},
+		{
+			name: "should not return error when all params are valid",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Running)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
+					mock.EXPECT().Update(gomock.Any(), trk).Times(1).Return(nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					proc := gpsgen.NewAnimalTracker()
+					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(proc, true)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+			},
+			wantErr: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			if err := g.AddSensor(tt.args.ctx, tt.args.trackerID, tt.args.sensor); !errors.Is(err, tt.wantErr) {
+				t.Errorf("Generator.AddSensor() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestGenerator_RemoveSensor(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	expectedTrackerID := types.NewID()
+	expectedSensor, err := gpsgen.NewSensor("s1", 1, 10, 8, stdtypes.WithSensorRandomMode)
+	require.NoError(t, err)
+
+	type args struct {
+		ctx       context.Context
+		trackerID types.ID
+		sensorID  types.ID
+	}
+	tests := []struct {
+		name    string
+		fields  mocks
+		args    args
+		wantErr error
+		want    bool
+	}{
+		{
+			name: "should return error when trackerID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when sensorID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				sensorID:  types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when tracker not found",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Return(nil, generator.ErrTrackerNotFound)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				sensorID:  s2id(expectedSensor.ID()),
+			},
+			wantErr: generator.ErrTrackerNotFound,
+		},
+		{
+			name: "should return error when tracker is paused",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Paused)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Return(trk, nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				sensorID:  s2id(expectedSensor.ID()),
+			},
+			wantErr: generator.ErrTrackerOff,
+		},
+		{
+			name: "should return error when storage.Update failure",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Running)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
+					mock.EXPECT().Update(gomock.Any(), trk).Times(1).Return(generator.ErrInvalidTrackerVersion)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				sensorID:  s2id(expectedSensor.ID()),
+			},
+			wantErr: generator.ErrInvalidTrackerVersion,
+		},
+		{
+			name: "should not return error when all params are valid",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Running)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
+					mock.EXPECT().Update(gomock.Any(), trk).Times(1).Return(nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					proc := gpsgen.NewAnimalTracker()
+					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(proc, true)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				sensorID:  s2id(expectedSensor.ID()),
+			},
+			wantErr: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			got, err := g.RemoveSensor(tt.args.ctx, tt.args.trackerID, tt.args.sensorID)
+			if !errors.Is(err, tt.wantErr) {
+				t.Errorf("Generator.RemoveSensor() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("Generator.RemoveSensor() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGenerator_Sensors(t *testing.T) {
+	type args struct {
+		ctx       context.Context
+		trackerID types.ID
+	}
+
+	// expectedTrackerID := types.NewID()
+
+	tests := []struct {
+		name    string
+		fields  mocks
+		args    args
+		want    []*gpsgen.Sensor
+		wantErr error
+	}{
+		{
+			name: "should return error when trackerID is empty",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					return nil
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					return nil
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			got, err := g.Sensors(tt.args.ctx, tt.args.trackerID)
+			if !errors.Is(err, tt.wantErr) {
+				t.Errorf("Generator.Sensors() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Generator.Sensors() = %v, want %v", got, tt.want)
 			}
 		})
 	}

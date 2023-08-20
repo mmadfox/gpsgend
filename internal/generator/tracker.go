@@ -83,12 +83,16 @@ func (t *Tracker) UpdateInfo(opts UpdateTrackerOptions) (bool, error) {
 }
 
 func (t *Tracker) NewProcess() (newProc *gpsgen.Device, err error) {
-	if t.numRoutes == 0 {
-		return nil, ErrTrackerHasNoRoutes
+	if t.status == types.Running {
+		return nil, ErrTrackerIsAlreadyRunning
 	}
 
 	if t.status == types.Paused {
 		return nil, errTrackerOff(t)
+	}
+
+	if t.numRoutes == 0 {
+		return nil, ErrTrackerHasNoRoutes
 	}
 
 	opts := gpsgen.NewDeviceOptions()
@@ -139,7 +143,7 @@ func (t *Tracker) NewProcess() (newProc *gpsgen.Device, err error) {
 }
 
 func (t *Tracker) Stop() error {
-	if t.status == types.Stopped {
+	if t.status == types.Paused {
 		return errTrackerOff(t)
 	}
 	if t.status == types.Stopped {
@@ -204,7 +208,7 @@ func (t *Tracker) RemoveRoute(routeID types.ID) error {
 	}
 
 	if t.numRoutes == 0 {
-		return ErrNoRoutes
+		return nil
 	}
 
 	routes, err := gpsgen.DecodeRoutes(t.routesSnapshot)

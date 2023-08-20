@@ -11,4 +11,5 @@ var (
 	ErrInvalidMinAmplitude  = errors.New("invalid minimum amplitude")
 	ErrInvalidMaxAmplitude  = errors.New("invalid maximum amplitude")
 	ErrInvalidName          = errors.New("invalid name value")
+	ErrInvalidID            = errors.New("invalid id")
 )

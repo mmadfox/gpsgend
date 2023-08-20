@@ -143,13 +143,13 @@ func (g *Generator) StopTracker(ctx context.Context, trackerID types.ID) error {
 		return err
 	}
 
-	defer func() {
-		_ = g.processes.Detach(trackerID.String())
-	}()
-
 	if err := tracker.Stop(); err != nil {
 		return err
 	}
+
+	defer func() {
+		_ = g.processes.Detach(trackerID.String())
+	}()
 
 	return g.storage.Update(ctx, tracker)
 }
@@ -267,6 +267,10 @@ func (g *Generator) RouteByID(ctx context.Context, trackerID, routeID types.ID) 
 		return nil, err
 	}
 
+	if err := validateType(routeID, "route.id"); err != nil {
+		return nil, err
+	}
+
 	tracker, err := g.storage.FindTracker(ctx, trackerID)
 	if err != nil {
 		return nil, err
@@ -370,7 +374,7 @@ func (g *Generator) MoveToRouteByID(ctx context.Context, trackerID types.ID, rou
 		return types.Navigator{}, false, err
 	}
 
-	if err := validateType(trackerID, "route.id"); err != nil {
+	if err := validateType(routeID, "route.id"); err != nil {
 		return types.Navigator{}, false, err
 	}
 
@@ -404,11 +408,11 @@ func (g *Generator) MoveToTrackByID(ctx context.Context, trackerID, routeID, tra
 		return types.Navigator{}, false, err
 	}
 
-	if err := validateType(trackerID, "route.id"); err != nil {
+	if err := validateType(routeID, "route.id"); err != nil {
 		return types.Navigator{}, false, err
 	}
 
-	if err := validateType(trackerID, "track.id"); err != nil {
+	if err := validateType(trackID, "track.id"); err != nil {
 		return types.Navigator{}, false, err
 	}
 
@@ -477,7 +481,7 @@ func (g *Generator) RemoveSensor(ctx context.Context, trackerID types.ID, sensor
 	}
 
 	if err := tracker.RemoveSensorByID(sensorID); err != nil {
-		return false, nil
+		return false, err
 	}
 
 	if err := g.storage.Update(ctx, tracker); err != nil {

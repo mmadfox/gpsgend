@@ -67,6 +67,7 @@ var _ = []validater{
 	types.Speed{}, types.Elevation{}, types.Battery{},
 	types.Offline{}, types.Description{}, types.CustomID{},
 	types.Color{}, types.Model{}, types.DeviceStatus(0),
+	types.ID{},
 }
 
 func validateType(t any, ctx string) error {

@@ -308,10 +308,6 @@ func TestTracker_RemoveRoute(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "should return error when tracker has no routes",
-			wantErr: true,
-		},
-		{
 			name: "should return error when routeSnapshot is invalid",
 			arrange: func(trk *generator.Tracker) string {
 				route := gpsgen.RandomRouteForMoscow()
@@ -333,21 +329,6 @@ func TestTracker_RemoveRoute(t *testing.T) {
 				require.Equal(t, 1, trk.NumRoutes())
 			},
 			wantErr: true,
-		},
-		{
-			name: "should not return error when all params are valid",
-			arrange: func(trk *generator.Tracker) string {
-				route := gpsgen.RandomRouteForMoscow()
-				trk.AddRoute(route)
-				return route.ID()
-			},
-			assert: func(trk *generator.Tracker, _ types.ID) {
-				require.Equal(t, 0, trk.NumRoutes())
-				routes, err := trk.Routes()
-				require.NoError(t, err)
-				require.Len(t, routes, 0)
-			},
-			wantErr: false,
 		},
 		{
 			name: "should not return error when all params are valid",

@@ -1,8 +1,6 @@
 package types
 
 import (
-	"fmt"
-
 	"github.com/google/uuid"
 )
 
@@ -28,7 +26,7 @@ func NewID() ID {
 
 func (t ID) Validate() error {
 	if t.value == uuid.Nil {
-		return fmt.Errorf("gpsgend/types: invalid id")
+		return ErrInvalidID
 	}
 	return nil
 }

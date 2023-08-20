@@ -24,7 +24,7 @@ func ParseDeviceStatus(status int) (DeviceStatus, error) {
 
 func (t DeviceStatus) Validate() error {
 	switch t {
-	case Running, Stopped:
+	case Running, Stopped, Paused:
 		return nil
 	default:
 		return fmt.Errorf("gpsgend/types: invalid device status")
