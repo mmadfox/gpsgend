@@ -3,6 +3,7 @@
 declare -a files=(
     "internal/generator/storage.go"
     "internal/generator/processes.go"
+    "internal/generator/bootstraper.go"
 )
 
 path="$(pwd)"

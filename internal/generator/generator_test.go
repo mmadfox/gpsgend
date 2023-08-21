@@ -21,8 +21,9 @@ import (
 )
 
 type mocks struct {
-	storage   func() *mockgenerator.MockStorage
-	processes func() *mockgenerator.MockProcesses
+	storage     func() *mockgenerator.MockStorage
+	processes   func() *mockgenerator.MockProcesses
+	bootstraper func() *mockgenerator.MockBootstraper
 }
 
 func offlineType(t *testing.T, min, max int) types.Offline {
@@ -99,6 +100,27 @@ func s2id(id string) types.ID {
 		panic(err)
 	}
 	return uid
+}
+
+func newGeneratorFromMocks(m mocks) *generator.Generator {
+	var (
+		s *mockgenerator.MockStorage
+		p *mockgenerator.MockProcesses
+		b *mockgenerator.MockBootstraper
+	)
+	if m.storage != nil {
+		s = m.storage()
+	}
+
+	if m.processes != nil {
+		p = m.processes()
+	}
+
+	if m.bootstraper != nil {
+		b = m.bootstraper()
+	}
+
+	return generator.New(s, p, b)
 }
 
 func TestGenerator_NewTracker(t *testing.T) {
@@ -200,10 +222,7 @@ func TestGenerator_NewTracker(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := generator.New(
-				tt.fields.storage(),
-				tt.fields.processes(),
-			)
+			g := newGeneratorFromMocks(tt.fields)
 			got, err := g.NewTracker(tt.args.ctx, tt.args.opts)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Generator.NewTracker() error = %v, wantErr %v", err, tt.wantErr)
@@ -267,7 +286,7 @@ func TestGenerator_RemoveTracker(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			g := newGeneratorFromMocks(tt.fields)
 			if err := g.RemoveTracker(tt.args.ctx, tt.args.trackID); (err != nil) != tt.wantErr {
 				t.Errorf("Generator.RemoveTracker() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -291,14 +310,6 @@ func TestGenerator_UpdateTracker(t *testing.T) {
 	}{
 		{
 			name: "should return error when options are empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: types.NewID(),
@@ -308,14 +319,6 @@ func TestGenerator_UpdateTracker(t *testing.T) {
 		},
 		{
 			name: "should return error when options invalid",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: types.NewID(),
@@ -341,9 +344,6 @@ func TestGenerator_UpdateTracker(t *testing.T) {
 					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
 					return mock
 				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
 			},
 			wantErr: true,
 		},
@@ -365,9 +365,6 @@ func TestGenerator_UpdateTracker(t *testing.T) {
 					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
 				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
 			},
 			wantErr: true,
 		},
@@ -388,9 +385,6 @@ func TestGenerator_UpdateTracker(t *testing.T) {
 					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					mock.EXPECT().Update(gomock.Any(), gomock.Any()).Return(errors.New("error"))
 					return mock
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
 				},
 			},
 			wantErr: true,
@@ -427,7 +421,7 @@ func TestGenerator_UpdateTracker(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			g := newGeneratorFromMocks(tt.fields)
 			if err := g.UpdateTracker(tt.args.ctx, tt.args.trackerID, tt.args.opts); (err != nil) != tt.wantErr {
 				t.Errorf("Generator.UpdateTracker() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -450,14 +444,6 @@ func TestGenerator_FindTracker(t *testing.T) {
 	}{
 		{
 			name: "should return error when trackerID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				trackerID: types.ID{},
 			},
@@ -472,9 +458,6 @@ func TestGenerator_FindTracker(t *testing.T) {
 					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Return(trk, nil)
 					return mock
 				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
 			},
 			args: args{
 				trackerID: types.NewID(),
@@ -484,7 +467,7 @@ func TestGenerator_FindTracker(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			g := newGeneratorFromMocks(tt.fields)
 			_, err := g.FindTracker(tt.args.ctx, tt.args.trackerID)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Generator.FindTracker() error = %v, wantErr %v", err, tt.wantErr)
@@ -508,14 +491,6 @@ func TestGenerator_StartTracker(t *testing.T) {
 	}{
 		{
 			name: "should return error when trackerID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: types.ID{},
@@ -525,9 +500,6 @@ func TestGenerator_StartTracker(t *testing.T) {
 		{
 			name: "should return error when tracker is running",
 			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
 				processes: func() *mockgenerator.MockProcesses {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					mock.EXPECT().HasTracker(gomock.Any()).Times(1).Return(true)
@@ -695,7 +667,7 @@ func TestGenerator_StartTracker(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			g := newGeneratorFromMocks(tt.fields)
 			if err := g.StartTracker(tt.args.ctx, tt.args.trackerID); !errors.Is(err, tt.want) {
 				t.Errorf("Generator.StartTracker() error = %v, wantErr %v", err, tt.want)
 			}
@@ -739,14 +711,6 @@ func TestGenerator_StopTracker(t *testing.T) {
 	}{
 		{
 			name: "should return error when trackerID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: types.ID{},
@@ -760,9 +724,6 @@ func TestGenerator_StopTracker(t *testing.T) {
 					mock := mockgenerator.NewMockStorage(ctrl)
 					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
 					return mock
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
 				},
 			},
 			args: args{
@@ -780,9 +741,6 @@ func TestGenerator_StopTracker(t *testing.T) {
 					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
 				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
 			},
 			args: args{
 				ctx:       context.Background(),
@@ -798,9 +756,6 @@ func TestGenerator_StopTracker(t *testing.T) {
 					mock := mockgenerator.NewMockStorage(ctrl)
 					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
 				},
 			},
 			args: args{
@@ -834,7 +789,7 @@ func TestGenerator_StopTracker(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			g := newGeneratorFromMocks(tt.fields)
 			if err := g.StopTracker(tt.args.ctx, tt.args.trackerID); !errors.Is(err, tt.want) {
 				t.Errorf("Generator.StopTracker() error = %v, wantErr %v", err, tt.want)
 			}
@@ -863,14 +818,6 @@ func TestGenerator_TrackerState(t *testing.T) {
 	}{
 		{
 			name: "should return error when trackerID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: types.ID{},
@@ -880,9 +827,6 @@ func TestGenerator_TrackerState(t *testing.T) {
 		{
 			name: "should return error when tracker not running",
 			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
 				processes: func() *mockgenerator.MockProcesses {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					mock.EXPECT().Lookup(gomock.Any()).Return(nil, false)
@@ -898,9 +842,6 @@ func TestGenerator_TrackerState(t *testing.T) {
 		{
 			name: "should return device state when all params are valid",
 			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
 				processes: func() *mockgenerator.MockProcesses {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					mock.EXPECT().Lookup(gomock.Any()).Return(tracker, true)
@@ -916,7 +857,7 @@ func TestGenerator_TrackerState(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			g := newGeneratorFromMocks(tt.fields)
 			got, err := g.TrackerState(tt.args.ctx, tt.args.trackerID)
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("Generator.TrackerState() error = %v, wantErr %v", err, tt.wantErr)
@@ -945,14 +886,6 @@ func TestGenerator_AddRoutes(t *testing.T) {
 	}{
 		{
 			name: "should return error when trackerID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: types.ID{},
@@ -966,9 +899,6 @@ func TestGenerator_AddRoutes(t *testing.T) {
 					mock := mockgenerator.NewMockStorage(ctrl)
 					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
 					return mock
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
 				},
 			},
 			args: args{
@@ -986,9 +916,6 @@ func TestGenerator_AddRoutes(t *testing.T) {
 					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
 				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
 			},
 			args: args{
 				ctx:       context.Background(),
@@ -1004,9 +931,6 @@ func TestGenerator_AddRoutes(t *testing.T) {
 					mock := mockgenerator.NewMockStorage(ctrl)
 					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
 				},
 			},
 			args: args{
@@ -1025,9 +949,6 @@ func TestGenerator_AddRoutes(t *testing.T) {
 					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					mock.EXPECT().Update(gomock.Any(), gomock.Any()).Return(generator.ErrInvalidTrackerVersion)
 					return mock
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
 				},
 			},
 			args: args{
@@ -1067,7 +988,7 @@ func TestGenerator_AddRoutes(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			g := newGeneratorFromMocks(tt.fields)
 			if err := g.AddRoutes(tt.args.ctx, tt.args.trackerID, tt.args.newRoutes); !errors.Is(err, tt.wantErr) {
 				t.Errorf("Generator.AddRoutes() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -1095,14 +1016,6 @@ func TestGenerator_RemoveRoute(t *testing.T) {
 	}{
 		{
 			name: "should return error when trackerID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: types.ID{},
@@ -1111,14 +1024,6 @@ func TestGenerator_RemoveRoute(t *testing.T) {
 		},
 		{
 			name: "should return error when routeID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: expectedTrackerID,
@@ -1133,9 +1038,6 @@ func TestGenerator_RemoveRoute(t *testing.T) {
 					mock := mockgenerator.NewMockStorage(ctrl)
 					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
 					return mock
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
 				},
 			},
 			args: args{
@@ -1153,9 +1055,6 @@ func TestGenerator_RemoveRoute(t *testing.T) {
 					mock := mockgenerator.NewMockStorage(ctrl)
 					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
 				},
 			},
 			args: args{
@@ -1176,9 +1075,6 @@ func TestGenerator_RemoveRoute(t *testing.T) {
 					mock.EXPECT().Update(gomock.Any(), gomock.Any()).Return(generator.ErrInvalidTrackerVersion)
 					return mock
 				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
 			},
 			args: args{
 				ctx:       context.Background(),
@@ -1194,16 +1090,16 @@ func TestGenerator_RemoveRoute(t *testing.T) {
 					trk := new(generator.Tracker)
 					trk.AddRoute(expectedRoute)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
-					mock.EXPECT().Update(gomock.Any(), gomock.Any()).Times(1).Return(nil)
+					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
+					mock.EXPECT().Update(gomock.Any(), trk).Times(1).Return(nil)
 					return mock
 				},
 				processes: func() *mockgenerator.MockProcesses {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					proc := gpsgen.NewAnimalTracker()
 					proc.AddRoute(expectedRoute)
-					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(proc, true)
-					mock.EXPECT().Detach(expectedTrackerID.String()).Times(1)
+					mock.EXPECT().Lookup(gomock.Any()).Times(1).Return(proc, true)
+					mock.EXPECT().Detach(proc.ID()).Times(1)
 					return mock
 				},
 			},
@@ -1217,7 +1113,7 @@ func TestGenerator_RemoveRoute(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			g := newGeneratorFromMocks(tt.fields)
 			if err := g.RemoveRoute(tt.args.ctx, tt.args.trackerID, tt.args.routeID); !errors.Is(err, tt.wantErr) {
 				t.Errorf("Generator.RemoveRoute() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -1246,14 +1142,6 @@ func TestGenerator_Routes(t *testing.T) {
 	}{
 		{
 			name: "should return error when trackerID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: types.ID{},
@@ -1262,14 +1150,6 @@ func TestGenerator_Routes(t *testing.T) {
 		},
 		{
 			name: "should return error when routeID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: expectedTrackerID,
@@ -1284,9 +1164,6 @@ func TestGenerator_Routes(t *testing.T) {
 					mock := mockgenerator.NewMockStorage(ctrl)
 					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
 					return mock
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
 				},
 			},
 			args: args{
@@ -1306,9 +1183,6 @@ func TestGenerator_Routes(t *testing.T) {
 					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
 				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
 			},
 			args: args{
 				ctx:       context.Background(),
@@ -1321,7 +1195,7 @@ func TestGenerator_Routes(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			g := newGeneratorFromMocks(tt.fields)
 			got, err := g.Routes(tt.args.ctx, tt.args.trackerID, tt.args.routeID)
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("Generator.Routes() error = %v, wantErr %v", err, tt.wantErr)
@@ -1354,14 +1228,6 @@ func TestGenerator_RouteAt(t *testing.T) {
 	}{
 		{
 			name: "should return error when trackerID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: types.ID{},
@@ -1375,9 +1241,6 @@ func TestGenerator_RouteAt(t *testing.T) {
 					mock := mockgenerator.NewMockStorage(ctrl)
 					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
 					return mock
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
 				},
 			},
 			args: args{
@@ -1397,9 +1260,6 @@ func TestGenerator_RouteAt(t *testing.T) {
 					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
 				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
 			},
 			args: args{
 				ctx:        context.Background(),
@@ -1418,9 +1278,6 @@ func TestGenerator_RouteAt(t *testing.T) {
 					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
 				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
 			},
 			args: args{
 				ctx:        context.Background(),
@@ -1433,7 +1290,7 @@ func TestGenerator_RouteAt(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			g := newGeneratorFromMocks(tt.fields)
 			got, err := g.RouteAt(tt.args.ctx, tt.args.trackerID, tt.args.routeIndex)
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("Generator.RouteAt() error = %v, wantErr %v", err, tt.wantErr)
@@ -1466,14 +1323,6 @@ func TestGenerator_RouteByID(t *testing.T) {
 	}{
 		{
 			name: "should return error when trackerID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: types.ID{},
@@ -1482,14 +1331,6 @@ func TestGenerator_RouteByID(t *testing.T) {
 		},
 		{
 			name: "should return error when routeID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: expectedTrackerID,
@@ -1504,9 +1345,6 @@ func TestGenerator_RouteByID(t *testing.T) {
 					mock := mockgenerator.NewMockStorage(ctrl)
 					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
 					return mock
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
 				},
 			},
 			args: args{
@@ -1526,9 +1364,6 @@ func TestGenerator_RouteByID(t *testing.T) {
 					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
 				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
 			},
 			args: args{
 				ctx:       context.Background(),
@@ -1547,9 +1382,6 @@ func TestGenerator_RouteByID(t *testing.T) {
 					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
 				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
 			},
 			args: args{
 				ctx:       context.Background(),
@@ -1562,7 +1394,7 @@ func TestGenerator_RouteByID(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			g := newGeneratorFromMocks(tt.fields)
 			got, err := g.RouteByID(tt.args.ctx, tt.args.trackerID, tt.args.routeID)
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("Generator.RouteByID() error = %v, wantErr %v", err, tt.wantErr)
@@ -1595,14 +1427,6 @@ func TestGenerator_ResetRoutes(t *testing.T) {
 	}{
 		{
 			name: "should return error when trackerID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: types.ID{},
@@ -1616,9 +1440,6 @@ func TestGenerator_ResetRoutes(t *testing.T) {
 					mock := mockgenerator.NewMockStorage(ctrl)
 					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
 					return mock
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
 				},
 			},
 			args: args{
@@ -1636,9 +1457,6 @@ func TestGenerator_ResetRoutes(t *testing.T) {
 					mock := mockgenerator.NewMockStorage(ctrl)
 					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
 				},
 			},
 			args: args{
@@ -1658,9 +1476,6 @@ func TestGenerator_ResetRoutes(t *testing.T) {
 					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					mock.EXPECT().Update(gomock.Any(), gomock.Any()).Return(generator.ErrInvalidTrackerVersion)
 					return mock
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
 				},
 			},
 			args: args{
@@ -1699,7 +1514,7 @@ func TestGenerator_ResetRoutes(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			g := newGeneratorFromMocks(tt.fields)
 			got, err := g.ResetRoutes(tt.args.ctx, tt.args.trackerID)
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("Generator.ResetRoutes() error = %v, wantErr %v", err, tt.wantErr)
@@ -1729,14 +1544,6 @@ func TestGenerator_ResetNavigator(t *testing.T) {
 	}{
 		{
 			name: "should return error when trackerID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: types.ID{},
@@ -1746,9 +1553,6 @@ func TestGenerator_ResetNavigator(t *testing.T) {
 		{
 			name: "should return error when tracker not found",
 			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
 				processes: func() *mockgenerator.MockProcesses {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(nil, false)
@@ -1764,9 +1568,6 @@ func TestGenerator_ResetNavigator(t *testing.T) {
 		{
 			name: "should not return error when all params are valid",
 			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
 				processes: func() *mockgenerator.MockProcesses {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					proc := gpsgen.NewAnimalTracker()
@@ -1783,7 +1584,7 @@ func TestGenerator_ResetNavigator(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			g := newGeneratorFromMocks(tt.fields)
 			if err := g.ResetNavigator(tt.args.ctx, tt.args.trackerID); !errors.Is(err, tt.wantErr) {
 				t.Errorf("Generator.ResetNavigator() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -1817,14 +1618,6 @@ func TestGenerator_ToNextRoute(t *testing.T) {
 	}{
 		{
 			name: "should return error when trackerID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: types.ID{},
@@ -1834,9 +1627,6 @@ func TestGenerator_ToNextRoute(t *testing.T) {
 		{
 			name: "should return error when tracker not found",
 			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
 				processes: func() *mockgenerator.MockProcesses {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(nil, false)
@@ -1852,9 +1642,6 @@ func TestGenerator_ToNextRoute(t *testing.T) {
 		{
 			name: "should not return error when all params are valid",
 			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
 				processes: func() *mockgenerator.MockProcesses {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(expectedProc, true)
@@ -1874,7 +1661,7 @@ func TestGenerator_ToNextRoute(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			g := newGeneratorFromMocks(tt.fields)
 			got, got1, err := g.ToNextRoute(tt.args.ctx, tt.args.trackerID)
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("Generator.ToNextRoute() error = %v, wantErr %v", err, tt.wantErr)
@@ -1917,14 +1704,6 @@ func TestGenerator_ToPrevRoute(t *testing.T) {
 	}{
 		{
 			name: "should return error when trackerID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: types.ID{},
@@ -1934,9 +1713,6 @@ func TestGenerator_ToPrevRoute(t *testing.T) {
 		{
 			name: "should return error when tracker not found",
 			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
 				processes: func() *mockgenerator.MockProcesses {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(nil, false)
@@ -1952,9 +1728,6 @@ func TestGenerator_ToPrevRoute(t *testing.T) {
 		{
 			name: "should not return error when all params are valid",
 			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
 				processes: func() *mockgenerator.MockProcesses {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(expectedProc, true)
@@ -1974,7 +1747,7 @@ func TestGenerator_ToPrevRoute(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			g := newGeneratorFromMocks(tt.fields)
 			got, got1, err := g.ToPrevRoute(tt.args.ctx, tt.args.trackerID)
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("Generator.ToPrevRoute() error = %v, wantErr %v", err, tt.wantErr)
@@ -2017,14 +1790,6 @@ func TestGenerator_MoveToRoute(t *testing.T) {
 	}{
 		{
 			name: "should return error when trackerID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: types.ID{},
@@ -2034,9 +1799,6 @@ func TestGenerator_MoveToRoute(t *testing.T) {
 		{
 			name: "should return error when tracker not found",
 			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
 				processes: func() *mockgenerator.MockProcesses {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(nil, false)
@@ -2052,9 +1814,6 @@ func TestGenerator_MoveToRoute(t *testing.T) {
 		{
 			name: "should not return error when all params are valid",
 			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
 				processes: func() *mockgenerator.MockProcesses {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(expectedProc, true)
@@ -2075,7 +1834,7 @@ func TestGenerator_MoveToRoute(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			g := newGeneratorFromMocks(tt.fields)
 			got, got1, err := g.MoveToRoute(tt.args.ctx, tt.args.trackerID, tt.args.routeIndex)
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("Generator.MoveToRoute() error = %v, wantErr %v", err, tt.wantErr)
@@ -2119,14 +1878,6 @@ func TestGenerator_MoveToRouteByID(t *testing.T) {
 	}{
 		{
 			name: "should return error when trackerID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: types.ID{},
@@ -2135,14 +1886,6 @@ func TestGenerator_MoveToRouteByID(t *testing.T) {
 		},
 		{
 			name: "should return error when routeID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: expectedTrackerID,
@@ -2153,9 +1896,6 @@ func TestGenerator_MoveToRouteByID(t *testing.T) {
 		{
 			name: "should return error when tracker not found",
 			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
 				processes: func() *mockgenerator.MockProcesses {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(nil, false)
@@ -2172,9 +1912,6 @@ func TestGenerator_MoveToRouteByID(t *testing.T) {
 		{
 			name: "should not return error when all params are valid",
 			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
 				processes: func() *mockgenerator.MockProcesses {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(expectedProc, true)
@@ -2195,7 +1932,7 @@ func TestGenerator_MoveToRouteByID(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			g := newGeneratorFromMocks(tt.fields)
 			got, got1, err := g.MoveToRouteByID(tt.args.ctx, tt.args.trackerID, tt.args.routeID)
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("Generator.MoveToRouteByID() error = %v, wantErr %v", err, tt.wantErr)
@@ -2240,14 +1977,6 @@ func TestGenerator_MoveToTrack(t *testing.T) {
 	}{
 		{
 			name: "should return error when trackerID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: types.ID{},
@@ -2257,9 +1986,6 @@ func TestGenerator_MoveToTrack(t *testing.T) {
 		{
 			name: "should return error when tracker not found",
 			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
 				processes: func() *mockgenerator.MockProcesses {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(nil, false)
@@ -2275,9 +2001,6 @@ func TestGenerator_MoveToTrack(t *testing.T) {
 		{
 			name: "should not return error when all params are valid",
 			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
 				processes: func() *mockgenerator.MockProcesses {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(expectedProc, true)
@@ -2299,7 +2022,7 @@ func TestGenerator_MoveToTrack(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			g := newGeneratorFromMocks(tt.fields)
 			got, got1, err := g.MoveToTrack(tt.args.ctx, tt.args.trackerID, tt.args.routeIndex, tt.args.trackIndex)
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("Generator.MoveToTrack() error = %v, wantErr %v", err, tt.wantErr)
@@ -2347,14 +2070,6 @@ func TestGenerator_MoveToTrackByID(t *testing.T) {
 	}{
 		{
 			name: "should return error when trackerID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: types.ID{},
@@ -2363,14 +2078,6 @@ func TestGenerator_MoveToTrackByID(t *testing.T) {
 		},
 		{
 			name: "should return error when routeID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: expectedTrackerID,
@@ -2380,14 +2087,6 @@ func TestGenerator_MoveToTrackByID(t *testing.T) {
 		},
 		{
 			name: "should return error when trackID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: expectedTrackerID,
@@ -2399,9 +2098,6 @@ func TestGenerator_MoveToTrackByID(t *testing.T) {
 		{
 			name: "should return error when tracker not found",
 			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
 				processes: func() *mockgenerator.MockProcesses {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(nil, false)
@@ -2419,9 +2115,6 @@ func TestGenerator_MoveToTrackByID(t *testing.T) {
 		{
 			name: "should not return error when all params are valid",
 			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
 				processes: func() *mockgenerator.MockProcesses {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(expectedProc, true)
@@ -2443,7 +2136,7 @@ func TestGenerator_MoveToTrackByID(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			g := newGeneratorFromMocks(tt.fields)
 			got, got1, err := g.MoveToTrackByID(tt.args.ctx, tt.args.trackerID, tt.args.routeID, tt.args.trackID)
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("Generator.MoveToTrackByID() error = %v, wantErr %v", err, tt.wantErr)
@@ -2491,14 +2184,6 @@ func TestGenerator_MoveToSegment(t *testing.T) {
 	}{
 		{
 			name: "should return error when trackerID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: types.ID{},
@@ -2526,9 +2211,6 @@ func TestGenerator_MoveToSegment(t *testing.T) {
 		{
 			name: "should not return error when all params are valid",
 			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
 				processes: func() *mockgenerator.MockProcesses {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(expectedProc, true)
@@ -2551,7 +2233,7 @@ func TestGenerator_MoveToSegment(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			g := newGeneratorFromMocks(tt.fields)
 			got, got1, err := g.MoveToSegment(tt.args.ctx, tt.args.trackerID, tt.args.routeIndex, tt.args.trackIndex, tt.args.segmentIndex)
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("Generator.MoveToSegment() error = %v, wantErr %v", err, tt.wantErr)
@@ -2585,14 +2267,6 @@ func TestGenerator_AddSensor(t *testing.T) {
 	}{
 		{
 			name: "should return error when trackerID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: types.ID{},
@@ -2606,9 +2280,6 @@ func TestGenerator_AddSensor(t *testing.T) {
 					mock := mockgenerator.NewMockStorage(ctrl)
 					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Return(nil, generator.ErrTrackerNotFound)
 					return mock
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
 				},
 			},
 			args: args{
@@ -2626,9 +2297,6 @@ func TestGenerator_AddSensor(t *testing.T) {
 					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Return(trk, nil)
 					return mock
 				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
 			},
 			args: args{
 				ctx:       context.Background(),
@@ -2645,9 +2313,6 @@ func TestGenerator_AddSensor(t *testing.T) {
 					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
 					mock.EXPECT().Update(gomock.Any(), trk).Times(1).Return(generator.ErrInvalidTrackerVersion)
 					return mock
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
 				},
 			},
 			args: args{
@@ -2682,7 +2347,7 @@ func TestGenerator_AddSensor(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			g := newGeneratorFromMocks(tt.fields)
 			if err := g.AddSensor(tt.args.ctx, tt.args.trackerID, tt.args.sensor); !errors.Is(err, tt.wantErr) {
 				t.Errorf("Generator.AddSensor() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -2711,14 +2376,6 @@ func TestGenerator_RemoveSensor(t *testing.T) {
 	}{
 		{
 			name: "should return error when trackerID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: types.ID{},
@@ -2727,14 +2384,6 @@ func TestGenerator_RemoveSensor(t *testing.T) {
 		},
 		{
 			name: "should return error when sensorID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: expectedTrackerID,
@@ -2749,9 +2398,6 @@ func TestGenerator_RemoveSensor(t *testing.T) {
 					mock := mockgenerator.NewMockStorage(ctrl)
 					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Return(nil, generator.ErrTrackerNotFound)
 					return mock
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
 				},
 			},
 			args: args{
@@ -2770,9 +2416,6 @@ func TestGenerator_RemoveSensor(t *testing.T) {
 					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Return(trk, nil)
 					return mock
 				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
 			},
 			args: args{
 				ctx:       context.Background(),
@@ -2782,17 +2425,32 @@ func TestGenerator_RemoveSensor(t *testing.T) {
 			wantErr: generator.ErrTrackerOff,
 		},
 		{
-			name: "should return error when storage.Update failure",
+			name: "should return error when sensor not found",
 			fields: mocks{
 				storage: func() *mockgenerator.MockStorage {
 					trk := makeValidTracker(t, types.Running)
 					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Return(trk, nil)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+				sensorID:  s2id(expectedSensor.ID()),
+			},
+			wantErr: generator.ErrSensorNotFound,
+		},
+		{
+			name: "should return error when storage.Update failure",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Running)
+					trk.AddSensor(expectedSensor)
+					mock := mockgenerator.NewMockStorage(ctrl)
 					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
 					mock.EXPECT().Update(gomock.Any(), trk).Times(1).Return(generator.ErrInvalidTrackerVersion)
 					return mock
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
 				},
 			},
 			args: args{
@@ -2807,6 +2465,7 @@ func TestGenerator_RemoveSensor(t *testing.T) {
 			fields: mocks{
 				storage: func() *mockgenerator.MockStorage {
 					trk := makeValidTracker(t, types.Running)
+					trk.AddSensor(expectedSensor)
 					mock := mockgenerator.NewMockStorage(ctrl)
 					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
 					mock.EXPECT().Update(gomock.Any(), trk).Times(1).Return(nil)
@@ -2829,7 +2488,7 @@ func TestGenerator_RemoveSensor(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			g := newGeneratorFromMocks(tt.fields)
 			got, err := g.RemoveSensor(tt.args.ctx, tt.args.trackerID, tt.args.sensorID)
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("Generator.RemoveSensor() error = %v, wantErr %v", err, tt.wantErr)
@@ -2843,12 +2502,20 @@ func TestGenerator_RemoveSensor(t *testing.T) {
 }
 
 func TestGenerator_Sensors(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
 	type args struct {
 		ctx       context.Context
 		trackerID types.ID
 	}
 
-	// expectedTrackerID := types.NewID()
+	expectedTrackerID := types.NewID()
+	expectedSensors := make([]*gpsgen.Sensor, 0)
+	for i := 0; i < 10; i++ {
+		sensor, err := gpsgen.NewSensor("s", 0, 1, 8, 0)
+		require.NoError(t, err)
+		expectedSensors = append(expectedSensors, sensor)
+	}
 
 	tests := []struct {
 		name    string
@@ -2859,24 +2526,49 @@ func TestGenerator_Sensors(t *testing.T) {
 	}{
 		{
 			name: "should return error when trackerID is empty",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					return nil
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					return nil
-				},
-			},
 			args: args{
 				ctx:       context.Background(),
 				trackerID: types.ID{},
 			},
 			wantErr: types.ErrInvalidID,
 		},
+		{
+			name: "should return error when tracker not found",
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+			},
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(nil, generator.ErrTrackerNotFound)
+					return mock
+				},
+			},
+			wantErr: generator.ErrTrackerNotFound,
+		},
+		{
+			name: "should not return error when all params are valid",
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+			},
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := new(generator.Tracker)
+					trk.AddSensor(expectedSensors...)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
+					return mock
+				},
+			},
+			want:    expectedSensors,
+			wantErr: nil,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := generator.New(tt.fields.storage(), tt.fields.processes())
+			g := newGeneratorFromMocks(tt.fields)
 			got, err := g.Sensors(tt.args.ctx, tt.args.trackerID)
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("Generator.Sensors() error = %v, wantErr %v", err, tt.wantErr)
@@ -2884,6 +2576,313 @@ func TestGenerator_Sensors(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Generator.Sensors() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGenerator_ShutdownTracker(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	expectedTrackerID := types.NewID()
+
+	type args struct {
+		ctx       context.Context
+		trackerID types.ID
+	}
+	tests := []struct {
+		name    string
+		fields  mocks
+		args    args
+		wantErr error
+	}{
+		{
+			name: "should return error when trackerID is invalid",
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when tracker not found",
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+			},
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(nil, generator.ErrTrackerNotFound)
+					return mock
+				},
+			},
+			wantErr: generator.ErrTrackerNotFound,
+		},
+		{
+			name: "should return error when tracker is not running",
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+			},
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Stopped)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
+					return mock
+				},
+			},
+			wantErr: generator.ErrTrackerNotRunning,
+		},
+		{
+			name: "should return error when process not found - invalid invariant",
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+			},
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Running)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
+					mock.EXPECT().Update(gomock.Any(), trk).Return(nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(nil, false)
+					return mock
+				},
+			},
+			wantErr: generator.ErrTrackerNotRunning,
+		},
+		{
+			name: "should return error when storage.Update failure",
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+			},
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Running)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
+					mock.EXPECT().Update(gomock.Any(), trk).Return(generator.ErrInvalidTrackerVersion)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					proc := gpsgen.NewAnimalTracker()
+					mock.EXPECT().Lookup(gomock.Any()).Times(1).Return(proc, true)
+					mock.EXPECT().Detach(gomock.All())
+					return mock
+				},
+			},
+			wantErr: generator.ErrInvalidTrackerVersion,
+		},
+		{
+			name: "should not return error when all params are valid",
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+			},
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Running)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
+					mock.EXPECT().Update(gomock.Any(), trk).Return(nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					proc := gpsgen.NewAnimalTracker()
+					mock.EXPECT().Lookup(gomock.Any()).Times(1).Return(proc, true)
+					mock.EXPECT().Detach(gomock.All())
+					return mock
+				},
+			},
+			wantErr: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := newGeneratorFromMocks(tt.fields)
+			if err := g.ShutdownTracker(tt.args.ctx, tt.args.trackerID); !errors.Is(err, tt.wantErr) {
+				t.Errorf("Generator.ShutdownTracker() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestGenerator_ResumeTracker(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	expectedTrackerID := types.NewID()
+	expectedProc := gpsgen.NewAnimalTracker()
+
+	type args struct {
+		ctx       context.Context
+		trackerID types.ID
+	}
+	tests := []struct {
+		name    string
+		fields  mocks
+		args    args
+		wantErr error
+	}{
+		{
+			name: "should return error when trackerID is invalid",
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.ID{},
+			},
+			wantErr: types.ErrInvalidID,
+		},
+		{
+			name: "should return error when tracker not found",
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+			},
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(nil, generator.ErrTrackerNotFound)
+					return mock
+				},
+			},
+			wantErr: generator.ErrTrackerNotFound,
+		},
+		{
+			name: "should return error when tracker not paused",
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+			},
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Running)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
+					return mock
+				},
+			},
+			wantErr: generator.ErrTrackerNotPaused,
+		},
+		{
+			name: "should return error when storage.Update failure",
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+			},
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Paused)
+					proc := gpsgen.NewAnimalTracker()
+					trk.ShutdownProcess(proc)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
+					mock.EXPECT().Update(gomock.Any(), trk).Return(generator.ErrInvalidTrackerVersion)
+					return mock
+				},
+			},
+			wantErr: generator.ErrInvalidTrackerVersion,
+		},
+		{
+			name: "should not return error when all params are valid",
+			args: args{
+				ctx:       context.Background(),
+				trackerID: expectedTrackerID,
+			},
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Paused)
+					trk.ShutdownProcess(expectedProc)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
+					mock.EXPECT().Update(gomock.Any(), trk).Return(nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().Attach(gomock.Any()).Times(1).Return(nil)
+					return mock
+				},
+			},
+			wantErr: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := newGeneratorFromMocks(tt.fields)
+			if err := g.ResumeTracker(tt.args.ctx, tt.args.trackerID); !errors.Is(err, tt.wantErr) {
+				t.Errorf("Generator.ResumeTracker() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestGenerator_Run(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	tests := []struct {
+		name    string
+		fields  mocks
+		wantErr error
+	}{
+		{
+			name: "should return error when loading trackers failure",
+			fields: mocks{
+				bootstraper: func() *mockgenerator.MockBootstraper {
+					mock := mockgenerator.NewMockBootstraper(ctrl)
+					mock.EXPECT().LoadTrackers(gomock.Any(), gomock.Any()).Return(generator.ErrLoadingTracker)
+					return mock
+				},
+			},
+			wantErr: generator.ErrLoadingTracker,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := newGeneratorFromMocks(tt.fields)
+			if err := g.Run(context.Background()); !errors.Is(err, tt.wantErr) {
+				t.Errorf("Generator.Run() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestGenerator_Close(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	type args struct {
+		ctx context.Context
+	}
+	tests := []struct {
+		name    string
+		fields  mocks
+		args    args
+		wantErr error
+	}{
+		{
+			name: "should return error when unloading trackers failure",
+			fields: mocks{
+				bootstraper: func() *mockgenerator.MockBootstraper {
+					mock := mockgenerator.NewMockBootstraper(ctrl)
+					mock.EXPECT().UnloadTrackers(gomock.Any(), gomock.Any()).Return(generator.ErrUnloadingTracker)
+					return mock
+				},
+			},
+			wantErr: generator.ErrUnloadingTracker,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := newGeneratorFromMocks(tt.fields)
+			if err := g.Close(tt.args.ctx); !errors.Is(err, tt.wantErr) {
+				t.Errorf("Generator.Close() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

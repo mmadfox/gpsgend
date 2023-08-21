@@ -8,21 +8,23 @@ import (
 	"github.com/mmadfox/gpsgend/internal/types"
 )
 
+// Generator is a service for managing GPS trackers, routes, and related processes.
 type Generator struct {
-	storage   Storage
-	processes Processes
+	storage     Storage
+	processes   Processes
+	bootstraper Bootstraper
 }
 
-func New(
-	storage Storage,
-	processes Processes,
-) *Generator {
+// New creates a new instance of the Generator.
+func New(s Storage, p Processes, b Bootstraper) *Generator {
 	return &Generator{
-		storage:   storage,
-		processes: processes,
+		storage:     s,
+		processes:   p,
+		bootstraper: b,
 	}
 }
 
+// NewTracker creates a new tracker instance with the given options and inserts it into storage.
 func (g *Generator) NewTracker(ctx context.Context, opts NewTrackerOptions) (*Tracker, error) {
 	trackerBuilder := NewTrackerBuilder()
 	trackerBuilder.ID(types.NewID())
@@ -61,11 +63,13 @@ func (g *Generator) NewTracker(ctx context.Context, opts NewTrackerOptions) (*Tr
 	return newTracker, nil
 }
 
+// RemoveTracker removes a tracker from storage and detaches it from any associated processes.
 func (g *Generator) RemoveTracker(ctx context.Context, trackID types.ID) error {
 	g.processes.Detach(trackID.String())
 	return g.storage.Delete(ctx, trackID)
 }
 
+// UpdateTracker updates the information of a tracker, validates options, and manages related processes.
 func (g *Generator) UpdateTracker(
 	ctx context.Context,
 	trackerID types.ID,
@@ -99,6 +103,7 @@ func (g *Generator) UpdateTracker(
 	return nil
 }
 
+// FindTracker retrieves a tracker from storage using its ID.
 func (g *Generator) FindTracker(ctx context.Context, trackerID types.ID) (*Tracker, error) {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return nil, err
@@ -106,6 +111,7 @@ func (g *Generator) FindTracker(ctx context.Context, trackerID types.ID) (*Track
 	return g.storage.FindTracker(ctx, trackerID)
 }
 
+// StartTracker starts a tracker process and attaches it.
 func (g *Generator) StartTracker(ctx context.Context, trackerID types.ID) error {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return err
@@ -129,10 +135,11 @@ func (g *Generator) StartTracker(ctx context.Context, trackerID types.ID) error 
 		return err
 	}
 
-	g.processes.Attach(newProc)
+	g.addProc(newProc)
 	return nil
 }
 
+// StopTracker stops a tracker process and detaches it.
 func (g *Generator) StopTracker(ctx context.Context, trackerID types.ID) error {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return err
@@ -154,12 +161,13 @@ func (g *Generator) StopTracker(ctx context.Context, trackerID types.ID) error {
 	return g.storage.Update(ctx, tracker)
 }
 
+// TrackerState retrieves the state of a running tracker process.
 func (g *Generator) TrackerState(ctx context.Context, trackerID types.ID) (*proto.Device, error) {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return nil, err
 	}
 
-	proc, ok := g.processes.Lookup(trackerID.String())
+	proc, ok := g.findProc(trackerID)
 	if !ok {
 		return nil, ErrTrackerNotRunning
 	}
@@ -167,6 +175,7 @@ func (g *Generator) TrackerState(ctx context.Context, trackerID types.ID) (*prot
 	return proc.State(), nil
 }
 
+// AddRoutes adds new routes to a tracker and updates related processes.
 func (g *Generator) AddRoutes(ctx context.Context, trackerID types.ID, newRoutes []*gpsgen.Route) error {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return err
@@ -186,7 +195,7 @@ func (g *Generator) AddRoutes(ctx context.Context, trackerID types.ID, newRoutes
 		return err
 	}
 
-	proc, ok := g.processes.Lookup(trackerID.String())
+	proc, ok := g.findProc(trackerID)
 	if ok {
 		proc.ResetRoutes()
 		proc.AddRoute(currRoutes...)
@@ -195,6 +204,7 @@ func (g *Generator) AddRoutes(ctx context.Context, trackerID types.ID, newRoutes
 	return nil
 }
 
+// RemoveRoute removes a route from a tracker and updates related processes if needed.
 func (g *Generator) RemoveRoute(ctx context.Context, trackerID types.ID, routeID types.ID) error {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return err
@@ -217,16 +227,17 @@ func (g *Generator) RemoveRoute(ctx context.Context, trackerID types.ID, routeID
 		return err
 	}
 
-	proc, ok := g.processes.Lookup(trackerID.String())
+	proc, ok := g.findProc(trackerID)
 	if ok {
 		proc.RemoveRoute(routeID.String())
 		if tracker.HasNoRoutes() {
-			g.processes.Detach(trackerID.String())
+			g.removeProc(proc)
 		}
 	}
 	return nil
 }
 
+// Routes retrieves the list of routes associated with a tracker.
 func (g *Generator) Routes(ctx context.Context, trackerID, routeID types.ID) ([]*gpsgen.Route, error) {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return nil, err
@@ -244,6 +255,7 @@ func (g *Generator) Routes(ctx context.Context, trackerID, routeID types.ID) ([]
 	return tracker.Routes()
 }
 
+// RouteAt retrieves a route at a specific index for a tracker.
 func (g *Generator) RouteAt(ctx context.Context, trackerID types.ID, routeIndex int) (*gpsgen.Route, error) {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return nil, err
@@ -262,6 +274,7 @@ func (g *Generator) RouteAt(ctx context.Context, trackerID types.ID, routeIndex 
 	return route, nil
 }
 
+// RouteByID retrieves a route by its ID for a tracker.
 func (g *Generator) RouteByID(ctx context.Context, trackerID, routeID types.ID) (*gpsgen.Route, error) {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return nil, err
@@ -284,6 +297,7 @@ func (g *Generator) RouteByID(ctx context.Context, trackerID, routeID types.ID) 
 	return route, nil
 }
 
+// ResetRoutes resets all routes for a tracker and updates related processes.
 func (g *Generator) ResetRoutes(ctx context.Context, trackerID types.ID) (bool, error) {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return false, err
@@ -302,7 +316,7 @@ func (g *Generator) ResetRoutes(ctx context.Context, trackerID types.ID) (bool, 
 		return false, err
 	}
 
-	proc, ok := g.processes.Lookup(trackerID.String())
+	proc, ok := g.findProc(trackerID)
 	if ok {
 		proc.ResetRoutes()
 	}
@@ -310,12 +324,13 @@ func (g *Generator) ResetRoutes(ctx context.Context, trackerID types.ID) (bool, 
 	return true, nil
 }
 
+// ResetNavigator resets the navigation state of a running tracker process.
 func (g *Generator) ResetNavigator(ctx context.Context, trackerID types.ID) error {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return err
 	}
 
-	proc, ok := g.processes.Lookup(trackerID.String())
+	proc, ok := g.findProc(trackerID)
 	if !ok {
 		return ErrTrackerNotRunning
 	}
@@ -324,12 +339,14 @@ func (g *Generator) ResetNavigator(ctx context.Context, trackerID types.ID) erro
 	return nil
 }
 
+// ToNextRoute moves the tracker's navigation to the next route
+// and provides the updated navigation state.
 func (g *Generator) ToNextRoute(ctx context.Context, trackerID types.ID) (types.Navigator, bool, error) {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return types.Navigator{}, false, err
 	}
 
-	proc, ok := g.processes.Lookup(trackerID.String())
+	proc, ok := g.findProc(trackerID)
 	if !ok {
 		return types.Navigator{}, false, ErrTrackerNotRunning
 	}
@@ -339,12 +356,14 @@ func (g *Generator) ToNextRoute(ctx context.Context, trackerID types.ID) (types.
 	return types.NavigatorFromProc(proc), next, nil
 }
 
+// ToPrevRoute moves the tracker's navigation to the previous route
+// and provides the updated navigation state.
 func (g *Generator) ToPrevRoute(ctx context.Context, trackerID types.ID) (types.Navigator, bool, error) {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return types.Navigator{}, false, err
 	}
 
-	proc, ok := g.processes.Lookup(trackerID.String())
+	proc, ok := g.findProc(trackerID)
 	if !ok {
 		return types.Navigator{}, false, ErrTrackerNotRunning
 	}
@@ -354,12 +373,14 @@ func (g *Generator) ToPrevRoute(ctx context.Context, trackerID types.ID) (types.
 	return types.NavigatorFromProc(proc), next, nil
 }
 
+// MoveToRoute moves the tracker's navigation to a specific route index
+// and provides the updated navigation state.
 func (g *Generator) MoveToRoute(ctx context.Context, trackerID types.ID, routeIndex int) (types.Navigator, bool, error) {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return types.Navigator{}, false, err
 	}
 
-	proc, ok := g.processes.Lookup(trackerID.String())
+	proc, ok := g.findProc(trackerID)
 	if !ok {
 		return types.Navigator{}, false, ErrTrackerNotRunning
 	}
@@ -369,6 +390,8 @@ func (g *Generator) MoveToRoute(ctx context.Context, trackerID types.ID, routeIn
 	return types.NavigatorFromProc(proc), next, nil
 }
 
+// MoveToRouteByID moves the tracker's navigation to a specific route ID
+// and provides the updated navigation state.
 func (g *Generator) MoveToRouteByID(ctx context.Context, trackerID types.ID, routeID types.ID) (types.Navigator, bool, error) {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return types.Navigator{}, false, err
@@ -378,7 +401,7 @@ func (g *Generator) MoveToRouteByID(ctx context.Context, trackerID types.ID, rou
 		return types.Navigator{}, false, err
 	}
 
-	proc, ok := g.processes.Lookup(trackerID.String())
+	proc, ok := g.findProc(trackerID)
 	if !ok {
 		return types.Navigator{}, false, ErrTrackerNotRunning
 	}
@@ -388,12 +411,14 @@ func (g *Generator) MoveToRouteByID(ctx context.Context, trackerID types.ID, rou
 	return types.NavigatorFromProc(proc), next, nil
 }
 
+// MoveToTrack moves the tracker's navigation to a specific track index
+// within a route and provides the updated navigation state.
 func (g *Generator) MoveToTrack(ctx context.Context, trackerID types.ID, routeIndex, trackIndex int) (types.Navigator, bool, error) {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return types.Navigator{}, false, err
 	}
 
-	proc, ok := g.processes.Lookup(trackerID.String())
+	proc, ok := g.findProc(trackerID)
 	if !ok {
 		return types.Navigator{}, false, ErrTrackerNotRunning
 	}
@@ -403,6 +428,8 @@ func (g *Generator) MoveToTrack(ctx context.Context, trackerID types.ID, routeIn
 	return types.NavigatorFromProc(proc), next, nil
 }
 
+// MoveToTrackByID moves the tracker's navigation to a specific track ID
+// within a route and provides the updated navigation state.
 func (g *Generator) MoveToTrackByID(ctx context.Context, trackerID, routeID, trackID types.ID) (types.Navigator, bool, error) {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return types.Navigator{}, false, err
@@ -416,7 +443,7 @@ func (g *Generator) MoveToTrackByID(ctx context.Context, trackerID, routeID, tra
 		return types.Navigator{}, false, err
 	}
 
-	proc, ok := g.processes.Lookup(trackerID.String())
+	proc, ok := g.findProc(trackerID)
 	if !ok {
 		return types.Navigator{}, false, ErrTrackerNotRunning
 	}
@@ -426,12 +453,14 @@ func (g *Generator) MoveToTrackByID(ctx context.Context, trackerID, routeID, tra
 	return types.NavigatorFromProc(proc), next, nil
 }
 
+// MoveToSegment moves the tracker's navigation to a specific segment index
+// within a route and provides the updated navigation state.
 func (g *Generator) MoveToSegment(ctx context.Context, trackerID types.ID, routeIndex, trackIndex, segmentIndex int) (types.Navigator, bool, error) {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return types.Navigator{}, false, err
 	}
 
-	proc, ok := g.processes.Lookup(trackerID.String())
+	proc, ok := g.findProc(trackerID)
 	if !ok {
 		return types.Navigator{}, false, ErrTrackerNotRunning
 	}
@@ -441,6 +470,7 @@ func (g *Generator) MoveToSegment(ctx context.Context, trackerID types.ID, route
 	return types.NavigatorFromProc(proc), next, nil
 }
 
+// AddSensor adds a sensor to a tracker's list of sensors and updates related processes.
 func (g *Generator) AddSensor(ctx context.Context, trackerID types.ID, sensor *gpsgen.Sensor) error {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return err
@@ -459,7 +489,7 @@ func (g *Generator) AddSensor(ctx context.Context, trackerID types.ID, sensor *g
 		return err
 	}
 
-	proc, ok := g.processes.Lookup(trackerID.String())
+	proc, ok := g.findProc(trackerID)
 	if ok {
 		proc.AddSensor(sensor)
 	}
@@ -467,6 +497,7 @@ func (g *Generator) AddSensor(ctx context.Context, trackerID types.ID, sensor *g
 	return nil
 }
 
+// RemoveSensor removes a sensor from a tracker's list of sensors and updates related processes.
 func (g *Generator) RemoveSensor(ctx context.Context, trackerID types.ID, sensorID types.ID) (bool, error) {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return false, err
@@ -488,7 +519,7 @@ func (g *Generator) RemoveSensor(ctx context.Context, trackerID types.ID, sensor
 		return false, err
 	}
 
-	proc, ok := g.processes.Lookup(trackerID.String())
+	proc, ok := g.findProc(trackerID)
 	if ok {
 		proc.RemoveSensor(sensorID.String())
 	}
@@ -496,6 +527,7 @@ func (g *Generator) RemoveSensor(ctx context.Context, trackerID types.ID, sensor
 	return false, nil
 }
 
+// Sensors retrieves the list of sensors associated with a tracker.
 func (g *Generator) Sensors(ctx context.Context, trackerID types.ID) ([]*gpsgen.Sensor, error) {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return nil, err
@@ -506,10 +538,11 @@ func (g *Generator) Sensors(ctx context.Context, trackerID types.ID) ([]*gpsgen.
 		return nil, err
 	}
 
-	return tracker.Sensors(), nil
+	return tracker.Sensors()
 }
 
-func (g *Generator) Shutdown(ctx context.Context, trackerID types.ID) error {
+// Shutdown shuts down a tracker, takes snapshots if needed, and detaches processes.
+func (g *Generator) ShutdownTracker(ctx context.Context, trackerID types.ID) error {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return err
 	}
@@ -519,16 +552,15 @@ func (g *Generator) Shutdown(ctx context.Context, trackerID types.ID) error {
 		return err
 	}
 
-	isNotRunning := tracker.IsRunning()
-	if isNotRunning {
+	if !tracker.IsRunning() {
 		return ErrTrackerNotRunning
 	}
 
 	invalidProc := false
-	proc, ok := g.processes.Lookup(trackerID.String())
+	proc, ok := g.findProc(trackerID)
 	if ok {
-		tracker.TakeSnapshot(proc)
-		g.processes.Detach(proc.ID())
+		tracker.ShutdownProcess(proc)
+		g.removeProc(proc)
 	} else {
 		invalidProc = true
 		tracker.ResetStatus()
@@ -545,7 +577,8 @@ func (g *Generator) Shutdown(ctx context.Context, trackerID types.ID) error {
 	return nil
 }
 
-func (g *Generator) Resume(ctx context.Context, trackerID types.ID) error {
+// ResumeTracker resumes a tracker from a previously taken snapshot and attaches the process// Resume resumes a tracker from a previously taken snapshot and attaches the process.
+func (g *Generator) ResumeTracker(ctx context.Context, trackerID types.ID) error {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return err
 	}
@@ -555,7 +588,7 @@ func (g *Generator) Resume(ctx context.Context, trackerID types.ID) error {
 		return err
 	}
 
-	proc, err := tracker.FromSnapshot()
+	proc, err := tracker.ResumeProcess()
 	if err != nil {
 		return err
 	}
@@ -564,8 +597,28 @@ func (g *Generator) Resume(ctx context.Context, trackerID types.ID) error {
 		return err
 	}
 
-	g.processes.Attach(proc)
+	g.addProc(proc)
 	return nil
+}
+
+func (g *Generator) Run(ctx context.Context) error {
+	return g.bootstraper.LoadTrackers(ctx, g.processes)
+}
+
+func (g *Generator) Close(ctx context.Context) error {
+	return g.bootstraper.UnloadTrackers(ctx, g.processes)
+}
+
+func (g *Generator) findProc(trackerID types.ID) (*gpsgen.Device, bool) {
+	return g.processes.Lookup(trackerID.String())
+}
+
+func (g *Generator) removeProc(proc *gpsgen.Device) {
+	g.processes.Detach(proc.ID())
+}
+
+func (g *Generator) addProc(proc *gpsgen.Device) {
+	g.processes.Attach(proc)
 }
 
 func (g *Generator) updateTrackerProcess(trackerID string, opts UpdateTrackerOptions) {
