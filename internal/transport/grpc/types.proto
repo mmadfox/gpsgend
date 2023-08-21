@@ -1,0 +1,91 @@
+syntax = "proto3";
+
+package grpc;
+
+option go_package = "internal/transport/grpc;grpc";
+
+message Tracker {
+    string id = 1;
+    string custom_id = 2;
+    Status status = 3;
+    string model = 4;
+    string color = 5;
+    string descr = 6;
+    Offline offline = 7;
+    Elevation elevation = 8;
+    Battery battery = 9;
+    Speed speed = 10;
+    bytes props = 11;
+    int64 num_sensors = 12;
+    int64 num_routes = 13;
+    bool skip_offline = 14; 
+    int64 created_at = 15;
+    int64 updated_at = 16;
+    int64 running_at = 17;
+    int64 stopped_at = 18;
+}
+
+message Error {
+    int64 code = 1;
+    string msg = 2;
+}
+
+message Filter {
+    string model = 1;
+	string descr = 2;
+	string color = 3;
+	int64 status = 4;
+	int64 limit = 5; 
+	int64 offset = 6;
+}
+
+message Status {
+    int64 id = 1;
+    string name = 2;
+}
+
+message Offline {
+    int64 min = 1;
+    int64 max = 2;
+}
+
+message Elevation {
+    double min = 1;
+    double max = 2;
+    int64 amplitude = 3;
+    int64 mode = 4;
+}
+
+message Battery {
+    double min = 1;
+    double max = 2;
+    int64 charge_time = 3;
+}
+
+message Speed {
+    double min = 1;
+    double max = 2;
+    int64 amplitude = 3;
+}
+
+message Navigator {
+    double lon = 1; 
+    double lat = 2; 
+    double distance = 3;
+    double route_distance = 4;
+    int64 route_index = 5;
+    double track_distance = 6;
+    int64 track_index = 7;
+    double segment_distance = 8;
+    int64 segment_index = 9;
+    string units = 10;
+}
+
+message Sensor {
+    string id = 1;
+    string name = 2;
+    double min = 3; 
+    double max = 4;
+    int64 amplitude = 5; 
+    int64 mode = 6;
+}

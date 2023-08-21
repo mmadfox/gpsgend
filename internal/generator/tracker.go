@@ -2,6 +2,7 @@ package generator
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/mmadfox/go-gpsgen"
 	"github.com/mmadfox/go-gpsgen/properties"
@@ -15,6 +16,7 @@ const (
 	MaxSensorsPerDevice = 10
 )
 
+// Tracker represents a GPS tracker device with various properties and capabilities.
 type Tracker struct {
 	id              types.ID
 	status          types.DeviceStatus
@@ -33,32 +35,63 @@ type Tracker struct {
 	routesSnapshot  types.Raw
 	sensorsSnapshot types.Raw
 	skipOffline     bool
+	createdAt       time.Time
+	updatedAt       time.Time
+	runningAt       time.Time
+	stoppedAt       time.Time
 }
 
+// ID returns the unique identifier of the tracker.
 func (t *Tracker) ID() types.ID {
 	return t.id
 }
 
+// IsRunning checks if the tracker is currently running.
 func (t *Tracker) IsRunning() bool {
 	return t.status == types.Running
 }
 
+// IsTrackerOff checks if the tracker is in a paused state.
 func (t *Tracker) IsTrackerOff() bool {
 	return t.status == types.Paused
 }
 
+// Model returns the model of the tracker.
 func (t *Tracker) Model() types.Model {
 	return t.model
 }
 
+// Properties returns the custom properties associated with the tracker.
 func (t *Tracker) Properties() properties.Properties {
 	return t.props
 }
 
+// HasNoRoutes checks if the tracker has no routes.
 func (t *Tracker) HasNoRoutes() bool {
 	return t.numRoutes == 0
 }
 
+// CreatedAt returns the timestamp indicating when the tracker was created.
+func (t *Tracker) CreatedAt() time.Time {
+	return t.createdAt
+}
+
+// UpdatedAt returns the timestamp indicating when the tracker was last updated.
+func (t *Tracker) UpdatedAt() time.Time {
+	return t.updatedAt
+}
+
+// RunningAt returns the timestamp indicating when the tracker's GPS process started running.
+func (t *Tracker) RunningAt() time.Time {
+	return t.runningAt
+}
+
+// StoppedAt returns the timestamp indicating when the tracker's GPS process was stopped.
+func (t *Tracker) StoppedAt() time.Time {
+	return t.stoppedAt
+}
+
+// UpdateInfo updates the tracker's information with the provided options.
 func (t *Tracker) UpdateInfo(opts UpdateTrackerOptions) (bool, error) {
 	if t.status == types.Paused {
 		return false, errTrackerOff(t)
@@ -80,9 +113,11 @@ func (t *Tracker) UpdateInfo(opts UpdateTrackerOptions) (bool, error) {
 		t.userID = *opts.UserID
 	}
 
+	t.updatedAt = time.Now()
 	return true, nil
 }
 
+// NewProcess creates a new GPS device process for the tracker.
 func (t *Tracker) NewProcess() (newProc *gpsgen.Device, err error) {
 	if t.status == types.Running {
 		return nil, ErrTrackerIsAlreadyRunning
@@ -140,9 +175,11 @@ func (t *Tracker) NewProcess() (newProc *gpsgen.Device, err error) {
 	}
 
 	t.status = types.Running
+	t.runningAt = time.Now()
 	return
 }
 
+// Stop stops the tracker's GPS device process.
 func (t *Tracker) Stop() error {
 	if t.status == types.Paused {
 		return errTrackerOff(t)
@@ -151,45 +188,56 @@ func (t *Tracker) Stop() error {
 		return ErrTrackerIsAlreadyStopped
 	}
 	t.status = types.Stopped
+	t.stoppedAt = time.Now()
 	return nil
 }
 
+// Color returns the color of the tracker.
 func (t *Tracker) Color() types.Color {
 	return t.color
 }
 
+// Description returns the description of the tracker.
 func (t *Tracker) Description() types.Description {
 	return t.description
 }
 
+// UserID returns the custom user identifier associated with the tracker.
 func (t *Tracker) UserID() types.CustomID {
 	return t.userID
 }
 
+// Speed returns the speed information of the tracker.
 func (t *Tracker) Speed() types.Speed {
 	return t.speed
 }
 
+// Battery returns the battery information of the tracker.
 func (t *Tracker) Battery() types.Battery {
 	return t.battery
 }
 
+// Elevation returns the elevation information of the tracker.
 func (t *Tracker) Elevation() types.Elevation {
 	return t.elevation
 }
 
+// Offline returns the offline configuration of the tracker.
 func (t *Tracker) Offline() types.Offline {
 	return t.offline
 }
 
+// SkipOffline returns whether skipping offline data is enabled for the tracker.
 func (t *Tracker) SkipOffline() bool {
 	return t.skipOffline
 }
 
+// AddRoute adds a new route to the tracker.
 func (t *Tracker) AddRoute(route *gpsgen.Route) ([]*gpsgen.Route, error) {
 	return t.AddRoutes([]*gpsgen.Route{route})
 }
 
+// AddRoutes adds multiple new routes to the tracker.
 func (t *Tracker) AddRoutes(newRoutes []*gpsgen.Route) ([]*gpsgen.Route, error) {
 	if t.status == types.Paused {
 		return nil, errTrackerOff(t)
@@ -200,9 +248,11 @@ func (t *Tracker) AddRoutes(newRoutes []*gpsgen.Route) ([]*gpsgen.Route, error) 
 	if err := t.validateRoutes(newRoutes); err != nil {
 		return nil, err
 	}
+	t.updatedAt = time.Now()
 	return t.appendRoutes(newRoutes)
 }
 
+// RemoveRoute removes a route from the tracker by route ID.
 func (t *Tracker) RemoveRoute(routeID types.ID) error {
 	if t.status == types.Paused {
 		return errTrackerOff(t)
@@ -238,6 +288,8 @@ func (t *Tracker) RemoveRoute(routeID types.ID) error {
 		} else {
 			t.routesSnapshot = make(types.Raw, 0)
 		}
+
+		t.updatedAt = time.Now()
 		return nil
 	}
 
@@ -245,6 +297,7 @@ func (t *Tracker) RemoveRoute(routeID types.ID) error {
 		ErrRouteNotFound, t.id)
 }
 
+// RouteAt returns the route at the specified index.
 func (t *Tracker) RouteAt(index int) (*gpsgen.Route, error) {
 	if index <= 0 || index > t.numRoutes {
 		return nil, fmt.Errorf("%w by index for Tracker{ID:%s}",
@@ -259,6 +312,7 @@ func (t *Tracker) RouteAt(index int) (*gpsgen.Route, error) {
 	return routes[index-1], nil
 }
 
+// RouteByID returns the route with the specified ID.
 func (t *Tracker) RouteByID(routeID types.ID) (route *gpsgen.Route, err error) {
 	if t.numRoutes == 0 {
 		return nil, ErrNoRoutes
@@ -283,19 +337,23 @@ func (t *Tracker) RouteByID(routeID types.ID) (route *gpsgen.Route, err error) {
 	return
 }
 
+// ResetRoutes removes all routes from the tracker.
 func (t *Tracker) ResetRoutes() error {
 	if t.status == types.Paused {
 		return errTrackerOff(t)
 	}
 	t.numRoutes = 0
 	t.routesSnapshot = make(types.Raw, 0)
+	t.updatedAt = time.Now()
 	return nil
 }
 
+// NumRoutes returns the number of routes associated with the tracker.
 func (t *Tracker) NumRoutes() int {
 	return t.numRoutes
 }
 
+// Routes returns a list of all routes associated with the tracker.
 func (t *Tracker) Routes() ([]*gpsgen.Route, error) {
 	if t.numRoutes == 0 {
 		return []*gpsgen.Route{}, nil
@@ -338,6 +396,7 @@ func (t *Tracker) appendRoutes(newRoutes []*gpsgen.Route) ([]*gpsgen.Route, erro
 
 	t.routesSnapshot = data
 	t.numRoutes = len(new)
+	t.updatedAt = time.Now()
 	return new, nil
 }
 
@@ -369,6 +428,7 @@ loop:
 	return err
 }
 
+// AddSensor adds one or more sensors to the tracker.
 func (t *Tracker) AddSensor(newSensors ...*gpsgen.Sensor) error {
 	if t.status == types.Paused {
 		return errTrackerOff(t)
@@ -423,9 +483,11 @@ func (t *Tracker) AddSensor(newSensors ...*gpsgen.Sensor) error {
 	}
 
 	t.numSensors = len(new)
+	t.updatedAt = time.Now()
 	return nil
 }
 
+// RemoveSensorByID removes a sensor from the tracker by sensor ID.
 func (t *Tracker) RemoveSensorByID(id types.ID) error {
 	if t.status == types.Paused {
 		return errTrackerOff(t)
@@ -461,6 +523,7 @@ func (t *Tracker) RemoveSensorByID(id types.ID) error {
 		} else {
 			t.sensorsSnapshot = make(types.Raw, 0)
 		}
+		t.updatedAt = time.Now()
 		return nil
 	}
 
@@ -468,6 +531,7 @@ func (t *Tracker) RemoveSensorByID(id types.ID) error {
 		ErrSensorNotFound, t.id)
 }
 
+// Sensors returns a list of all sensors associated with the tracker.
 func (t *Tracker) Sensors() ([]*gpsgen.Sensor, error) {
 	if t.numSensors == 0 {
 		return []*gpsgen.Sensor{}, nil
@@ -475,10 +539,13 @@ func (t *Tracker) Sensors() ([]*gpsgen.Sensor, error) {
 	return gpsgen.DecodeSensors(t.sensorsSnapshot)
 }
 
+// ResetStatus resets the tracker's status to stopped.
 func (t *Tracker) ResetStatus() {
 	t.status = types.Stopped
+	t.updatedAt = time.Now()
 }
 
+// ShutdownProcess saves the current GPS device state and pauses the tracker's process.
 func (t *Tracker) ShutdownProcess(tracker *gpsgen.Device) error {
 	data, err := gpsgen.EncodeTracker(tracker)
 	if err != nil {
@@ -486,9 +553,11 @@ func (t *Tracker) ShutdownProcess(tracker *gpsgen.Device) error {
 	}
 	t.snapshot = data
 	t.status = types.Paused
+	t.updatedAt = time.Now()
 	return nil
 }
 
+// ResumeProcess resumes a paused tracker's process with the provided GPS device state.
 func (t *Tracker) ResumeProcess() (*gpsgen.Device, error) {
 	if t.status != types.Paused {
 		return nil, ErrTrackerNotPaused
@@ -501,5 +570,6 @@ func (t *Tracker) ResumeProcess() (*gpsgen.Device, error) {
 
 	t.status = types.Running
 	t.snapshot = nil
+	t.updatedAt = time.Now()
 	return proc, nil
 }

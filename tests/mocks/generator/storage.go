@@ -50,19 +50,19 @@ func (mr *MockStorageMockRecorder) Delete(ctx, trackerID interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockStorage)(nil).Delete), ctx, trackerID)
 }
 
-// FindTracker mocks base method.
-func (m *MockStorage) FindTracker(ctx context.Context, trackerID types.ID) (*generator.Tracker, error) {
+// Find mocks base method.
+func (m *MockStorage) Find(ctx context.Context, trackerID types.ID) (*generator.Tracker, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindTracker", ctx, trackerID)
+	ret := m.ctrl.Call(m, "Find", ctx, trackerID)
 	ret0, _ := ret[0].(*generator.Tracker)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// FindTracker indicates an expected call of FindTracker.
-func (mr *MockStorageMockRecorder) FindTracker(ctx, trackerID interface{}) *gomock.Call {
+// Find indicates an expected call of Find.
+func (mr *MockStorageMockRecorder) Find(ctx, trackerID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindTracker", reflect.TypeOf((*MockStorage)(nil).FindTracker), ctx, trackerID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Find", reflect.TypeOf((*MockStorage)(nil).Find), ctx, trackerID)
 }
 
 // Insert mocks base method.

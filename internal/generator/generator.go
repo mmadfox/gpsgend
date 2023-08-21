@@ -2,6 +2,7 @@ package generator
 
 import (
 	"context"
+	"time"
 
 	"github.com/mmadfox/go-gpsgen"
 	"github.com/mmadfox/go-gpsgen/proto"
@@ -10,17 +11,24 @@ import (
 
 // Generator is a service for managing GPS trackers, routes, and related processes.
 type Generator struct {
-	storage     Storage
+	trackers    Storage
 	processes   Processes
 	bootstraper Bootstraper
+	query       Query
 }
 
 // New creates a new instance of the Generator.
-func New(s Storage, p Processes, b Bootstraper) *Generator {
+func New(
+	s Storage,
+	p Processes,
+	b Bootstraper,
+	q Query,
+) *Generator {
 	return &Generator{
-		storage:     s,
+		trackers:    s,
 		processes:   p,
 		bootstraper: b,
+		query:       q,
 	}
 }
 
@@ -50,23 +58,30 @@ func (g *Generator) NewTracker(ctx context.Context, opts NewTrackerOptions) (*Tr
 	trackerBuilder.Elevation(opts.Elevation)
 	trackerBuilder.Speed(opts.Speed)
 	trackerBuilder.Battery(opts.Battery)
+	trackerBuilder.CreatedAt(time.Now())
 
 	newTracker, err := trackerBuilder.Build()
 	if err != nil {
 		return nil, err
 	}
 
-	if err := g.storage.Insert(ctx, newTracker); err != nil {
+	if err := g.trackers.Insert(ctx, newTracker); err != nil {
 		return nil, err
 	}
 
 	return newTracker, nil
 }
 
+// SearchTrackers searches for trackers based on the provided filter.
+// It returns a SearchResult and an error if the search operation fails.
+func (g *Generator) SearchTrackers(ctx context.Context, f Filter) (SearchResult, error) {
+	return g.query.SearchTrackers(ctx, f)
+}
+
 // RemoveTracker removes a tracker from storage and detaches it from any associated processes.
 func (g *Generator) RemoveTracker(ctx context.Context, trackID types.ID) error {
 	g.processes.Detach(trackID.String())
-	return g.storage.Delete(ctx, trackID)
+	return g.trackers.Delete(ctx, trackID)
 }
 
 // UpdateTracker updates the information of a tracker, validates options, and manages related processes.
@@ -83,7 +98,7 @@ func (g *Generator) UpdateTracker(
 		return err
 	}
 
-	tracker, err := g.storage.FindTracker(ctx, trackerID)
+	tracker, err := g.trackers.Find(ctx, trackerID)
 	if err != nil {
 		return err
 	}
@@ -94,7 +109,7 @@ func (g *Generator) UpdateTracker(
 	}
 
 	if trackerUpdatedOk {
-		if err := g.storage.Update(ctx, tracker); err != nil {
+		if err := g.trackers.Update(ctx, tracker); err != nil {
 			return err
 		}
 	}
@@ -108,7 +123,7 @@ func (g *Generator) FindTracker(ctx context.Context, trackerID types.ID) (*Track
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return nil, err
 	}
-	return g.storage.FindTracker(ctx, trackerID)
+	return g.trackers.Find(ctx, trackerID)
 }
 
 // StartTracker starts a tracker process and attaches it.
@@ -121,7 +136,7 @@ func (g *Generator) StartTracker(ctx context.Context, trackerID types.ID) error 
 		return ErrTrackerIsAlreadyRunning
 	}
 
-	tracker, err := g.storage.FindTracker(ctx, trackerID)
+	tracker, err := g.trackers.Find(ctx, trackerID)
 	if err != nil {
 		return err
 	}
@@ -131,7 +146,7 @@ func (g *Generator) StartTracker(ctx context.Context, trackerID types.ID) error 
 		return err
 	}
 
-	if err := g.storage.Update(ctx, tracker); err != nil {
+	if err := g.trackers.Update(ctx, tracker); err != nil {
 		return err
 	}
 
@@ -145,7 +160,7 @@ func (g *Generator) StopTracker(ctx context.Context, trackerID types.ID) error {
 		return err
 	}
 
-	tracker, err := g.storage.FindTracker(ctx, trackerID)
+	tracker, err := g.trackers.Find(ctx, trackerID)
 	if err != nil {
 		return err
 	}
@@ -158,7 +173,7 @@ func (g *Generator) StopTracker(ctx context.Context, trackerID types.ID) error {
 		_ = g.processes.Detach(trackerID.String())
 	}()
 
-	return g.storage.Update(ctx, tracker)
+	return g.trackers.Update(ctx, tracker)
 }
 
 // TrackerState retrieves the state of a running tracker process.
@@ -181,7 +196,7 @@ func (g *Generator) AddRoutes(ctx context.Context, trackerID types.ID, newRoutes
 		return err
 	}
 
-	tracker, err := g.storage.FindTracker(ctx, trackerID)
+	tracker, err := g.trackers.Find(ctx, trackerID)
 	if err != nil {
 		return err
 	}
@@ -191,7 +206,7 @@ func (g *Generator) AddRoutes(ctx context.Context, trackerID types.ID, newRoutes
 		return err
 	}
 
-	if err := g.storage.Update(ctx, tracker); err != nil {
+	if err := g.trackers.Update(ctx, tracker); err != nil {
 		return err
 	}
 
@@ -214,7 +229,7 @@ func (g *Generator) RemoveRoute(ctx context.Context, trackerID types.ID, routeID
 		return err
 	}
 
-	tracker, err := g.storage.FindTracker(ctx, trackerID)
+	tracker, err := g.trackers.Find(ctx, trackerID)
 	if err != nil {
 		return err
 	}
@@ -223,7 +238,7 @@ func (g *Generator) RemoveRoute(ctx context.Context, trackerID types.ID, routeID
 		return err
 	}
 
-	if err := g.storage.Update(ctx, tracker); err != nil {
+	if err := g.trackers.Update(ctx, tracker); err != nil {
 		return err
 	}
 
@@ -247,7 +262,7 @@ func (g *Generator) Routes(ctx context.Context, trackerID, routeID types.ID) ([]
 		return nil, err
 	}
 
-	tracker, err := g.storage.FindTracker(ctx, trackerID)
+	tracker, err := g.trackers.Find(ctx, trackerID)
 	if err != nil {
 		return nil, err
 	}
@@ -261,7 +276,7 @@ func (g *Generator) RouteAt(ctx context.Context, trackerID types.ID, routeIndex 
 		return nil, err
 	}
 
-	tracker, err := g.storage.FindTracker(ctx, trackerID)
+	tracker, err := g.trackers.Find(ctx, trackerID)
 	if err != nil {
 		return nil, err
 	}
@@ -284,7 +299,7 @@ func (g *Generator) RouteByID(ctx context.Context, trackerID, routeID types.ID) 
 		return nil, err
 	}
 
-	tracker, err := g.storage.FindTracker(ctx, trackerID)
+	tracker, err := g.trackers.Find(ctx, trackerID)
 	if err != nil {
 		return nil, err
 	}
@@ -303,7 +318,7 @@ func (g *Generator) ResetRoutes(ctx context.Context, trackerID types.ID) (bool, 
 		return false, err
 	}
 
-	tracker, err := g.storage.FindTracker(ctx, trackerID)
+	tracker, err := g.trackers.Find(ctx, trackerID)
 	if err != nil {
 		return false, err
 	}
@@ -312,7 +327,7 @@ func (g *Generator) ResetRoutes(ctx context.Context, trackerID types.ID) (bool, 
 		return false, err
 	}
 
-	if err := g.storage.Update(ctx, tracker); err != nil {
+	if err := g.trackers.Update(ctx, tracker); err != nil {
 		return false, err
 	}
 
@@ -476,7 +491,7 @@ func (g *Generator) AddSensor(ctx context.Context, trackerID types.ID, sensor *g
 		return err
 	}
 
-	tracker, err := g.storage.FindTracker(ctx, trackerID)
+	tracker, err := g.trackers.Find(ctx, trackerID)
 	if err != nil {
 		return err
 	}
@@ -485,7 +500,7 @@ func (g *Generator) AddSensor(ctx context.Context, trackerID types.ID, sensor *g
 		return err
 	}
 
-	if err := g.storage.Update(ctx, tracker); err != nil {
+	if err := g.trackers.Update(ctx, tracker); err != nil {
 		return err
 	}
 
@@ -498,25 +513,25 @@ func (g *Generator) AddSensor(ctx context.Context, trackerID types.ID, sensor *g
 }
 
 // RemoveSensor removes a sensor from a tracker's list of sensors and updates related processes.
-func (g *Generator) RemoveSensor(ctx context.Context, trackerID types.ID, sensorID types.ID) (bool, error) {
+func (g *Generator) RemoveSensor(ctx context.Context, trackerID types.ID, sensorID types.ID) error {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
-		return false, err
+		return err
 	}
 	if err := validateType(sensorID, "sensor.id"); err != nil {
-		return false, err
+		return err
 	}
 
-	tracker, err := g.storage.FindTracker(ctx, trackerID)
+	tracker, err := g.trackers.Find(ctx, trackerID)
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	if err := tracker.RemoveSensorByID(sensorID); err != nil {
-		return false, err
+		return err
 	}
 
-	if err := g.storage.Update(ctx, tracker); err != nil {
-		return false, err
+	if err := g.trackers.Update(ctx, tracker); err != nil {
+		return err
 	}
 
 	proc, ok := g.findProc(trackerID)
@@ -524,7 +539,7 @@ func (g *Generator) RemoveSensor(ctx context.Context, trackerID types.ID, sensor
 		proc.RemoveSensor(sensorID.String())
 	}
 
-	return false, nil
+	return nil
 }
 
 // Sensors retrieves the list of sensors associated with a tracker.
@@ -533,7 +548,7 @@ func (g *Generator) Sensors(ctx context.Context, trackerID types.ID) ([]*gpsgen.
 		return nil, err
 	}
 
-	tracker, err := g.storage.FindTracker(ctx, trackerID)
+	tracker, err := g.trackers.Find(ctx, trackerID)
 	if err != nil {
 		return nil, err
 	}
@@ -547,7 +562,7 @@ func (g *Generator) ShutdownTracker(ctx context.Context, trackerID types.ID) err
 		return err
 	}
 
-	tracker, err := g.storage.FindTracker(ctx, trackerID)
+	tracker, err := g.trackers.Find(ctx, trackerID)
 	if err != nil {
 		return err
 	}
@@ -566,7 +581,7 @@ func (g *Generator) ShutdownTracker(ctx context.Context, trackerID types.ID) err
 		tracker.ResetStatus()
 	}
 
-	if err := g.storage.Update(ctx, tracker); err != nil {
+	if err := g.trackers.Update(ctx, tracker); err != nil {
 		return err
 	}
 
@@ -583,7 +598,7 @@ func (g *Generator) ResumeTracker(ctx context.Context, trackerID types.ID) error
 		return err
 	}
 
-	tracker, err := g.storage.FindTracker(ctx, trackerID)
+	tracker, err := g.trackers.Find(ctx, trackerID)
 	if err != nil {
 		return err
 	}
@@ -593,7 +608,7 @@ func (g *Generator) ResumeTracker(ctx context.Context, trackerID types.ID) error
 		return err
 	}
 
-	if err := g.storage.Update(ctx, tracker); err != nil {
+	if err := g.trackers.Update(ctx, tracker); err != nil {
 		return err
 	}
 

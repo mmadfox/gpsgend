@@ -24,6 +24,7 @@ type mocks struct {
 	storage     func() *mockgenerator.MockStorage
 	processes   func() *mockgenerator.MockProcesses
 	bootstraper func() *mockgenerator.MockBootstraper
+	query       func() *mockgenerator.MockQuery
 }
 
 func offlineType(t *testing.T, min, max int) types.Offline {
@@ -107,20 +108,21 @@ func newGeneratorFromMocks(m mocks) *generator.Generator {
 		s *mockgenerator.MockStorage
 		p *mockgenerator.MockProcesses
 		b *mockgenerator.MockBootstraper
+		q *mockgenerator.MockQuery
 	)
 	if m.storage != nil {
 		s = m.storage()
 	}
-
 	if m.processes != nil {
 		p = m.processes()
 	}
-
 	if m.bootstraper != nil {
 		b = m.bootstraper()
 	}
-
-	return generator.New(s, p, b)
+	if m.query != nil {
+		q = m.query()
+	}
+	return generator.New(s, p, b, q)
 }
 
 func TestGenerator_NewTracker(t *testing.T) {
@@ -341,7 +343,7 @@ func TestGenerator_UpdateTracker(t *testing.T) {
 			fields: mocks{
 				storage: func() *mockgenerator.MockStorage {
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
 					return mock
 				},
 			},
@@ -362,7 +364,7 @@ func TestGenerator_UpdateTracker(t *testing.T) {
 					trk := new(generator.Tracker)
 					generator.Debug_InjectInvalidDatatForTracker(trk, "status.paused")
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
 				},
 			},
@@ -382,7 +384,7 @@ func TestGenerator_UpdateTracker(t *testing.T) {
 				storage: func() *mockgenerator.MockStorage {
 					trk := new(generator.Tracker)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					mock.EXPECT().Update(gomock.Any(), gomock.Any()).Return(errors.New("error"))
 					return mock
 				},
@@ -405,7 +407,7 @@ func TestGenerator_UpdateTracker(t *testing.T) {
 				storage: func() *mockgenerator.MockStorage {
 					trk := new(generator.Tracker)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					mock.EXPECT().Update(gomock.Any(), gomock.Any()).Return(nil)
 					return mock
 				},
@@ -429,7 +431,7 @@ func TestGenerator_UpdateTracker(t *testing.T) {
 	}
 }
 
-func TestGenerator_FindTracker(t *testing.T) {
+func TestGenerator_Find(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	type args struct {
@@ -455,7 +457,7 @@ func TestGenerator_FindTracker(t *testing.T) {
 				storage: func() *mockgenerator.MockStorage {
 					mock := mockgenerator.NewMockStorage(ctrl)
 					trk := new(generator.Tracker)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Return(trk, nil)
 					return mock
 				},
 			},
@@ -470,7 +472,7 @@ func TestGenerator_FindTracker(t *testing.T) {
 			g := newGeneratorFromMocks(tt.fields)
 			_, err := g.FindTracker(tt.args.ctx, tt.args.trackerID)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Generator.FindTracker() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Generator.Find() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 		})
@@ -517,7 +519,7 @@ func TestGenerator_StartTracker(t *testing.T) {
 			fields: mocks{
 				storage: func() *mockgenerator.MockStorage {
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
 					return mock
 				},
 				processes: func() *mockgenerator.MockProcesses {
@@ -538,7 +540,7 @@ func TestGenerator_StartTracker(t *testing.T) {
 				storage: func() *mockgenerator.MockStorage {
 					trk := makeValidTracker(t, types.Paused)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
 				},
 				processes: func() *mockgenerator.MockProcesses {
@@ -559,7 +561,7 @@ func TestGenerator_StartTracker(t *testing.T) {
 				storage: func() *mockgenerator.MockStorage {
 					trk := makeValidTracker(t, types.Running)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
 				},
 				processes: func() *mockgenerator.MockProcesses {
@@ -580,7 +582,7 @@ func TestGenerator_StartTracker(t *testing.T) {
 				storage: func() *mockgenerator.MockStorage {
 					trk := new(generator.Tracker)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
 				},
 				processes: func() *mockgenerator.MockProcesses {
@@ -602,7 +604,7 @@ func TestGenerator_StartTracker(t *testing.T) {
 					trk := new(generator.Tracker)
 					trk.AddRoute(gpsgen.RandomRouteForMoscow())
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
 				},
 				processes: func() *mockgenerator.MockProcesses {
@@ -624,7 +626,7 @@ func TestGenerator_StartTracker(t *testing.T) {
 					trk := makeValidTracker(t, types.Stopped)
 					trk.AddRoute(gpsgen.RandomRouteForMoscow())
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					mock.EXPECT().Update(gomock.Any(), trk).Return(generator.ErrInvalidTrackerVersion)
 					return mock
 				},
@@ -647,7 +649,7 @@ func TestGenerator_StartTracker(t *testing.T) {
 					trk := makeValidTracker(t, types.Stopped)
 					trk.AddRoute(gpsgen.RandomRouteForMoscow())
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					mock.EXPECT().Update(gomock.Any(), trk).Return(nil)
 					return mock
 				},
@@ -722,7 +724,7 @@ func TestGenerator_StopTracker(t *testing.T) {
 			fields: mocks{
 				storage: func() *mockgenerator.MockStorage {
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
 					return mock
 				},
 			},
@@ -738,7 +740,7 @@ func TestGenerator_StopTracker(t *testing.T) {
 				storage: func() *mockgenerator.MockStorage {
 					trk := makeValidTracker(t, types.Paused)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
 				},
 			},
@@ -754,7 +756,7 @@ func TestGenerator_StopTracker(t *testing.T) {
 				storage: func() *mockgenerator.MockStorage {
 					trk := makeValidTracker(t, types.Stopped)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
 				},
 			},
@@ -770,7 +772,7 @@ func TestGenerator_StopTracker(t *testing.T) {
 				storage: func() *mockgenerator.MockStorage {
 					trk := makeValidTracker(t, types.Running)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					mock.EXPECT().Update(gomock.Any(), trk).Return(generator.ErrInvalidTrackerVersion)
 					return mock
 				},
@@ -897,7 +899,7 @@ func TestGenerator_AddRoutes(t *testing.T) {
 			fields: mocks{
 				storage: func() *mockgenerator.MockStorage {
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
 					return mock
 				},
 			},
@@ -913,7 +915,7 @@ func TestGenerator_AddRoutes(t *testing.T) {
 				storage: func() *mockgenerator.MockStorage {
 					trk := makeValidTracker(t, types.Paused)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
 				},
 			},
@@ -929,7 +931,7 @@ func TestGenerator_AddRoutes(t *testing.T) {
 				storage: func() *mockgenerator.MockStorage {
 					trk := makeValidTracker(t, types.Running)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
 				},
 			},
@@ -946,7 +948,7 @@ func TestGenerator_AddRoutes(t *testing.T) {
 				storage: func() *mockgenerator.MockStorage {
 					trk := makeValidTracker(t, types.Running)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					mock.EXPECT().Update(gomock.Any(), gomock.Any()).Return(generator.ErrInvalidTrackerVersion)
 					return mock
 				},
@@ -966,7 +968,7 @@ func TestGenerator_AddRoutes(t *testing.T) {
 				storage: func() *mockgenerator.MockStorage {
 					trk := makeValidTracker(t, types.Running)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					mock.EXPECT().Update(gomock.Any(), gomock.Any()).Return(nil)
 					return mock
 				},
@@ -1036,7 +1038,7 @@ func TestGenerator_RemoveRoute(t *testing.T) {
 			fields: mocks{
 				storage: func() *mockgenerator.MockStorage {
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
 					return mock
 				},
 			},
@@ -1053,7 +1055,7 @@ func TestGenerator_RemoveRoute(t *testing.T) {
 				storage: func() *mockgenerator.MockStorage {
 					trk := makeValidTracker(t, types.Paused)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
 				},
 			},
@@ -1071,7 +1073,7 @@ func TestGenerator_RemoveRoute(t *testing.T) {
 					trk := makeValidTracker(t, types.Running)
 					trk.AddRoute(expectedRoute)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					mock.EXPECT().Update(gomock.Any(), gomock.Any()).Return(generator.ErrInvalidTrackerVersion)
 					return mock
 				},
@@ -1090,7 +1092,7 @@ func TestGenerator_RemoveRoute(t *testing.T) {
 					trk := new(generator.Tracker)
 					trk.AddRoute(expectedRoute)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
 					mock.EXPECT().Update(gomock.Any(), trk).Times(1).Return(nil)
 					return mock
 				},
@@ -1162,7 +1164,7 @@ func TestGenerator_Routes(t *testing.T) {
 			fields: mocks{
 				storage: func() *mockgenerator.MockStorage {
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
 					return mock
 				},
 			},
@@ -1180,7 +1182,7 @@ func TestGenerator_Routes(t *testing.T) {
 					trk := new(generator.Tracker)
 					trk.AddRoute(expectedRoute)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
 				},
 			},
@@ -1239,7 +1241,7 @@ func TestGenerator_RouteAt(t *testing.T) {
 			fields: mocks{
 				storage: func() *mockgenerator.MockStorage {
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
 					return mock
 				},
 			},
@@ -1257,7 +1259,7 @@ func TestGenerator_RouteAt(t *testing.T) {
 					trk := new(generator.Tracker)
 					trk.AddRoute(expectedRoute)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
 				},
 			},
@@ -1275,7 +1277,7 @@ func TestGenerator_RouteAt(t *testing.T) {
 					trk := new(generator.Tracker)
 					trk.AddRoute(expectedRoute)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
 				},
 			},
@@ -1343,7 +1345,7 @@ func TestGenerator_RouteByID(t *testing.T) {
 			fields: mocks{
 				storage: func() *mockgenerator.MockStorage {
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
 					return mock
 				},
 			},
@@ -1361,7 +1363,7 @@ func TestGenerator_RouteByID(t *testing.T) {
 					trk := new(generator.Tracker)
 					trk.AddRoute(expectedRoute)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
 				},
 			},
@@ -1379,7 +1381,7 @@ func TestGenerator_RouteByID(t *testing.T) {
 					trk := new(generator.Tracker)
 					trk.AddRoute(expectedRoute)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
 				},
 			},
@@ -1438,7 +1440,7 @@ func TestGenerator_ResetRoutes(t *testing.T) {
 			fields: mocks{
 				storage: func() *mockgenerator.MockStorage {
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(nil, generator.ErrTrackerNotFound)
 					return mock
 				},
 			},
@@ -1455,7 +1457,7 @@ func TestGenerator_ResetRoutes(t *testing.T) {
 				storage: func() *mockgenerator.MockStorage {
 					trk := makeValidTracker(t, types.Paused)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					return mock
 				},
 			},
@@ -1473,7 +1475,7 @@ func TestGenerator_ResetRoutes(t *testing.T) {
 					trk := makeValidTracker(t, types.Running)
 					trk.AddRoute(expectedRoute)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					mock.EXPECT().Update(gomock.Any(), gomock.Any()).Return(generator.ErrInvalidTrackerVersion)
 					return mock
 				},
@@ -1492,7 +1494,7 @@ func TestGenerator_ResetRoutes(t *testing.T) {
 					trk := new(generator.Tracker)
 					trk.AddRoute(expectedRoute)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
 					mock.EXPECT().Update(gomock.Any(), trk).Return(nil)
 					return mock
 				},
@@ -2278,7 +2280,7 @@ func TestGenerator_AddSensor(t *testing.T) {
 			fields: mocks{
 				storage: func() *mockgenerator.MockStorage {
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Return(nil, generator.ErrTrackerNotFound)
+					mock.EXPECT().Find(gomock.Any(), expectedTrackerID).Return(nil, generator.ErrTrackerNotFound)
 					return mock
 				},
 			},
@@ -2294,7 +2296,7 @@ func TestGenerator_AddSensor(t *testing.T) {
 				storage: func() *mockgenerator.MockStorage {
 					trk := makeValidTracker(t, types.Paused)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), expectedTrackerID).Return(trk, nil)
 					return mock
 				},
 			},
@@ -2310,7 +2312,7 @@ func TestGenerator_AddSensor(t *testing.T) {
 				storage: func() *mockgenerator.MockStorage {
 					trk := makeValidTracker(t, types.Running)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
 					mock.EXPECT().Update(gomock.Any(), trk).Times(1).Return(generator.ErrInvalidTrackerVersion)
 					return mock
 				},
@@ -2327,7 +2329,7 @@ func TestGenerator_AddSensor(t *testing.T) {
 				storage: func() *mockgenerator.MockStorage {
 					trk := makeValidTracker(t, types.Running)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
 					mock.EXPECT().Update(gomock.Any(), trk).Times(1).Return(nil)
 					return mock
 				},
@@ -2372,7 +2374,6 @@ func TestGenerator_RemoveSensor(t *testing.T) {
 		fields  mocks
 		args    args
 		wantErr error
-		want    bool
 	}{
 		{
 			name: "should return error when trackerID is empty",
@@ -2396,7 +2397,7 @@ func TestGenerator_RemoveSensor(t *testing.T) {
 			fields: mocks{
 				storage: func() *mockgenerator.MockStorage {
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Return(nil, generator.ErrTrackerNotFound)
+					mock.EXPECT().Find(gomock.Any(), expectedTrackerID).Return(nil, generator.ErrTrackerNotFound)
 					return mock
 				},
 			},
@@ -2413,7 +2414,7 @@ func TestGenerator_RemoveSensor(t *testing.T) {
 				storage: func() *mockgenerator.MockStorage {
 					trk := makeValidTracker(t, types.Paused)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), expectedTrackerID).Return(trk, nil)
 					return mock
 				},
 			},
@@ -2430,7 +2431,7 @@ func TestGenerator_RemoveSensor(t *testing.T) {
 				storage: func() *mockgenerator.MockStorage {
 					trk := makeValidTracker(t, types.Running)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), expectedTrackerID).Return(trk, nil)
 					return mock
 				},
 			},
@@ -2448,7 +2449,7 @@ func TestGenerator_RemoveSensor(t *testing.T) {
 					trk := makeValidTracker(t, types.Running)
 					trk.AddSensor(expectedSensor)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
 					mock.EXPECT().Update(gomock.Any(), trk).Times(1).Return(generator.ErrInvalidTrackerVersion)
 					return mock
 				},
@@ -2467,7 +2468,7 @@ func TestGenerator_RemoveSensor(t *testing.T) {
 					trk := makeValidTracker(t, types.Running)
 					trk.AddSensor(expectedSensor)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
 					mock.EXPECT().Update(gomock.Any(), trk).Times(1).Return(nil)
 					return mock
 				},
@@ -2489,13 +2490,10 @@ func TestGenerator_RemoveSensor(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := newGeneratorFromMocks(tt.fields)
-			got, err := g.RemoveSensor(tt.args.ctx, tt.args.trackerID, tt.args.sensorID)
+			err := g.RemoveSensor(tt.args.ctx, tt.args.trackerID, tt.args.sensorID)
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("Generator.RemoveSensor() error = %v, wantErr %v", err, tt.wantErr)
 				return
-			}
-			if got != tt.want {
-				t.Errorf("Generator.RemoveSensor() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -2541,7 +2539,7 @@ func TestGenerator_Sensors(t *testing.T) {
 			fields: mocks{
 				storage: func() *mockgenerator.MockStorage {
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(nil, generator.ErrTrackerNotFound)
+					mock.EXPECT().Find(gomock.Any(), expectedTrackerID).Times(1).Return(nil, generator.ErrTrackerNotFound)
 					return mock
 				},
 			},
@@ -2558,7 +2556,7 @@ func TestGenerator_Sensors(t *testing.T) {
 					trk := new(generator.Tracker)
 					trk.AddSensor(expectedSensors...)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
 					return mock
 				},
 			},
@@ -2613,7 +2611,7 @@ func TestGenerator_ShutdownTracker(t *testing.T) {
 			fields: mocks{
 				storage: func() *mockgenerator.MockStorage {
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(nil, generator.ErrTrackerNotFound)
+					mock.EXPECT().Find(gomock.Any(), expectedTrackerID).Times(1).Return(nil, generator.ErrTrackerNotFound)
 					return mock
 				},
 			},
@@ -2629,7 +2627,7 @@ func TestGenerator_ShutdownTracker(t *testing.T) {
 				storage: func() *mockgenerator.MockStorage {
 					trk := makeValidTracker(t, types.Stopped)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
 					return mock
 				},
 			},
@@ -2645,7 +2643,7 @@ func TestGenerator_ShutdownTracker(t *testing.T) {
 				storage: func() *mockgenerator.MockStorage {
 					trk := makeValidTracker(t, types.Running)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
 					mock.EXPECT().Update(gomock.Any(), trk).Return(nil)
 					return mock
 				},
@@ -2667,7 +2665,7 @@ func TestGenerator_ShutdownTracker(t *testing.T) {
 				storage: func() *mockgenerator.MockStorage {
 					trk := makeValidTracker(t, types.Running)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
 					mock.EXPECT().Update(gomock.Any(), trk).Return(generator.ErrInvalidTrackerVersion)
 					return mock
 				},
@@ -2691,7 +2689,7 @@ func TestGenerator_ShutdownTracker(t *testing.T) {
 				storage: func() *mockgenerator.MockStorage {
 					trk := makeValidTracker(t, types.Running)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
 					mock.EXPECT().Update(gomock.Any(), trk).Return(nil)
 					return mock
 				},
@@ -2749,7 +2747,7 @@ func TestGenerator_ResumeTracker(t *testing.T) {
 			fields: mocks{
 				storage: func() *mockgenerator.MockStorage {
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(nil, generator.ErrTrackerNotFound)
+					mock.EXPECT().Find(gomock.Any(), expectedTrackerID).Times(1).Return(nil, generator.ErrTrackerNotFound)
 					return mock
 				},
 			},
@@ -2765,7 +2763,7 @@ func TestGenerator_ResumeTracker(t *testing.T) {
 				storage: func() *mockgenerator.MockStorage {
 					trk := makeValidTracker(t, types.Running)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
 					return mock
 				},
 			},
@@ -2783,7 +2781,7 @@ func TestGenerator_ResumeTracker(t *testing.T) {
 					proc := gpsgen.NewAnimalTracker()
 					trk.ShutdownProcess(proc)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
 					mock.EXPECT().Update(gomock.Any(), trk).Return(generator.ErrInvalidTrackerVersion)
 					return mock
 				},
@@ -2801,7 +2799,7 @@ func TestGenerator_ResumeTracker(t *testing.T) {
 					trk := makeValidTracker(t, types.Paused)
 					trk.ShutdownProcess(expectedProc)
 					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().FindTracker(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
+					mock.EXPECT().Find(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
 					mock.EXPECT().Update(gomock.Any(), trk).Return(nil)
 					return mock
 				},

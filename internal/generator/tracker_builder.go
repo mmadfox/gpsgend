@@ -2,6 +2,7 @@ package generator
 
 import (
 	"errors"
+	"time"
 
 	"github.com/mmadfox/go-gpsgen/properties"
 	"github.com/mmadfox/gpsgend/internal/types"
@@ -118,6 +119,26 @@ func (b *TrackerBuilder) Speed(speed types.Speed) *TrackerBuilder {
 	} else {
 		b.device.speed = speed
 	}
+	return b
+}
+
+func (b *TrackerBuilder) CreatedAt(t time.Time) *TrackerBuilder {
+	b.device.createdAt = t
+	return b
+}
+
+func (b *TrackerBuilder) UpdatedAt(t time.Time) *TrackerBuilder {
+	b.device.updatedAt = t
+	return b
+}
+
+func (b *TrackerBuilder) RunningAt(t time.Time) *TrackerBuilder {
+	b.device.runningAt = t
+	return b
+}
+
+func (b *TrackerBuilder) StoppedAt(t time.Time) *TrackerBuilder {
+	b.device.stoppedAt = t
 	return b
 }
 

@@ -8,6 +8,15 @@ docker-mock:
 mocks: docker-mock
 	@bash ./scripts/mockgen.sh
 
+.PHONY: docker-protoc
+docker-protoc:
+	@docker build -t github.com/mmadfox/gpsgend/protoc:latest -f    \
+           ./docker/protoc.dockerfile .
+
+.PHONY: grpc
+grpc: docker-protoc
+	@bash ./scripts/grpcgen.sh
+
 .PHONY: cover
 cover:
 	go test ./... -cover -coverprofile=cover.out
