@@ -10,7 +10,7 @@ var (
 	ErrTrackerIsAlreadyStopped = errors.New("gpsgend/generator: tracker is already stopped")
 	ErrTrackerHasNoRoutes      = errors.New("gpsgend/generator: tracker has no routes")
 	ErrNoRoutes                = errors.New("gpsgend/generator: no routes for tracker")
-	ErrNoSensors               = errors.New("gpsgend/generator: no sensors for tracker")
+	ErrNoSensor                = errors.New("gpsgend/generator: no sensor for tracker")
 	ErrTrackNotFound           = errors.New("gpsgend/generator: track not found")
 	ErrMaxNumRoutesExceeded    = errors.New("gpsgend/generator: max number of routes exceeded")
 	ErrMaxNumTracksExceeded    = errors.New("gpsgend/generator: max number of tracks exceeded")
@@ -26,6 +26,7 @@ var (
 	ErrSensorNotFound          = errors.New("gpsgend/generator: sensor not found")
 	ErrLoadingTracker          = errors.New("gpsgend/generator: trackers loading error")
 	ErrUnloadingTracker        = errors.New("gpsgend/generator: trackers unloading error")
+	ErrSensorAlreadyExists     = errors.New("gpsgned/generator: sensor already exists")
 )
 
 func errTrackerOff(t *Tracker) error {

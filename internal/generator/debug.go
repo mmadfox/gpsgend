@@ -8,9 +8,7 @@ func Debug_InjectInvalidDatatForTracker(trk *Tracker, fieldName string) {
 		trk.status = types.Paused
 	case "routesSnapshot":
 		trk.routesSnapshot = []byte("invalidData")
-	case "sensorsSnapshot":
-		trk.sensorsSnapshot = []byte("invalidData")
 	default:
-		panic("DebugInvalidInvariantFroTracker")
+		panic("Debug_InjectInvalidDatatForTracker")
 	}
 }

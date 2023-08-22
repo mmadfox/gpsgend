@@ -79,9 +79,9 @@ func (g *Generator) SearchTrackers(ctx context.Context, f Filter) (SearchResult,
 }
 
 // RemoveTracker removes a tracker from storage and detaches it from any associated processes.
-func (g *Generator) RemoveTracker(ctx context.Context, trackID types.ID) error {
-	g.processes.Detach(trackID.String())
-	return g.trackers.Delete(ctx, trackID)
+func (g *Generator) RemoveTracker(ctx context.Context, trackerID types.ID) error {
+	g.processes.Detach(trackerID.String())
+	return g.trackers.Delete(ctx, trackerID)
 }
 
 // UpdateTracker updates the information of a tracker, validates options, and manages related processes.
@@ -253,12 +253,8 @@ func (g *Generator) RemoveRoute(ctx context.Context, trackerID types.ID, routeID
 }
 
 // Routes retrieves the list of routes associated with a tracker.
-func (g *Generator) Routes(ctx context.Context, trackerID, routeID types.ID) ([]*gpsgen.Route, error) {
+func (g *Generator) Routes(ctx context.Context, trackerID types.ID) ([]*gpsgen.Route, error) {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
-		return nil, err
-	}
-
-	if err := validateType(routeID, "route.id"); err != nil {
 		return nil, err
 	}
 
@@ -485,8 +481,13 @@ func (g *Generator) MoveToSegment(ctx context.Context, trackerID types.ID, route
 	return types.NavigatorFromProc(proc), next, nil
 }
 
-// AddSensor adds a sensor to a tracker's list of sensors and updates related processes.
-func (g *Generator) AddSensor(ctx context.Context, trackerID types.ID, sensor *gpsgen.Sensor) error {
+// AddSensor adds a sensor to a tracker's list of sensors and
+// updates related processes.
+func (g *Generator) AddSensor(
+	ctx context.Context,
+	trackerID types.ID,
+	sensorConf *types.Sensor,
+) error {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return err
 	}
@@ -496,7 +497,7 @@ func (g *Generator) AddSensor(ctx context.Context, trackerID types.ID, sensor *g
 		return err
 	}
 
-	if err := tracker.AddSensor(sensor); err != nil {
+	if err := tracker.AddSensor(sensorConf); err != nil {
 		return err
 	}
 
@@ -506,14 +507,23 @@ func (g *Generator) AddSensor(ctx context.Context, trackerID types.ID, sensor *g
 
 	proc, ok := g.findProc(trackerID)
 	if ok {
-		proc.AddSensor(sensor)
+		newSensor, err := tracker.makeSensorFromConf(sensorConf)
+		if err != nil {
+			return err
+		}
+		proc.AddSensor(newSensor)
 	}
 
 	return nil
 }
 
-// RemoveSensor removes a sensor from a tracker's list of sensors and updates related processes.
-func (g *Generator) RemoveSensor(ctx context.Context, trackerID types.ID, sensorID types.ID) error {
+// RemoveSensor removes a sensor from a tracker's list
+// of sensors and updates related processes.
+func (g *Generator) RemoveSensor(
+	ctx context.Context,
+	trackerID types.ID,
+	sensorID types.ID,
+) error {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return err
 	}
@@ -530,20 +540,19 @@ func (g *Generator) RemoveSensor(ctx context.Context, trackerID types.ID, sensor
 		return err
 	}
 
-	if err := g.trackers.Update(ctx, tracker); err != nil {
-		return err
-	}
-
 	proc, ok := g.findProc(trackerID)
 	if ok {
 		proc.RemoveSensor(sensorID.String())
 	}
 
-	return nil
+	return g.trackers.Update(ctx, tracker)
 }
 
 // Sensors retrieves the list of sensors associated with a tracker.
-func (g *Generator) Sensors(ctx context.Context, trackerID types.ID) ([]*gpsgen.Sensor, error) {
+func (g *Generator) Sensors(
+	ctx context.Context,
+	trackerID types.ID,
+) ([]*types.Sensor, error) {
 	if err := validateType(trackerID, "tracker.id"); err != nil {
 		return nil, err
 	}
@@ -553,7 +562,7 @@ func (g *Generator) Sensors(ctx context.Context, trackerID types.ID) ([]*gpsgen.
 		return nil, err
 	}
 
-	return tracker.Sensors()
+	return tracker.Sensors(), nil
 }
 
 // Shutdown shuts down a tracker, takes snapshots if needed, and detaches processes.

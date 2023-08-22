@@ -6,6 +6,7 @@ import (
 
 	"github.com/mmadfox/go-gpsgen"
 	"github.com/mmadfox/go-gpsgen/properties"
+	stdtypes "github.com/mmadfox/go-gpsgen/types"
 	"github.com/mmadfox/gpsgend/internal/types"
 )
 
@@ -18,27 +19,26 @@ const (
 
 // Tracker represents a GPS tracker device with various properties and capabilities.
 type Tracker struct {
-	id              types.ID
-	status          types.DeviceStatus
-	model           types.Model
-	color           types.Color
-	userID          types.CustomID
-	description     types.Description
-	offline         types.Offline
-	elevation       types.Elevation
-	battery         types.Battery
-	speed           types.Speed
-	props           properties.Properties
-	numSensors      int
-	numRoutes       int
-	snapshot        types.Raw
-	routesSnapshot  types.Raw
-	sensorsSnapshot types.Raw
-	skipOffline     bool
-	createdAt       time.Time
-	updatedAt       time.Time
-	runningAt       time.Time
-	stoppedAt       time.Time
+	id             types.ID
+	status         types.DeviceStatus
+	model          types.Model
+	color          types.Color
+	userID         types.CustomID
+	description    types.Description
+	offline        types.Offline
+	elevation      types.Elevation
+	battery        types.Battery
+	speed          types.Speed
+	props          properties.Properties
+	numRoutes      int
+	snapshot       types.Raw
+	routesSnapshot types.Raw
+	sensors        map[types.ID]*types.Sensor
+	skipOffline    bool
+	createdAt      time.Time
+	updatedAt      time.Time
+	runningAt      time.Time
+	stoppedAt      time.Time
 }
 
 // ID returns the unique identifier of the tracker.
@@ -54,6 +54,11 @@ func (t *Tracker) IsRunning() bool {
 // IsTrackerOff checks if the tracker is in a paused state.
 func (t *Tracker) IsTrackerOff() bool {
 	return t.status == types.Paused
+}
+
+// Status returns the status of the tracker.
+func (t *Tracker) Status() types.DeviceStatus {
+	return t.status
 }
 
 // Model returns the model of the tracker.
@@ -166,8 +171,8 @@ func (t *Tracker) NewProcess() (newProc *gpsgen.Device, err error) {
 	}
 	newProc.AddRoute(routes...)
 
-	if t.numSensors > 0 {
-		sensors, err := gpsgen.DecodeSensors(t.sensorsSnapshot)
+	if len(t.sensors) > 0 {
+		sensors, err := t.makeTrackerSensorsFromConf()
 		if err != nil {
 			return nil, err
 		}
@@ -353,6 +358,11 @@ func (t *Tracker) NumRoutes() int {
 	return t.numRoutes
 }
 
+// NumSensors returns the number of sensors associated with the tracker.
+func (t *Tracker) NumSensors() int {
+	return len(t.sensors)
+}
+
 // Routes returns a list of all routes associated with the tracker.
 func (t *Tracker) Routes() ([]*gpsgen.Route, error) {
 	if t.numRoutes == 0 {
@@ -428,63 +438,33 @@ loop:
 	return err
 }
 
-// AddSensor adds one or more sensors to the tracker.
-func (t *Tracker) AddSensor(newSensors ...*gpsgen.Sensor) error {
+// AddSensor adds one sensors to the tracker.
+func (t *Tracker) AddSensor(newSensor *types.Sensor) error {
+	if newSensor == nil {
+		return ErrNoSensor
+	}
+
 	if t.status == types.Paused {
 		return errTrackerOff(t)
 	}
 
-	if len(newSensors) == 0 {
-		return ErrNoSensors
-	}
-
-	if t.numSensors+len(newSensors) > MaxSensorsPerDevice {
+	if len(t.sensors)+1 > MaxSensorsPerDevice {
 		return ErrMaxNumSensorsExceeded
 	}
 
-	seen := make(map[string]struct{})
-	new := make([]*gpsgen.Sensor, 0, t.numSensors+len(newSensors))
-
-	if t.numSensors > 0 {
-		prevSensors, err := gpsgen.DecodeSensors(t.sensorsSnapshot)
-		if err != nil {
-			return err
-		}
-		for i := 0; i < len(prevSensors); i++ {
-			sensor := prevSensors[i]
-			if _, ok := seen[sensor.ID()]; ok {
-				continue
-			}
-			seen[sensor.ID()] = struct{}{}
-			new = append(new, sensor)
-		}
+	_, ok := t.sensors[newSensor.ID()]
+	if ok {
+		return ErrSensorAlreadyExists
 	}
 
-	for i := 0; i < len(newSensors); i++ {
-		sensor := newSensors[i]
-		if sensor == nil {
-			continue
-		}
-		if _, ok := seen[sensor.ID()]; ok {
-			continue
-		}
-		seen[sensor.ID()] = struct{}{}
-		new = append(new, sensor)
-	}
-
-	if len(new) > 0 {
-		data, err := gpsgen.EncodeSensors(new)
-		if err != nil {
-			return err
-		}
-		t.sensorsSnapshot = data
-	} else {
-		t.sensorsSnapshot = nil
-	}
-
-	t.numSensors = len(new)
+	t.sensors[newSensor.ID()] = newSensor
 	t.updatedAt = time.Now()
 	return nil
+}
+
+func (t *Tracker) ResetSensors() {
+	t.sensors = make(map[types.ID]*types.Sensor)
+	t.updatedAt = time.Now()
 }
 
 // RemoveSensorByID removes a sensor from the tracker by sensor ID.
@@ -493,50 +473,31 @@ func (t *Tracker) RemoveSensorByID(id types.ID) error {
 		return errTrackerOff(t)
 	}
 
-	if t.numSensors == 0 {
+	if len(t.sensors) == 0 {
 		return nil
 	}
 
-	sensors, err := gpsgen.DecodeSensors(t.sensorsSnapshot)
-	if err != nil {
-		return err
+	_, ok := t.sensors[id]
+	if !ok {
+		return fmt.Errorf("%w for Tracker{ID:%s}", ErrSensorNotFound, t.id)
 	}
 
-	var ok bool
-	sid := id.String()
-	for i := 0; i < len(sensors); i++ {
-		if sensors[i].ID() == sid {
-			sensors = append(sensors[:i], sensors[i+1:]...)
-			ok = true
-			break
-		}
-	}
+	delete(t.sensors, id)
 
-	if ok {
-		t.numSensors = len(sensors)
-		if t.numSensors > 0 {
-			data, err := gpsgen.EncodeSensors(sensors)
-			if err != nil {
-				return err
-			}
-			t.sensorsSnapshot = data
-		} else {
-			t.sensorsSnapshot = make(types.Raw, 0)
-		}
-		t.updatedAt = time.Now()
-		return nil
-	}
-
-	return fmt.Errorf("%w Tracker{ID:%s}",
-		ErrSensorNotFound, t.id)
+	t.updatedAt = time.Now()
+	return nil
 }
 
 // Sensors returns a list of all sensors associated with the tracker.
-func (t *Tracker) Sensors() ([]*gpsgen.Sensor, error) {
-	if t.numSensors == 0 {
-		return []*gpsgen.Sensor{}, nil
+func (t *Tracker) Sensors() []*types.Sensor {
+	if len(t.sensors) == 0 {
+		return []*types.Sensor{}
 	}
-	return gpsgen.DecodeSensors(t.sensorsSnapshot)
+	sensors := make([]*types.Sensor, 0, len(t.sensors))
+	for _, sensor := range t.sensors {
+		sensors = append(sensors, sensor)
+	}
+	return sensors
 }
 
 // ResetStatus resets the tracker's status to stopped.
@@ -572,4 +533,27 @@ func (t *Tracker) ResumeProcess() (*gpsgen.Device, error) {
 	t.snapshot = nil
 	t.updatedAt = time.Now()
 	return proc, nil
+}
+
+func (t *Tracker) makeSensorFromConf(conf *types.Sensor) (*gpsgen.Sensor, error) {
+	return stdtypes.RestoreSensor(
+		conf.ID().String(),
+		conf.Name(),
+		conf.Min(),
+		conf.Max(),
+		conf.Amplitude(),
+		conf.Mode(),
+	)
+}
+
+func (t *Tracker) makeTrackerSensorsFromConf() ([]*gpsgen.Sensor, error) {
+	sensors := make([]*gpsgen.Sensor, 0, len(t.sensors))
+	for _, conf := range t.sensors {
+		sensor, err := t.makeSensorFromConf(conf)
+		if err != nil {
+			return nil, err
+		}
+		sensors = append(sensors, sensor)
+	}
+	return sensors, nil
 }

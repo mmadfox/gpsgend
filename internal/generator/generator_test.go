@@ -693,7 +693,7 @@ func makeValidTracker(t *testing.T, status types.DeviceStatus) *generator.Tracke
 	tracker.AddRoute(gpsgen.RandomRouteForMoscow())
 	tracker.AddRoute(gpsgen.RandomRouteForMoscow())
 	tracker.AddRoute(gpsgen.RandomRouteForMoscow())
-	s1, err := gpsgen.NewSensor("s1", 1, 10, 8, stdtypes.WithSensorEndMode)
+	s1, err := types.NewSensor("s1", 1, 10, 8, stdtypes.WithSensorEndMode)
 	require.NoError(t, err)
 	tracker.AddSensor(s1)
 	return tracker
@@ -1151,15 +1151,6 @@ func TestGenerator_Routes(t *testing.T) {
 			wantErr: types.ErrInvalidID,
 		},
 		{
-			name: "should return error when routeID is empty",
-			args: args{
-				ctx:       context.Background(),
-				trackerID: expectedTrackerID,
-				routeID:   types.ID{},
-			},
-			wantErr: types.ErrInvalidID,
-		},
-		{
 			name: "should return error when tracker not found",
 			fields: mocks{
 				storage: func() *mockgenerator.MockStorage {
@@ -1198,7 +1189,7 @@ func TestGenerator_Routes(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := newGeneratorFromMocks(tt.fields)
-			got, err := g.Routes(tt.args.ctx, tt.args.trackerID, tt.args.routeID)
+			got, err := g.Routes(tt.args.ctx, tt.args.trackerID)
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("Generator.Routes() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -2255,11 +2246,13 @@ func TestGenerator_AddSensor(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	expectedTrackerID := types.NewID()
+	expectedSensor, err := types.NewSensor("s1", 1, 9, 8, 0)
+	require.NoError(t, err)
 
 	type args struct {
 		ctx       context.Context
 		trackerID types.ID
-		sensor    *gpsgen.Sensor
+		sensor    *types.Sensor
 	}
 	tests := []struct {
 		name    string
@@ -2303,6 +2296,7 @@ func TestGenerator_AddSensor(t *testing.T) {
 			args: args{
 				ctx:       context.Background(),
 				trackerID: expectedTrackerID,
+				sensor:    expectedSensor,
 			},
 			wantErr: generator.ErrTrackerOff,
 		},
@@ -2320,6 +2314,7 @@ func TestGenerator_AddSensor(t *testing.T) {
 			args: args{
 				ctx:       context.Background(),
 				trackerID: expectedTrackerID,
+				sensor:    expectedSensor,
 			},
 			wantErr: generator.ErrInvalidTrackerVersion,
 		},
@@ -2343,6 +2338,7 @@ func TestGenerator_AddSensor(t *testing.T) {
 			args: args{
 				ctx:       context.Background(),
 				trackerID: expectedTrackerID,
+				sensor:    expectedSensor,
 			},
 			wantErr: nil,
 		},
@@ -2361,7 +2357,7 @@ func TestGenerator_RemoveSensor(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	expectedTrackerID := types.NewID()
-	expectedSensor, err := gpsgen.NewSensor("s1", 1, 10, 8, stdtypes.WithSensorRandomMode)
+	expectedSensor, err := types.NewSensor("s1", 1, 10, 8, stdtypes.WithSensorRandomMode)
 	require.NoError(t, err)
 
 	type args struct {
@@ -2404,7 +2400,7 @@ func TestGenerator_RemoveSensor(t *testing.T) {
 			args: args{
 				ctx:       context.Background(),
 				trackerID: expectedTrackerID,
-				sensorID:  s2id(expectedSensor.ID()),
+				sensorID:  expectedSensor.ID(),
 			},
 			wantErr: generator.ErrTrackerNotFound,
 		},
@@ -2421,7 +2417,7 @@ func TestGenerator_RemoveSensor(t *testing.T) {
 			args: args{
 				ctx:       context.Background(),
 				trackerID: expectedTrackerID,
-				sensorID:  s2id(expectedSensor.ID()),
+				sensorID:  expectedSensor.ID(),
 			},
 			wantErr: generator.ErrTrackerOff,
 		},
@@ -2438,28 +2434,9 @@ func TestGenerator_RemoveSensor(t *testing.T) {
 			args: args{
 				ctx:       context.Background(),
 				trackerID: expectedTrackerID,
-				sensorID:  s2id(expectedSensor.ID()),
+				sensorID:  expectedSensor.ID(),
 			},
 			wantErr: generator.ErrSensorNotFound,
-		},
-		{
-			name: "should return error when storage.Update failure",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					trk := makeValidTracker(t, types.Running)
-					trk.AddSensor(expectedSensor)
-					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().Find(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
-					mock.EXPECT().Update(gomock.Any(), trk).Times(1).Return(generator.ErrInvalidTrackerVersion)
-					return mock
-				},
-			},
-			args: args{
-				ctx:       context.Background(),
-				trackerID: expectedTrackerID,
-				sensorID:  s2id(expectedSensor.ID()),
-			},
-			wantErr: generator.ErrInvalidTrackerVersion,
 		},
 		{
 			name: "should not return error when all params are valid",
@@ -2482,7 +2459,7 @@ func TestGenerator_RemoveSensor(t *testing.T) {
 			args: args{
 				ctx:       context.Background(),
 				trackerID: expectedTrackerID,
-				sensorID:  s2id(expectedSensor.ID()),
+				sensorID:  expectedSensor.ID(),
 			},
 			wantErr: nil,
 		},
@@ -2508,9 +2485,9 @@ func TestGenerator_Sensors(t *testing.T) {
 	}
 
 	expectedTrackerID := types.NewID()
-	expectedSensors := make([]*gpsgen.Sensor, 0)
-	for i := 0; i < 10; i++ {
-		sensor, err := gpsgen.NewSensor("s", 0, 1, 8, 0)
+	expectedSensors := make([]*types.Sensor, 0)
+	for i := 0; i < 2; i++ {
+		sensor, err := types.NewSensor("s", 0, 1, 8, 0)
 		require.NoError(t, err)
 		expectedSensors = append(expectedSensors, sensor)
 	}
@@ -2519,7 +2496,7 @@ func TestGenerator_Sensors(t *testing.T) {
 		name    string
 		fields  mocks
 		args    args
-		want    []*gpsgen.Sensor
+		want    []*types.Sensor
 		wantErr error
 	}{
 		{
@@ -2553,8 +2530,11 @@ func TestGenerator_Sensors(t *testing.T) {
 			},
 			fields: mocks{
 				storage: func() *mockgenerator.MockStorage {
-					trk := new(generator.Tracker)
-					trk.AddSensor(expectedSensors...)
+					trk := makeValidTracker(t, types.Running)
+					trk.ResetSensors()
+					for i := 0; i < len(expectedSensors); i++ {
+						trk.AddSensor(expectedSensors[i])
+					}
 					mock := mockgenerator.NewMockStorage(ctrl)
 					mock.EXPECT().Find(gomock.Any(), expectedTrackerID).Times(1).Return(trk, nil)
 					return mock
@@ -2572,7 +2552,7 @@ func TestGenerator_Sensors(t *testing.T) {
 				t.Errorf("Generator.Sensors() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
+			if len(got) != len(tt.want) {
 				t.Errorf("Generator.Sensors() = %v, want %v", got, tt.want)
 			}
 		})

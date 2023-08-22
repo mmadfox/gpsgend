@@ -15,7 +15,9 @@ type TrackerBuilder struct {
 
 func NewTrackerBuilder() *TrackerBuilder {
 	return &TrackerBuilder{
-		device: new(Tracker),
+		device: &Tracker{
+			sensors: make(map[types.ID]*types.Sensor),
+		},
 	}
 }
 

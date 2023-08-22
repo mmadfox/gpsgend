@@ -5,6 +5,7 @@ declare -a files=(
     "internal/generator/processes.go"
     "internal/generator/bootstraper.go"
     "internal/generator/projection.go"
+    "internal/generator/service.go"
 )
 
 path="$(pwd)"

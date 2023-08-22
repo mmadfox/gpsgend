@@ -4,6 +4,10 @@ package grpc;
 
 option go_package = "internal/transport/grpc;grpc";
 
+message Packet {
+    bytes trackers = 1;
+}
+
 message Tracker {
     string id = 1;
     string custom_id = 2;

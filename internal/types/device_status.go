@@ -14,6 +14,19 @@ const (
 	Paused  = DeviceStatus(gpsgen.Stopped + 1)
 )
 
+func (t DeviceStatus) String() string {
+	switch t {
+	case Running:
+		return "Running"
+	case Stopped:
+		return "Stopped"
+	case Paused:
+		return "Paused"
+	default:
+		return "Unknown device status"
+	}
+}
+
 func ParseDeviceStatus(status int) (DeviceStatus, error) {
 	s := DeviceStatus(status)
 	if err := s.Validate(); err != nil {
