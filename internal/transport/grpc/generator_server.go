@@ -7,17 +7,17 @@ import (
 	"github.com/mmadfox/gpsgend/internal/types"
 )
 
-type Server struct {
+type GeneratorServer struct {
 	UnimplementedGeneratorServiceServer
 
 	generator generator.Service
 }
 
-func NewServer(s generator.Service) *Server {
-	return &Server{generator: s}
+func NewGeneratorServer(s generator.Service) *GeneratorServer {
+	return &GeneratorServer{generator: s}
 }
 
-func (s *Server) NewTracker(ctx context.Context, req *NewTrackerRequest) (*NewTrackerResponse, error) {
+func (s *GeneratorServer) NewTracker(ctx context.Context, req *NewTrackerRequest) (*NewTrackerResponse, error) {
 	opts, err := decodeNewTrackerRequest(req)
 	if err != nil {
 		return encodeNewTrackerErrorResponse(err)
@@ -31,7 +31,7 @@ func (s *Server) NewTracker(ctx context.Context, req *NewTrackerRequest) (*NewTr
 	return encodeNewTrackerResponse(newTracker)
 }
 
-func (s *Server) SearchTrackers(ctx context.Context, req *SearchTrackersRequest) (*SearchTrackersResponse, error) {
+func (s *GeneratorServer) SearchTrackers(ctx context.Context, req *SearchTrackersRequest) (*SearchTrackersResponse, error) {
 	filter, err := decodeSearchTrackersRequest(req)
 	if err != nil {
 		return encodeSearchTrackersErrorResponse(err)
@@ -45,7 +45,7 @@ func (s *Server) SearchTrackers(ctx context.Context, req *SearchTrackersRequest)
 	return encodeSearchTrackersResponse(result)
 }
 
-func (s *Server) RemoveTracker(ctx context.Context, req *RemoveTrackerRequest) (*RemoveTrackerResponse, error) {
+func (s *GeneratorServer) RemoveTracker(ctx context.Context, req *RemoveTrackerRequest) (*RemoveTrackerResponse, error) {
 	trackerID, err := types.ParseID(req.TrackerId)
 	if err != nil {
 		return encodeRemoveTrackerErrorResponse(err)
@@ -58,7 +58,7 @@ func (s *Server) RemoveTracker(ctx context.Context, req *RemoveTrackerRequest) (
 	return encodeRemoveTrackerResponse()
 }
 
-func (s *Server) UpdateTracker(ctx context.Context, req *UpdateTrackerRequest) (*UpdateTrackerResponse, error) {
+func (s *GeneratorServer) UpdateTracker(ctx context.Context, req *UpdateTrackerRequest) (*UpdateTrackerResponse, error) {
 	trackerID, opts, err := decodeUpdateTrackerRequest(req)
 	if err != nil {
 		return encodeUpdateTrackerErrorResponse(err)
@@ -71,7 +71,7 @@ func (s *Server) UpdateTracker(ctx context.Context, req *UpdateTrackerRequest) (
 	return encodeUpdateTrackerResponse()
 }
 
-func (s *Server) FindTracker(ctx context.Context, req *FindTrackerRequest) (*FindTrackerResponse, error) {
+func (s *GeneratorServer) FindTracker(ctx context.Context, req *FindTrackerRequest) (*FindTrackerResponse, error) {
 	trackerID, err := types.ParseID(req.TrackerId)
 	if err != nil {
 		return encodeFindTrackerErrorResponse(err)
@@ -85,7 +85,7 @@ func (s *Server) FindTracker(ctx context.Context, req *FindTrackerRequest) (*Fin
 	return encodeFindTrackerResponse(tracker)
 }
 
-func (s *Server) StartTracker(ctx context.Context, req *StartTrackerRequest) (*StartTrackerResponse, error) {
+func (s *GeneratorServer) StartTracker(ctx context.Context, req *StartTrackerRequest) (*StartTrackerResponse, error) {
 	trackerID, err := types.ParseID(req.TrackerId)
 	if err != nil {
 		return encodeStartTrackerErrorResponse(err)
@@ -98,7 +98,7 @@ func (s *Server) StartTracker(ctx context.Context, req *StartTrackerRequest) (*S
 	return encodeStartTrackerResponse()
 }
 
-func (s *Server) StopTracker(ctx context.Context, req *StopTrackerRequest) (*StopTrackerResponse, error) {
+func (s *GeneratorServer) StopTracker(ctx context.Context, req *StopTrackerRequest) (*StopTrackerResponse, error) {
 	trackerID, err := types.ParseID(req.TrackerId)
 	if err != nil {
 		return encodeStopTrackerErrorResponse(err)
@@ -111,7 +111,7 @@ func (s *Server) StopTracker(ctx context.Context, req *StopTrackerRequest) (*Sto
 	return encodeStopTrackerResponse()
 }
 
-func (s *Server) TrackerState(ctx context.Context, req *TrackerStateRequest) (*TrackerStateResponse, error) {
+func (s *GeneratorServer) TrackerState(ctx context.Context, req *TrackerStateRequest) (*TrackerStateResponse, error) {
 	trackerID, err := types.ParseID(req.TrackerId)
 	if err != nil {
 		return encodeTrackerStateErrorResponse(err)
@@ -125,7 +125,7 @@ func (s *Server) TrackerState(ctx context.Context, req *TrackerStateRequest) (*T
 	return encodeTrackerStateResponse(state)
 }
 
-func (s *Server) AddRoutes(ctx context.Context, req *AddRoutesRequest) (*AddRoutesResponse, error) {
+func (s *GeneratorServer) AddRoutes(ctx context.Context, req *AddRoutesRequest) (*AddRoutesResponse, error) {
 	trackerID, routes, err := decodeAddRoutesRequest(req)
 	if err != nil {
 		return encodeAddRoutesErrorResponse(err)
@@ -138,7 +138,7 @@ func (s *Server) AddRoutes(ctx context.Context, req *AddRoutesRequest) (*AddRout
 	return encodeAddRoutesResponse()
 }
 
-func (s *Server) RemoveRoute(ctx context.Context, req *RemoveRouteRequest) (*RemoveRouteResponse, error) {
+func (s *GeneratorServer) RemoveRoute(ctx context.Context, req *RemoveRouteRequest) (*RemoveRouteResponse, error) {
 	trackerID, err := types.ParseID(req.TrackerId)
 	if err != nil {
 		return encodeRemoveRouteErrorResponse(err)
@@ -156,7 +156,7 @@ func (s *Server) RemoveRoute(ctx context.Context, req *RemoveRouteRequest) (*Rem
 	return encodeRemoveRoutesResponse()
 }
 
-func (s *Server) Routes(ctx context.Context, req *RotuesRequest) (*RoutesResponse, error) {
+func (s *GeneratorServer) Routes(ctx context.Context, req *RotuesRequest) (*RoutesResponse, error) {
 	trackerID, err := types.ParseID(req.TrackerId)
 	if err != nil {
 		return encodeRoutesErrorResponse(err)
@@ -170,7 +170,7 @@ func (s *Server) Routes(ctx context.Context, req *RotuesRequest) (*RoutesRespons
 	return encodeRoutesResponse(routes)
 }
 
-func (s *Server) RouteAt(ctx context.Context, req *RouteAtRequest) (*RouteAtResponse, error) {
+func (s *GeneratorServer) RouteAt(ctx context.Context, req *RouteAtRequest) (*RouteAtResponse, error) {
 	trackerID, err := types.ParseID(req.TrackerId)
 	if err != nil {
 		return encodeRouteAtErrorResponse(err)
@@ -185,7 +185,7 @@ func (s *Server) RouteAt(ctx context.Context, req *RouteAtRequest) (*RouteAtResp
 	return encodeRouteAtResponse(route)
 }
 
-func (s *Server) RouteByID(ctx context.Context, req *RouteByIDRequest) (*RouteByIDResponse, error) {
+func (s *GeneratorServer) RouteByID(ctx context.Context, req *RouteByIDRequest) (*RouteByIDResponse, error) {
 	trackerID, err := types.ParseID(req.TrackerId)
 	if err != nil {
 		return encodeRouteByIDErrorResponse(err)
@@ -203,7 +203,7 @@ func (s *Server) RouteByID(ctx context.Context, req *RouteByIDRequest) (*RouteBy
 	return encodeRouteIDResponse(route)
 }
 
-func (s *Server) ResetRoutes(ctx context.Context, req *ResetRoutesRequest) (*ResetRoutesResponse, error) {
+func (s *GeneratorServer) ResetRoutes(ctx context.Context, req *ResetRoutesRequest) (*ResetRoutesResponse, error) {
 	trackerID, err := types.ParseID(req.TrackerId)
 	if err != nil {
 		return encodeResetRoutesErrorResponse(err)
@@ -217,7 +217,7 @@ func (s *Server) ResetRoutes(ctx context.Context, req *ResetRoutesRequest) (*Res
 	return encodeResetRoutesResponse(ok)
 }
 
-func (s *Server) ResetNavigator(ctx context.Context, req *ResetNavigatorRequest) (*ResetNavigatorResponse, error) {
+func (s *GeneratorServer) ResetNavigator(ctx context.Context, req *ResetNavigatorRequest) (*ResetNavigatorResponse, error) {
 	trackerID, err := types.ParseID(req.TrackerId)
 	if err != nil {
 		return encodeResetNavigatorErrorResponse(err)
@@ -230,7 +230,7 @@ func (s *Server) ResetNavigator(ctx context.Context, req *ResetNavigatorRequest)
 	return encodeResetNavigatorResponse()
 }
 
-func (s *Server) ToNextRoute(ctx context.Context, req *ToNextRouteRequest) (*ToNextRouteResponse, error) {
+func (s *GeneratorServer) ToNextRoute(ctx context.Context, req *ToNextRouteRequest) (*ToNextRouteResponse, error) {
 	trackerID, err := types.ParseID(req.TrackerId)
 	if err != nil {
 		return encodeToNextRouteErrorResponse(err)
@@ -244,7 +244,7 @@ func (s *Server) ToNextRoute(ctx context.Context, req *ToNextRouteRequest) (*ToN
 	return encodeToNextRouteResponse(&navigator, ok)
 }
 
-func (s *Server) ToPrevRoute(ctx context.Context, req *ToPrevRouteRequest) (*ToPrevRouteResponse, error) {
+func (s *GeneratorServer) ToPrevRoute(ctx context.Context, req *ToPrevRouteRequest) (*ToPrevRouteResponse, error) {
 	trackerID, err := types.ParseID(req.TrackerId)
 	if err != nil {
 		return encodeToPrevRouteErrorResponse(err)
@@ -258,7 +258,7 @@ func (s *Server) ToPrevRoute(ctx context.Context, req *ToPrevRouteRequest) (*ToP
 	return encodeToPrevRouteResponse(&navigator, ok)
 }
 
-func (s *Server) MoveToRoute(ctx context.Context, req *MoveToRouteRequest) (*MoveToRouteResponse, error) {
+func (s *GeneratorServer) MoveToRoute(ctx context.Context, req *MoveToRouteRequest) (*MoveToRouteResponse, error) {
 	trackerID, err := types.ParseID(req.TrackerId)
 	if err != nil {
 		return encodeMoveToRouteErrorResponse(err)
@@ -273,7 +273,7 @@ func (s *Server) MoveToRoute(ctx context.Context, req *MoveToRouteRequest) (*Mov
 	return encodeMoveToRouteResponse(&navigator, ok)
 }
 
-func (s *Server) MoveToRouteByID(ctx context.Context, req *MoveToRouteByIDRequest) (*MoveToRouteByIDResponse, error) {
+func (s *GeneratorServer) MoveToRouteByID(ctx context.Context, req *MoveToRouteByIDRequest) (*MoveToRouteByIDResponse, error) {
 	trackerID, err := types.ParseID(req.TrackerId)
 	if err != nil {
 		return encodeMoveToRouteByIDErrorResponse(err)
@@ -291,7 +291,7 @@ func (s *Server) MoveToRouteByID(ctx context.Context, req *MoveToRouteByIDReques
 	return encodeMoveToRouteByIDResponse(&navigator, ok)
 }
 
-func (s *Server) MoveToTrack(ctx context.Context, req *MoveToTrackRequest) (*MoveToTrackResponse, error) {
+func (s *GeneratorServer) MoveToTrack(ctx context.Context, req *MoveToTrackRequest) (*MoveToTrackResponse, error) {
 	trackerID, err := types.ParseID(req.TrackerId)
 	if err != nil {
 		return encodeMoveToTrackErrorResponse(err)
@@ -307,7 +307,7 @@ func (s *Server) MoveToTrack(ctx context.Context, req *MoveToTrackRequest) (*Mov
 	return encodeMoveToTrackResponse(&navigator, ok)
 }
 
-func (s *Server) MoveToTrackByID(ctx context.Context, req *MoveToTrackByIDRequest) (*MoveToTrackByIDResponse, error) {
+func (s *GeneratorServer) MoveToTrackByID(ctx context.Context, req *MoveToTrackByIDRequest) (*MoveToTrackByIDResponse, error) {
 	trackerID, err := types.ParseID(req.TrackerId)
 	if err != nil {
 		return encodeMoveToTrackByIDErrorResponse(err)
@@ -329,7 +329,7 @@ func (s *Server) MoveToTrackByID(ctx context.Context, req *MoveToTrackByIDReques
 	return encodeMoveToTrackByIDResponse(&navigator, ok)
 }
 
-func (s *Server) MoveToSegment(ctx context.Context, req *MoveToSegmentRequest) (*MoveToSegmentResponse, error) {
+func (s *GeneratorServer) MoveToSegment(ctx context.Context, req *MoveToSegmentRequest) (*MoveToSegmentResponse, error) {
 	trackerID, err := types.ParseID(req.TrackerId)
 	if err != nil {
 		return encodeMoveToSegmentErrorResponse(err)
@@ -346,7 +346,7 @@ func (s *Server) MoveToSegment(ctx context.Context, req *MoveToSegmentRequest) (
 	return encodeMoveToSegmentResponse(&navigator, ok)
 }
 
-func (s *Server) AddSensor(ctx context.Context, req *AddSensorRequest) (*AddSensorResponse, error) {
+func (s *GeneratorServer) AddSensor(ctx context.Context, req *AddSensorRequest) (*AddSensorResponse, error) {
 	trackerID, sensor, err := decodeAddSensorRequest(req)
 	if err != nil {
 		return encodeAddSensorErrorResponse(err)
@@ -359,7 +359,7 @@ func (s *Server) AddSensor(ctx context.Context, req *AddSensorRequest) (*AddSens
 	return encodeAddSensorResponse(sensor)
 }
 
-func (s *Server) RemoveSensor(ctx context.Context, req *RemoveSensorRequest) (*RemoveSensorResponse, error) {
+func (s *GeneratorServer) RemoveSensor(ctx context.Context, req *RemoveSensorRequest) (*RemoveSensorResponse, error) {
 	trackerID, err := types.ParseID(req.TrackerId)
 	if err != nil {
 		return encodeRemoveSensorErrorResponse(err)
@@ -376,7 +376,7 @@ func (s *Server) RemoveSensor(ctx context.Context, req *RemoveSensorRequest) (*R
 	return encodeRemoveSensorResponse()
 }
 
-func (s *Server) Sensors(ctx context.Context, req *SensorsRequest) (*SensorsResponse, error) {
+func (s *GeneratorServer) Sensors(ctx context.Context, req *SensorsRequest) (*SensorsResponse, error) {
 	trackerID, err := types.ParseID(req.TrackerId)
 	if err != nil {
 		return encodeSensorsErrorResponse(err)
@@ -390,7 +390,7 @@ func (s *Server) Sensors(ctx context.Context, req *SensorsRequest) (*SensorsResp
 	return encodeSensorsResponse(sensors)
 }
 
-func (s *Server) ShutdownTracker(ctx context.Context, req *ShutdownTrackerRequest) (*ShutdownTrackerResponse, error) {
+func (s *GeneratorServer) ShutdownTracker(ctx context.Context, req *ShutdownTrackerRequest) (*ShutdownTrackerResponse, error) {
 	trackerID, err := types.ParseID(req.TrackerId)
 	if err != nil {
 		return encodeShutdownTrackerErrorResponse(err)
@@ -403,7 +403,7 @@ func (s *Server) ShutdownTracker(ctx context.Context, req *ShutdownTrackerReques
 	return encodeShutdownTrackerResponse()
 }
 
-func (s *Server) ResumeTracker(ctx context.Context, req *ResumeTrackerRequest) (*ResumeTrackerResponse, error) {
+func (s *GeneratorServer) ResumeTracker(ctx context.Context, req *ResumeTrackerRequest) (*ResumeTrackerResponse, error) {
 	trackerID, err := types.ParseID(req.TrackerId)
 	if err != nil {
 		return encodeResumeTrackerErrorResponse(err)

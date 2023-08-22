@@ -6,8 +6,9 @@ option go_package = "internal/transport/grpc;grpc";
 
 import "internal/transport/grpc/types.proto";
 
-service GeneratorStreamService {
-    rpc GetTrackerDataPackets(EmptyRequest) returns (stream Packet) {}
+service TrackerService {
+    rpc Subscribe(SubscribeRequest) returns (stream SubscribeResponse) {}
+    rpc Unsubscribe(UnsubscribeRequest) returns (UnsubscribeResponse) {}
 }
 
 service GeneratorService {
@@ -40,7 +41,21 @@ service GeneratorService {
     rpc ResumeTracker(ResumeTrackerRequest) returns (ResumeTrackerResponse) {}
 }
 
-message EmptyRequest { }
+message SubscribeRequest {
+    string client_id = 1;
+}
+
+message SubscribeResponse {
+    bytes packet = 1;
+}
+
+message UnsubscribeRequest {
+    string client_id = 2;
+}
+
+message UnsubscribeResponse {
+    Error error = 1;
+}
 
 message ResumeTrackerRequest {
     string tracker_id = 1;

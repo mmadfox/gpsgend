@@ -19,30 +19,32 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	GeneratorStreamService_GetTrackerDataPackets_FullMethodName = "/grpc.GeneratorStreamService/GetTrackerDataPackets"
+	TrackerService_Subscribe_FullMethodName   = "/grpc.TrackerService/Subscribe"
+	TrackerService_Unsubscribe_FullMethodName = "/grpc.TrackerService/Unsubscribe"
 )
 
-// GeneratorStreamServiceClient is the client API for GeneratorStreamService service.
+// TrackerServiceClient is the client API for TrackerService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type GeneratorStreamServiceClient interface {
-	GetTrackerDataPackets(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (GeneratorStreamService_GetTrackerDataPacketsClient, error)
+type TrackerServiceClient interface {
+	Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (TrackerService_SubscribeClient, error)
+	Unsubscribe(ctx context.Context, in *UnsubscribeRequest, opts ...grpc.CallOption) (*UnsubscribeResponse, error)
 }
 
-type generatorStreamServiceClient struct {
+type trackerServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewGeneratorStreamServiceClient(cc grpc.ClientConnInterface) GeneratorStreamServiceClient {
-	return &generatorStreamServiceClient{cc}
+func NewTrackerServiceClient(cc grpc.ClientConnInterface) TrackerServiceClient {
+	return &trackerServiceClient{cc}
 }
 
-func (c *generatorStreamServiceClient) GetTrackerDataPackets(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (GeneratorStreamService_GetTrackerDataPacketsClient, error) {
-	stream, err := c.cc.NewStream(ctx, &GeneratorStreamService_ServiceDesc.Streams[0], GeneratorStreamService_GetTrackerDataPackets_FullMethodName, opts...)
+func (c *trackerServiceClient) Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (TrackerService_SubscribeClient, error) {
+	stream, err := c.cc.NewStream(ctx, &TrackerService_ServiceDesc.Streams[0], TrackerService_Subscribe_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &generatorStreamServiceGetTrackerDataPacketsClient{stream}
+	x := &trackerServiceSubscribeClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -52,84 +54,119 @@ func (c *generatorStreamServiceClient) GetTrackerDataPackets(ctx context.Context
 	return x, nil
 }
 
-type GeneratorStreamService_GetTrackerDataPacketsClient interface {
-	Recv() (*Packet, error)
+type TrackerService_SubscribeClient interface {
+	Recv() (*SubscribeResponse, error)
 	grpc.ClientStream
 }
 
-type generatorStreamServiceGetTrackerDataPacketsClient struct {
+type trackerServiceSubscribeClient struct {
 	grpc.ClientStream
 }
 
-func (x *generatorStreamServiceGetTrackerDataPacketsClient) Recv() (*Packet, error) {
-	m := new(Packet)
+func (x *trackerServiceSubscribeClient) Recv() (*SubscribeResponse, error) {
+	m := new(SubscribeResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
 	return m, nil
 }
 
-// GeneratorStreamServiceServer is the server API for GeneratorStreamService service.
-// All implementations must embed UnimplementedGeneratorStreamServiceServer
+func (c *trackerServiceClient) Unsubscribe(ctx context.Context, in *UnsubscribeRequest, opts ...grpc.CallOption) (*UnsubscribeResponse, error) {
+	out := new(UnsubscribeResponse)
+	err := c.cc.Invoke(ctx, TrackerService_Unsubscribe_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// TrackerServiceServer is the server API for TrackerService service.
+// All implementations must embed UnimplementedTrackerServiceServer
 // for forward compatibility
-type GeneratorStreamServiceServer interface {
-	GetTrackerDataPackets(*EmptyRequest, GeneratorStreamService_GetTrackerDataPacketsServer) error
-	mustEmbedUnimplementedGeneratorStreamServiceServer()
+type TrackerServiceServer interface {
+	Subscribe(*SubscribeRequest, TrackerService_SubscribeServer) error
+	Unsubscribe(context.Context, *UnsubscribeRequest) (*UnsubscribeResponse, error)
+	mustEmbedUnimplementedTrackerServiceServer()
 }
 
-// UnimplementedGeneratorStreamServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedGeneratorStreamServiceServer struct {
+// UnimplementedTrackerServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedTrackerServiceServer struct {
 }
 
-func (UnimplementedGeneratorStreamServiceServer) GetTrackerDataPackets(*EmptyRequest, GeneratorStreamService_GetTrackerDataPacketsServer) error {
-	return status.Errorf(codes.Unimplemented, "method GetTrackerDataPackets not implemented")
+func (UnimplementedTrackerServiceServer) Subscribe(*SubscribeRequest, TrackerService_SubscribeServer) error {
+	return status.Errorf(codes.Unimplemented, "method Subscribe not implemented")
 }
-func (UnimplementedGeneratorStreamServiceServer) mustEmbedUnimplementedGeneratorStreamServiceServer() {
+func (UnimplementedTrackerServiceServer) Unsubscribe(context.Context, *UnsubscribeRequest) (*UnsubscribeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Unsubscribe not implemented")
 }
+func (UnimplementedTrackerServiceServer) mustEmbedUnimplementedTrackerServiceServer() {}
 
-// UnsafeGeneratorStreamServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to GeneratorStreamServiceServer will
+// UnsafeTrackerServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to TrackerServiceServer will
 // result in compilation errors.
-type UnsafeGeneratorStreamServiceServer interface {
-	mustEmbedUnimplementedGeneratorStreamServiceServer()
+type UnsafeTrackerServiceServer interface {
+	mustEmbedUnimplementedTrackerServiceServer()
 }
 
-func RegisterGeneratorStreamServiceServer(s grpc.ServiceRegistrar, srv GeneratorStreamServiceServer) {
-	s.RegisterService(&GeneratorStreamService_ServiceDesc, srv)
+func RegisterTrackerServiceServer(s grpc.ServiceRegistrar, srv TrackerServiceServer) {
+	s.RegisterService(&TrackerService_ServiceDesc, srv)
 }
 
-func _GeneratorStreamService_GetTrackerDataPackets_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(EmptyRequest)
+func _TrackerService_Subscribe_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(SubscribeRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(GeneratorStreamServiceServer).GetTrackerDataPackets(m, &generatorStreamServiceGetTrackerDataPacketsServer{stream})
+	return srv.(TrackerServiceServer).Subscribe(m, &trackerServiceSubscribeServer{stream})
 }
 
-type GeneratorStreamService_GetTrackerDataPacketsServer interface {
-	Send(*Packet) error
+type TrackerService_SubscribeServer interface {
+	Send(*SubscribeResponse) error
 	grpc.ServerStream
 }
 
-type generatorStreamServiceGetTrackerDataPacketsServer struct {
+type trackerServiceSubscribeServer struct {
 	grpc.ServerStream
 }
 
-func (x *generatorStreamServiceGetTrackerDataPacketsServer) Send(m *Packet) error {
+func (x *trackerServiceSubscribeServer) Send(m *SubscribeResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-// GeneratorStreamService_ServiceDesc is the grpc.ServiceDesc for GeneratorStreamService service.
+func _TrackerService_Unsubscribe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UnsubscribeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TrackerServiceServer).Unsubscribe(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TrackerService_Unsubscribe_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TrackerServiceServer).Unsubscribe(ctx, req.(*UnsubscribeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// TrackerService_ServiceDesc is the grpc.ServiceDesc for TrackerService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var GeneratorStreamService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "grpc.GeneratorStreamService",
-	HandlerType: (*GeneratorStreamServiceServer)(nil),
-	Methods:     []grpc.MethodDesc{},
+var TrackerService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "grpc.TrackerService",
+	HandlerType: (*TrackerServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Unsubscribe",
+			Handler:    _TrackerService_Unsubscribe_Handler,
+		},
+	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "GetTrackerDataPackets",
-			Handler:       _GeneratorStreamService_GetTrackerDataPackets_Handler,
+			StreamName:    "Subscribe",
+			Handler:       _TrackerService_Subscribe_Handler,
 			ServerStreams: true,
 		},
 	},

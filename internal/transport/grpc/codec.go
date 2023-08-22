@@ -2,7 +2,6 @@ package grpc
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/mmadfox/gpsgend/internal/generator"
 	"github.com/mmadfox/gpsgend/internal/types"
@@ -137,8 +136,4 @@ func navigator2model(n *types.Navigator) *Navigator {
 		SegmentIndex:    int64(n.SegmentIndex),
 		Units:           "meters",
 	}
-}
-
-func toErr(e *Error) error {
-	return errors.New(e.Msg)
 }
