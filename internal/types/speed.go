@@ -51,10 +51,10 @@ func (s Speed) Validate() error {
 		return ErrInvalidRangeValue
 	}
 	if s.amplitude < 4 {
-		return ErrInvalidMinAmplitude
+		return fmt.Errorf("%w - expected >= 4 value", ErrInvalidMinAmplitude)
 	}
 	if s.amplitude > 512 {
-		return ErrInvalidMaxAmplitude
+		return fmt.Errorf("%w - expected < 512 value", ErrInvalidMaxAmplitude)
 	}
 	return nil
 }

@@ -2,10 +2,8 @@ package codes
 
 import (
 	"errors"
-	"net/http"
 	"testing"
 
-	"github.com/mmadfox/gpsgend/internal/generator"
 	"github.com/mmadfox/gpsgend/internal/types"
 )
 
@@ -19,39 +17,25 @@ func TestCode(t *testing.T) {
 		want int
 	}{
 		{
-			name: "should return http.StatusBadRequest when error is types.ErrInvalidMinValue",
+			name: "should return valid code 1 ",
 			args: args{
 				err: types.ErrInvalidMinValue,
 			},
-			want: http.StatusBadRequest,
+			want: 1,
 		},
 		{
-			name: "should return http.StatusBadRequest when error is types.ErrInvalidMaxAmplitude",
+			name: "should return valid code 7",
 			args: args{
 				err: types.ErrInvalidMaxAmplitude,
 			},
-			want: http.StatusBadRequest,
+			want: 7,
 		},
 		{
-			name: "should return http.StatusUnprocessableEntity when error is generator.ErrTrackerIsAlreadyRunning",
-			args: args{
-				err: generator.ErrTrackerIsAlreadyRunning,
-			},
-			want: http.StatusUnprocessableEntity,
-		},
-		{
-			name: "should return http.StatusNotFound when error is generator.ErrTrackNotFound",
-			args: args{
-				err: generator.ErrTrackNotFound,
-			},
-			want: http.StatusNotFound,
-		},
-		{
-			name: "should return  http.StatusInternalServerError when error not matches",
+			name: "should return invalid code when error not matches",
 			args: args{
 				err: errors.New("some errro"),
 			},
-			want: http.StatusInternalServerError,
+			want: 0,
 		},
 	}
 	for _, tt := range tests {

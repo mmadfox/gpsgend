@@ -3,6 +3,7 @@ package grpc
 import (
 	gpsgen "github.com/mmadfox/go-gpsgen"
 	gpsgenpb "github.com/mmadfox/go-gpsgen/proto"
+	gpsgendproto "github.com/mmadfox/gpsgend/gen/proto/gpsgend/v1"
 	"github.com/mmadfox/gpsgend/internal/generator"
 	transportcodes "github.com/mmadfox/gpsgend/internal/transport/codes"
 	"github.com/mmadfox/gpsgend/internal/types"
@@ -11,18 +12,18 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func encodeNewTrackerResponse(t *generator.Tracker) (*NewTrackerResponse, error) {
+func encodeNewTrackerResponse(t *generator.Tracker) (*gpsgendproto.NewTrackerResponse, error) {
 	trk, err := tracker2model(t)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "%v", err)
 	}
-	return &NewTrackerResponse{
+	return &gpsgendproto.NewTrackerResponse{
 		Tracker: trk,
 	}, nil
 }
 
-func encodeSearchTrackersResponse(result generator.SearchResult) (*SearchTrackersResponse, error) {
-	trackers := make([]*Tracker, len(result.Trackers))
+func encodeSearchTrackersResponse(result generator.SearchResult) (*gpsgendproto.SearchTrackersResponse, error) {
+	trackers := make([]*gpsgendproto.Tracker, len(result.Trackers))
 	for i := 0; i < len(result.Trackers); i++ {
 		model, err := trackerView2model(result.Trackers[i])
 		if err != nil {
@@ -30,332 +31,332 @@ func encodeSearchTrackersResponse(result generator.SearchResult) (*SearchTracker
 		}
 		trackers[i] = model
 	}
-	return &SearchTrackersResponse{
+	return &gpsgendproto.SearchTrackersResponse{
 		Trackers: trackers,
 	}, nil
 }
 
-func encodeRemoveTrackerResponse() (*RemoveTrackerResponse, error) {
-	return &RemoveTrackerResponse{}, nil
+func encodeRemoveTrackerResponse() (*gpsgendproto.RemoveTrackerResponse, error) {
+	return &gpsgendproto.RemoveTrackerResponse{}, nil
 }
 
-func encodeUpdateTrackerResponse() (*UpdateTrackerResponse, error) {
-	return &UpdateTrackerResponse{}, nil
+func encodeUpdateTrackerResponse() (*gpsgendproto.UpdateTrackerResponse, error) {
+	return &gpsgendproto.UpdateTrackerResponse{}, nil
 }
 
-func encodeFindTrackerResponse(trk *generator.Tracker) (*FindTrackerResponse, error) {
+func encodeFindTrackerResponse(trk *generator.Tracker) (*gpsgendproto.FindTrackerResponse, error) {
 	model, err := tracker2model(trk)
 	if err != nil {
 		return nil, err
 	}
-	return &FindTrackerResponse{
+	return &gpsgendproto.FindTrackerResponse{
 		Tracker: model,
 	}, nil
 }
 
-func encodeStartTrackerResponse() (*StartTrackerResponse, error) {
-	return &StartTrackerResponse{}, nil
+func encodeStartTrackerResponse() (*gpsgendproto.StartTrackerResponse, error) {
+	return &gpsgendproto.StartTrackerResponse{}, nil
 }
 
-func encodeStopTrackerResponse() (*StopTrackerResponse, error) {
-	return &StopTrackerResponse{}, nil
+func encodeStopTrackerResponse() (*gpsgendproto.StopTrackerResponse, error) {
+	return &gpsgendproto.StopTrackerResponse{}, nil
 }
 
-func encodeTrackerStateResponse(state *gpsgenpb.Device) (*TrackerStateResponse, error) {
+func encodeTrackerStateResponse(state *gpsgenpb.Device) (*gpsgendproto.TrackerStateResponse, error) {
 	data, err := proto.Marshal(state)
 	if err != nil {
 		return nil, err
 	}
-	return &TrackerStateResponse{
+	return &gpsgendproto.TrackerStateResponse{
 		State: data,
 	}, nil
 }
 
-func encodeAddRoutesResponse() (*AddRoutesResponse, error) {
-	return &AddRoutesResponse{}, nil
+func encodeAddRoutesResponse() (*gpsgendproto.AddRoutesResponse, error) {
+	return &gpsgendproto.AddRoutesResponse{}, nil
 }
 
-func encodeRemoveRoutesResponse() (*RemoveRouteResponse, error) {
-	return &RemoveRouteResponse{}, nil
+func encodeRemoveRoutesResponse() (*gpsgendproto.RemoveRouteResponse, error) {
+	return &gpsgendproto.RemoveRouteResponse{}, nil
 }
 
-func encodeRoutesResponse(routes []*gpsgen.Route) (*RoutesResponse, error) {
+func encodeRoutesResponse(routes []*gpsgen.Route) (*gpsgendproto.RoutesResponse, error) {
 	data, err := gpsgen.EncodeRoutes(routes)
 	if err != nil {
 		return nil, err
 	}
-	return &RoutesResponse{
+	return &gpsgendproto.RoutesResponse{
 		Routes: data,
 	}, nil
 }
 
-func encodeRouteAtResponse(route *gpsgen.Route) (*RouteAtResponse, error) {
+func encodeRouteAtResponse(route *gpsgen.Route) (*gpsgendproto.RouteAtResponse, error) {
 	data, err := gpsgen.EncodeRoutes([]*gpsgen.Route{route})
 	if err != nil {
 		return nil, err
 	}
-	return &RouteAtResponse{
+	return &gpsgendproto.RouteAtResponse{
 		Route: data,
 	}, nil
 }
 
-func encodeRouteIDResponse(route *gpsgen.Route) (*RouteByIDResponse, error) {
+func encodeRouteIDResponse(route *gpsgen.Route) (*gpsgendproto.RouteByIDResponse, error) {
 	data, err := gpsgen.EncodeRoutes([]*gpsgen.Route{route})
 	if err != nil {
 		return nil, err
 	}
-	return &RouteByIDResponse{
+	return &gpsgendproto.RouteByIDResponse{
 		Route: data,
 	}, nil
 }
 
-func encodeResetRoutesResponse(ok bool) (*ResetRoutesResponse, error) {
-	return &ResetRoutesResponse{
+func encodeResetRoutesResponse(ok bool) (*gpsgendproto.ResetRoutesResponse, error) {
+	return &gpsgendproto.ResetRoutesResponse{
 		Ok: ok,
 	}, nil
 }
 
-func encodeResetNavigatorResponse() (*ResetNavigatorResponse, error) {
-	return &ResetNavigatorResponse{}, nil
+func encodeResetNavigatorResponse() (*gpsgendproto.ResetNavigatorResponse, error) {
+	return &gpsgendproto.ResetNavigatorResponse{}, nil
 }
 
-func encodeToNextRouteResponse(nav *types.Navigator, ok bool) (*ToNextRouteResponse, error) {
-	return &ToNextRouteResponse{
+func encodeToNextRouteResponse(nav *types.Navigator, ok bool) (*gpsgendproto.ToNextRouteResponse, error) {
+	return &gpsgendproto.ToNextRouteResponse{
 		Navigator: navigator2model(nav),
 		Ok:        ok,
 	}, nil
 }
 
-func encodeToPrevRouteResponse(nav *types.Navigator, ok bool) (*ToPrevRouteResponse, error) {
-	return &ToPrevRouteResponse{
+func encodeToPrevRouteResponse(nav *types.Navigator, ok bool) (*gpsgendproto.ToPrevRouteResponse, error) {
+	return &gpsgendproto.ToPrevRouteResponse{
 		Navigator: navigator2model(nav),
 		Ok:        ok,
 	}, nil
 }
 
-func encodeMoveToRouteResponse(nav *types.Navigator, ok bool) (*MoveToRouteResponse, error) {
-	return &MoveToRouteResponse{
+func encodeMoveToRouteResponse(nav *types.Navigator, ok bool) (*gpsgendproto.MoveToRouteResponse, error) {
+	return &gpsgendproto.MoveToRouteResponse{
 		Navigator: navigator2model(nav),
 		Ok:        ok,
 	}, nil
 }
 
-func encodeMoveToRouteByIDResponse(nav *types.Navigator, ok bool) (*MoveToRouteByIDResponse, error) {
-	return &MoveToRouteByIDResponse{
+func encodeMoveToRouteByIDResponse(nav *types.Navigator, ok bool) (*gpsgendproto.MoveToRouteByIDResponse, error) {
+	return &gpsgendproto.MoveToRouteByIDResponse{
 		Navigator: navigator2model(nav),
 		Ok:        ok,
 	}, nil
 }
 
-func encodeMoveToTrackResponse(nav *types.Navigator, ok bool) (*MoveToTrackResponse, error) {
-	return &MoveToTrackResponse{
+func encodeMoveToTrackResponse(nav *types.Navigator, ok bool) (*gpsgendproto.MoveToTrackResponse, error) {
+	return &gpsgendproto.MoveToTrackResponse{
 		Navigator: navigator2model(nav),
 		Ok:        ok,
 	}, nil
 }
 
-func encodeMoveToTrackByIDResponse(nav *types.Navigator, ok bool) (*MoveToTrackByIDResponse, error) {
-	return &MoveToTrackByIDResponse{
+func encodeMoveToTrackByIDResponse(nav *types.Navigator, ok bool) (*gpsgendproto.MoveToTrackByIDResponse, error) {
+	return &gpsgendproto.MoveToTrackByIDResponse{
 		Navigator: navigator2model(nav),
 		Ok:        ok,
 	}, nil
 }
 
-func encodeMoveToSegmentResponse(nav *types.Navigator, ok bool) (*MoveToSegmentResponse, error) {
-	return &MoveToSegmentResponse{
+func encodeMoveToSegmentResponse(nav *types.Navigator, ok bool) (*gpsgendproto.MoveToSegmentResponse, error) {
+	return &gpsgendproto.MoveToSegmentResponse{
 		Navigator: navigator2model(nav),
 		Ok:        ok,
 	}, nil
 }
 
-func encodeAddSensorResponse(s *gpsgen.Sensor) (*AddSensorResponse, error) {
-	return &AddSensorResponse{
+func encodeAddSensorResponse(s *gpsgen.Sensor) (*gpsgendproto.AddSensorResponse, error) {
+	return &gpsgendproto.AddSensorResponse{
 		SensorId: s.ID(),
 	}, nil
 }
 
-func encodeRemoveSensorResponse() (*RemoveSensorResponse, error) {
-	return &RemoveSensorResponse{}, nil
+func encodeRemoveSensorResponse() (*gpsgendproto.RemoveSensorResponse, error) {
+	return &gpsgendproto.RemoveSensorResponse{}, nil
 }
 
-func encodeSensorsResponse(sensors []*types.Sensor) (*SensorsResponse, error) {
-	return &SensorsResponse{
+func encodeSensorsResponse(sensors []*types.Sensor) (*gpsgendproto.SensorsResponse, error) {
+	return &gpsgendproto.SensorsResponse{
 		Sensors: sensors2model(sensors),
 	}, nil
 }
 
-func encodeShutdownTrackerResponse() (*ShutdownTrackerResponse, error) {
-	return &ShutdownTrackerResponse{}, nil
+func encodeShutdownTrackerResponse() (*gpsgendproto.ShutdownTrackerResponse, error) {
+	return &gpsgendproto.ShutdownTrackerResponse{}, nil
 }
 
-func encodeResumeTrackerResponse() (*ResumeTrackerResponse, error) {
-	return &ResumeTrackerResponse{}, nil
+func encodeResumeTrackerResponse() (*gpsgendproto.ResumeTrackerResponse, error) {
+	return &gpsgendproto.ResumeTrackerResponse{}, nil
 }
 
-func encodeNewTrackerErrorResponse(err error) (*NewTrackerResponse, error) {
-	return &NewTrackerResponse{
+func encodeNewTrackerErrorResponse(err error) (*gpsgendproto.NewTrackerResponse, error) {
+	return &gpsgendproto.NewTrackerResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func encodeSearchTrackersErrorResponse(err error) (*SearchTrackersResponse, error) {
-	return &SearchTrackersResponse{
+func encodeSearchTrackersErrorResponse(err error) (*gpsgendproto.SearchTrackersResponse, error) {
+	return &gpsgendproto.SearchTrackersResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func encodeRemoveTrackerErrorResponse(err error) (*RemoveTrackerResponse, error) {
-	return &RemoveTrackerResponse{
+func encodeRemoveTrackerErrorResponse(err error) (*gpsgendproto.RemoveTrackerResponse, error) {
+	return &gpsgendproto.RemoveTrackerResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func encodeUpdateTrackerErrorResponse(err error) (*UpdateTrackerResponse, error) {
-	return &UpdateTrackerResponse{
+func encodeUpdateTrackerErrorResponse(err error) (*gpsgendproto.UpdateTrackerResponse, error) {
+	return &gpsgendproto.UpdateTrackerResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func encodeFindTrackerErrorResponse(err error) (*FindTrackerResponse, error) {
-	return &FindTrackerResponse{
+func encodeFindTrackerErrorResponse(err error) (*gpsgendproto.FindTrackerResponse, error) {
+	return &gpsgendproto.FindTrackerResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func encodeStartTrackerErrorResponse(err error) (*StartTrackerResponse, error) {
-	return &StartTrackerResponse{
+func encodeStartTrackerErrorResponse(err error) (*gpsgendproto.StartTrackerResponse, error) {
+	return &gpsgendproto.StartTrackerResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func encodeStopTrackerErrorResponse(err error) (*StopTrackerResponse, error) {
-	return &StopTrackerResponse{
+func encodeStopTrackerErrorResponse(err error) (*gpsgendproto.StopTrackerResponse, error) {
+	return &gpsgendproto.StopTrackerResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func encodeTrackerStateErrorResponse(err error) (*TrackerStateResponse, error) {
-	return &TrackerStateResponse{
+func encodeTrackerStateErrorResponse(err error) (*gpsgendproto.TrackerStateResponse, error) {
+	return &gpsgendproto.TrackerStateResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func encodeAddRoutesErrorResponse(err error) (*AddRoutesResponse, error) {
-	return &AddRoutesResponse{
+func encodeAddRoutesErrorResponse(err error) (*gpsgendproto.AddRoutesResponse, error) {
+	return &gpsgendproto.AddRoutesResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func encodeRemoveRouteErrorResponse(err error) (*RemoveRouteResponse, error) {
-	return &RemoveRouteResponse{
+func encodeRemoveRouteErrorResponse(err error) (*gpsgendproto.RemoveRouteResponse, error) {
+	return &gpsgendproto.RemoveRouteResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func encodeRoutesErrorResponse(err error) (*RoutesResponse, error) {
-	return &RoutesResponse{
+func encodeRoutesErrorResponse(err error) (*gpsgendproto.RoutesResponse, error) {
+	return &gpsgendproto.RoutesResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func encodeRouteByIDErrorResponse(err error) (*RouteByIDResponse, error) {
-	return &RouteByIDResponse{
+func encodeRouteByIDErrorResponse(err error) (*gpsgendproto.RouteByIDResponse, error) {
+	return &gpsgendproto.RouteByIDResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func encodeRouteAtErrorResponse(err error) (*RouteAtResponse, error) {
-	return &RouteAtResponse{
+func encodeRouteAtErrorResponse(err error) (*gpsgendproto.RouteAtResponse, error) {
+	return &gpsgendproto.RouteAtResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func encodeResetRoutesErrorResponse(err error) (*ResetRoutesResponse, error) {
-	return &ResetRoutesResponse{
+func encodeResetRoutesErrorResponse(err error) (*gpsgendproto.ResetRoutesResponse, error) {
+	return &gpsgendproto.ResetRoutesResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func encodeResetNavigatorErrorResponse(err error) (*ResetNavigatorResponse, error) {
-	return &ResetNavigatorResponse{
+func encodeResetNavigatorErrorResponse(err error) (*gpsgendproto.ResetNavigatorResponse, error) {
+	return &gpsgendproto.ResetNavigatorResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func encodeToNextRouteErrorResponse(err error) (*ToNextRouteResponse, error) {
-	return &ToNextRouteResponse{
+func encodeToNextRouteErrorResponse(err error) (*gpsgendproto.ToNextRouteResponse, error) {
+	return &gpsgendproto.ToNextRouteResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func encodeToPrevRouteErrorResponse(err error) (*ToPrevRouteResponse, error) {
-	return &ToPrevRouteResponse{
+func encodeToPrevRouteErrorResponse(err error) (*gpsgendproto.ToPrevRouteResponse, error) {
+	return &gpsgendproto.ToPrevRouteResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func encodeMoveToRouteErrorResponse(err error) (*MoveToRouteResponse, error) {
-	return &MoveToRouteResponse{
+func encodeMoveToRouteErrorResponse(err error) (*gpsgendproto.MoveToRouteResponse, error) {
+	return &gpsgendproto.MoveToRouteResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func encodeMoveToRouteByIDErrorResponse(err error) (*MoveToRouteByIDResponse, error) {
-	return &MoveToRouteByIDResponse{
+func encodeMoveToRouteByIDErrorResponse(err error) (*gpsgendproto.MoveToRouteByIDResponse, error) {
+	return &gpsgendproto.MoveToRouteByIDResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func encodeMoveToTrackErrorResponse(err error) (*MoveToTrackResponse, error) {
-	return &MoveToTrackResponse{
+func encodeMoveToTrackErrorResponse(err error) (*gpsgendproto.MoveToTrackResponse, error) {
+	return &gpsgendproto.MoveToTrackResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func encodeMoveToTrackByIDErrorResponse(err error) (*MoveToTrackByIDResponse, error) {
-	return &MoveToTrackByIDResponse{
+func encodeMoveToTrackByIDErrorResponse(err error) (*gpsgendproto.MoveToTrackByIDResponse, error) {
+	return &gpsgendproto.MoveToTrackByIDResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func encodeMoveToSegmentErrorResponse(err error) (*MoveToSegmentResponse, error) {
-	return &MoveToSegmentResponse{
+func encodeMoveToSegmentErrorResponse(err error) (*gpsgendproto.MoveToSegmentResponse, error) {
+	return &gpsgendproto.MoveToSegmentResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func encodeAddSensorErrorResponse(err error) (*AddSensorResponse, error) {
-	return &AddSensorResponse{
+func encodeAddSensorErrorResponse(err error) (*gpsgendproto.AddSensorResponse, error) {
+	return &gpsgendproto.AddSensorResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func encodeRemoveSensorErrorResponse(err error) (*RemoveSensorResponse, error) {
-	return &RemoveSensorResponse{
+func encodeRemoveSensorErrorResponse(err error) (*gpsgendproto.RemoveSensorResponse, error) {
+	return &gpsgendproto.RemoveSensorResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func encodeSensorsErrorResponse(err error) (*SensorsResponse, error) {
-	return &SensorsResponse{
+func encodeSensorsErrorResponse(err error) (*gpsgendproto.SensorsResponse, error) {
+	return &gpsgendproto.SensorsResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func encodeShutdownTrackerErrorResponse(err error) (*ShutdownTrackerResponse, error) {
-	return &ShutdownTrackerResponse{
+func encodeShutdownTrackerErrorResponse(err error) (*gpsgendproto.ShutdownTrackerResponse, error) {
+	return &gpsgendproto.ShutdownTrackerResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func encodeResumeTrackerErrorResponse(err error) (*ResumeTrackerResponse, error) {
-	return &ResumeTrackerResponse{
+func encodeResumeTrackerErrorResponse(err error) (*gpsgendproto.ResumeTrackerResponse, error) {
+	return &gpsgendproto.ResumeTrackerResponse{
 		Error: newError(err),
 	}, nil
 }
 
-func newError(err error) *Error {
-	return &Error{
+func newError(err error) *gpsgendproto.Error {
+	return &gpsgendproto.Error{
 		Code: int64(transportcodes.FromError(err)),
 		Msg:  err.Error(),
 	}

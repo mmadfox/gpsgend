@@ -1,20 +1,22 @@
 package grpc
 
 import (
+	"fmt"
 	"time"
 
 	gpsgen "github.com/mmadfox/go-gpsgen"
 	stdtypes "github.com/mmadfox/go-gpsgen/types"
+	gpsgendproto "github.com/mmadfox/gpsgend/gen/proto/gpsgend/v1"
 	"github.com/mmadfox/gpsgend/internal/generator"
 	"github.com/mmadfox/gpsgend/internal/types"
 )
 
-func decodeNewTrackerRequest(req *NewTrackerRequest) (generator.NewTrackerOptions, error) {
+func decodeNewTrackerRequest(req *gpsgendproto.NewTrackerRequest) (generator.NewTrackerOptions, error) {
 	opts := generator.NewTrackerOptions{}
 	if len(req.Model) > 0 {
 		model, err := types.ParseModel(req.Model)
 		if err != nil {
-			return opts, err
+			return opts, fmt.Errorf("%w: tracker.model", err)
 		}
 		opts.Model = &model
 	}
@@ -22,7 +24,7 @@ func decodeNewTrackerRequest(req *NewTrackerRequest) (generator.NewTrackerOption
 	if len(req.Color) > 0 {
 		color, err := types.ParseColor(req.Color)
 		if err != nil {
-			return opts, err
+			return opts, fmt.Errorf("%w: tracker.color", err)
 		}
 		opts.Color = &color
 	}
@@ -30,7 +32,7 @@ func decodeNewTrackerRequest(req *NewTrackerRequest) (generator.NewTrackerOption
 	if len(req.CustomId) > 0 {
 		cid, err := types.ParseCustomID(req.CustomId)
 		if err != nil {
-			return opts, err
+			return opts, fmt.Errorf("%w: tracker.customID", err)
 		}
 		opts.UserID = &cid
 	}
@@ -38,7 +40,7 @@ func decodeNewTrackerRequest(req *NewTrackerRequest) (generator.NewTrackerOption
 	if len(req.Descr) > 0 {
 		descr, err := types.ParseDescription(req.Descr)
 		if err != nil {
-			return opts, err
+			return opts, fmt.Errorf("%w: tracker.description", err)
 		}
 		opts.Descr = &descr
 	}
@@ -53,7 +55,7 @@ func decodeNewTrackerRequest(req *NewTrackerRequest) (generator.NewTrackerOption
 			stdtypes.SensorMode(req.Elevation.Mode),
 		)
 		if err != nil {
-			return opts, err
+			return opts, fmt.Errorf("%w: tracker.elevation", err)
 		}
 		opts.Elevation = elevation
 	}
@@ -77,7 +79,7 @@ func decodeNewTrackerRequest(req *NewTrackerRequest) (generator.NewTrackerOption
 			int(req.Speed.Amplitude),
 		)
 		if err != nil {
-			return opts, err
+			return opts, fmt.Errorf("%w: tracker.speed", err)
 		}
 		opts.Speed = speed
 	}
@@ -85,7 +87,7 @@ func decodeNewTrackerRequest(req *NewTrackerRequest) (generator.NewTrackerOption
 	return opts, nil
 }
 
-func decodeSearchTrackersRequest(req *SearchTrackersRequest) (generator.Filter, error) {
+func decodeSearchTrackersRequest(req *gpsgendproto.SearchTrackersRequest) (generator.Filter, error) {
 	filter := generator.Filter{}
 	if req.Filter == nil {
 		return filter, nil
@@ -100,7 +102,7 @@ func decodeSearchTrackersRequest(req *SearchTrackersRequest) (generator.Filter, 
 	}, nil
 }
 
-func decodeUpdateTrackerRequest(req *UpdateTrackerRequest) (types.ID, generator.UpdateTrackerOptions, error) {
+func decodeUpdateTrackerRequest(req *gpsgendproto.UpdateTrackerRequest) (types.ID, generator.UpdateTrackerOptions, error) {
 	trackerID, err := types.ParseID(req.TrackerId)
 	if err != nil {
 		return types.ID{}, generator.UpdateTrackerOptions{}, err
@@ -143,7 +145,7 @@ func decodeUpdateTrackerRequest(req *UpdateTrackerRequest) (types.ID, generator.
 	return trackerID, opts, nil
 }
 
-func decodeAddRoutesRequest(req *AddRoutesRequest) (types.ID, []*gpsgen.Route, error) {
+func decodeAddRoutesRequest(req *gpsgendproto.AddRoutesRequest) (types.ID, []*gpsgen.Route, error) {
 	trackerID, err := types.ParseID(req.TrackerId)
 	if err != nil {
 		return trackerID, nil, err
@@ -155,7 +157,7 @@ func decodeAddRoutesRequest(req *AddRoutesRequest) (types.ID, []*gpsgen.Route, e
 	return trackerID, routes, nil
 }
 
-func decodeAddSensorRequest(req *AddSensorRequest) (types.ID, *gpsgen.Sensor, error) {
+func decodeAddSensorRequest(req *gpsgendproto.AddSensorRequest) (types.ID, *gpsgen.Sensor, error) {
 	trackerID, err := types.ParseID(req.TrackerId)
 	if err != nil {
 		return trackerID, nil, err

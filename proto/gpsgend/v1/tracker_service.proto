@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package proto.gpsgend.v1;
+
+import "proto/gpsgend/v1/types.proto";
+
+option go_package = "proto/gpsgend/v1;gpsgendproto";
+
+service TrackerService {
+    rpc Subscribe(SubscribeRequest) returns (stream SubscribeResponse) {}
+    rpc Unsubscribe(UnsubscribeRequest) returns (UnsubscribeResponse) {}
+    rpc GetClientsInfo(GetClientsInfoRequest) returns (GetClientsInfoResponse) {}
+}
+
+message GetClientsInfoRequest {}
+
+message GetClientsInfoResponse {
+    repeated ClientInfo clients = 1;
+}
+
+message SubscribeRequest {
+    string client_id = 1;
+}
+
+message SubscribeResponse {
+    bytes packet = 1;
+}
+
+message UnsubscribeRequest {
+    string client_id = 2;
+}
+
+message UnsubscribeResponse {
+    Error error = 1;
+}

@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package grpc;
+package proto.gpsgend.v1;
 
-option go_package = "internal/transport/grpc;grpc";
+option go_package = "proto/gpsgend/v1;gpsgendproto";
 
 message Tracker {
     string id = 1;

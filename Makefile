@@ -13,9 +13,9 @@ docker-protoc:
 	@docker build -t github.com/mmadfox/gpsgend/protoc:latest -f    \
            ./docker/protoc.dockerfile .
 
-.PHONY: grpc
-grpc: docker-protoc
-	@bash ./scripts/grpcgen.sh
+.PHONY: proto
+proto: docker-protoc
+	@bash ./scripts/proto.sh
 
 .PHONY: cover
 cover:

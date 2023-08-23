@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v4.24.1
-// source: internal/transport/grpc/service.proto
+// source: proto/gpsgend/v1/generator_service.proto
 
-package grpc
+package gpsgendproto
 
 import (
 	context "context"
@@ -19,225 +19,33 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	TrackerService_Subscribe_FullMethodName      = "/grpc.TrackerService/Subscribe"
-	TrackerService_Unsubscribe_FullMethodName    = "/grpc.TrackerService/Unsubscribe"
-	TrackerService_GetClientsInfo_FullMethodName = "/grpc.TrackerService/GetClientsInfo"
-)
-
-// TrackerServiceClient is the client API for TrackerService service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type TrackerServiceClient interface {
-	Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (TrackerService_SubscribeClient, error)
-	Unsubscribe(ctx context.Context, in *UnsubscribeRequest, opts ...grpc.CallOption) (*UnsubscribeResponse, error)
-	GetClientsInfo(ctx context.Context, in *GetClientsInfoRequest, opts ...grpc.CallOption) (*GetClientsInfoResponse, error)
-}
-
-type trackerServiceClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewTrackerServiceClient(cc grpc.ClientConnInterface) TrackerServiceClient {
-	return &trackerServiceClient{cc}
-}
-
-func (c *trackerServiceClient) Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (TrackerService_SubscribeClient, error) {
-	stream, err := c.cc.NewStream(ctx, &TrackerService_ServiceDesc.Streams[0], TrackerService_Subscribe_FullMethodName, opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &trackerServiceSubscribeClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type TrackerService_SubscribeClient interface {
-	Recv() (*SubscribeResponse, error)
-	grpc.ClientStream
-}
-
-type trackerServiceSubscribeClient struct {
-	grpc.ClientStream
-}
-
-func (x *trackerServiceSubscribeClient) Recv() (*SubscribeResponse, error) {
-	m := new(SubscribeResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *trackerServiceClient) Unsubscribe(ctx context.Context, in *UnsubscribeRequest, opts ...grpc.CallOption) (*UnsubscribeResponse, error) {
-	out := new(UnsubscribeResponse)
-	err := c.cc.Invoke(ctx, TrackerService_Unsubscribe_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *trackerServiceClient) GetClientsInfo(ctx context.Context, in *GetClientsInfoRequest, opts ...grpc.CallOption) (*GetClientsInfoResponse, error) {
-	out := new(GetClientsInfoResponse)
-	err := c.cc.Invoke(ctx, TrackerService_GetClientsInfo_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// TrackerServiceServer is the server API for TrackerService service.
-// All implementations must embed UnimplementedTrackerServiceServer
-// for forward compatibility
-type TrackerServiceServer interface {
-	Subscribe(*SubscribeRequest, TrackerService_SubscribeServer) error
-	Unsubscribe(context.Context, *UnsubscribeRequest) (*UnsubscribeResponse, error)
-	GetClientsInfo(context.Context, *GetClientsInfoRequest) (*GetClientsInfoResponse, error)
-	mustEmbedUnimplementedTrackerServiceServer()
-}
-
-// UnimplementedTrackerServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedTrackerServiceServer struct {
-}
-
-func (UnimplementedTrackerServiceServer) Subscribe(*SubscribeRequest, TrackerService_SubscribeServer) error {
-	return status.Errorf(codes.Unimplemented, "method Subscribe not implemented")
-}
-func (UnimplementedTrackerServiceServer) Unsubscribe(context.Context, *UnsubscribeRequest) (*UnsubscribeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Unsubscribe not implemented")
-}
-func (UnimplementedTrackerServiceServer) GetClientsInfo(context.Context, *GetClientsInfoRequest) (*GetClientsInfoResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetClientsInfo not implemented")
-}
-func (UnimplementedTrackerServiceServer) mustEmbedUnimplementedTrackerServiceServer() {}
-
-// UnsafeTrackerServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to TrackerServiceServer will
-// result in compilation errors.
-type UnsafeTrackerServiceServer interface {
-	mustEmbedUnimplementedTrackerServiceServer()
-}
-
-func RegisterTrackerServiceServer(s grpc.ServiceRegistrar, srv TrackerServiceServer) {
-	s.RegisterService(&TrackerService_ServiceDesc, srv)
-}
-
-func _TrackerService_Subscribe_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(SubscribeRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(TrackerServiceServer).Subscribe(m, &trackerServiceSubscribeServer{stream})
-}
-
-type TrackerService_SubscribeServer interface {
-	Send(*SubscribeResponse) error
-	grpc.ServerStream
-}
-
-type trackerServiceSubscribeServer struct {
-	grpc.ServerStream
-}
-
-func (x *trackerServiceSubscribeServer) Send(m *SubscribeResponse) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func _TrackerService_Unsubscribe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UnsubscribeRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TrackerServiceServer).Unsubscribe(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TrackerService_Unsubscribe_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TrackerServiceServer).Unsubscribe(ctx, req.(*UnsubscribeRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TrackerService_GetClientsInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetClientsInfoRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TrackerServiceServer).GetClientsInfo(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TrackerService_GetClientsInfo_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TrackerServiceServer).GetClientsInfo(ctx, req.(*GetClientsInfoRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-// TrackerService_ServiceDesc is the grpc.ServiceDesc for TrackerService service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var TrackerService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "grpc.TrackerService",
-	HandlerType: (*TrackerServiceServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "Unsubscribe",
-			Handler:    _TrackerService_Unsubscribe_Handler,
-		},
-		{
-			MethodName: "GetClientsInfo",
-			Handler:    _TrackerService_GetClientsInfo_Handler,
-		},
-	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "Subscribe",
-			Handler:       _TrackerService_Subscribe_Handler,
-			ServerStreams: true,
-		},
-	},
-	Metadata: "internal/transport/grpc/service.proto",
-}
-
-const (
-	GeneratorService_NewTracker_FullMethodName      = "/grpc.GeneratorService/NewTracker"
-	GeneratorService_SearchTrackers_FullMethodName  = "/grpc.GeneratorService/SearchTrackers"
-	GeneratorService_RemoveTracker_FullMethodName   = "/grpc.GeneratorService/RemoveTracker"
-	GeneratorService_UpdateTracker_FullMethodName   = "/grpc.GeneratorService/UpdateTracker"
-	GeneratorService_FindTracker_FullMethodName     = "/grpc.GeneratorService/FindTracker"
-	GeneratorService_StartTracker_FullMethodName    = "/grpc.GeneratorService/StartTracker"
-	GeneratorService_StopTracker_FullMethodName     = "/grpc.GeneratorService/StopTracker"
-	GeneratorService_TrackerState_FullMethodName    = "/grpc.GeneratorService/TrackerState"
-	GeneratorService_AddRoutes_FullMethodName       = "/grpc.GeneratorService/AddRoutes"
-	GeneratorService_RemoveRoute_FullMethodName     = "/grpc.GeneratorService/RemoveRoute"
-	GeneratorService_Routes_FullMethodName          = "/grpc.GeneratorService/Routes"
-	GeneratorService_RouteAt_FullMethodName         = "/grpc.GeneratorService/RouteAt"
-	GeneratorService_RouteByID_FullMethodName       = "/grpc.GeneratorService/RouteByID"
-	GeneratorService_ResetRoutes_FullMethodName     = "/grpc.GeneratorService/ResetRoutes"
-	GeneratorService_ResetNavigator_FullMethodName  = "/grpc.GeneratorService/ResetNavigator"
-	GeneratorService_ToNextRoute_FullMethodName     = "/grpc.GeneratorService/ToNextRoute"
-	GeneratorService_ToPrevRoute_FullMethodName     = "/grpc.GeneratorService/ToPrevRoute"
-	GeneratorService_MoveToRoute_FullMethodName     = "/grpc.GeneratorService/MoveToRoute"
-	GeneratorService_MoveToRouteByID_FullMethodName = "/grpc.GeneratorService/MoveToRouteByID"
-	GeneratorService_MoveToTrack_FullMethodName     = "/grpc.GeneratorService/MoveToTrack"
-	GeneratorService_MoveToTrackByID_FullMethodName = "/grpc.GeneratorService/MoveToTrackByID"
-	GeneratorService_MoveToSegment_FullMethodName   = "/grpc.GeneratorService/MoveToSegment"
-	GeneratorService_AddSensor_FullMethodName       = "/grpc.GeneratorService/AddSensor"
-	GeneratorService_RemoveSensor_FullMethodName    = "/grpc.GeneratorService/RemoveSensor"
-	GeneratorService_Sensors_FullMethodName         = "/grpc.GeneratorService/Sensors"
-	GeneratorService_ShutdownTracker_FullMethodName = "/grpc.GeneratorService/ShutdownTracker"
-	GeneratorService_ResumeTracker_FullMethodName   = "/grpc.GeneratorService/ResumeTracker"
+	GeneratorService_NewTracker_FullMethodName      = "/proto.gpsgend.v1.GeneratorService/NewTracker"
+	GeneratorService_SearchTrackers_FullMethodName  = "/proto.gpsgend.v1.GeneratorService/SearchTrackers"
+	GeneratorService_RemoveTracker_FullMethodName   = "/proto.gpsgend.v1.GeneratorService/RemoveTracker"
+	GeneratorService_UpdateTracker_FullMethodName   = "/proto.gpsgend.v1.GeneratorService/UpdateTracker"
+	GeneratorService_FindTracker_FullMethodName     = "/proto.gpsgend.v1.GeneratorService/FindTracker"
+	GeneratorService_StartTracker_FullMethodName    = "/proto.gpsgend.v1.GeneratorService/StartTracker"
+	GeneratorService_StopTracker_FullMethodName     = "/proto.gpsgend.v1.GeneratorService/StopTracker"
+	GeneratorService_TrackerState_FullMethodName    = "/proto.gpsgend.v1.GeneratorService/TrackerState"
+	GeneratorService_AddRoutes_FullMethodName       = "/proto.gpsgend.v1.GeneratorService/AddRoutes"
+	GeneratorService_RemoveRoute_FullMethodName     = "/proto.gpsgend.v1.GeneratorService/RemoveRoute"
+	GeneratorService_Routes_FullMethodName          = "/proto.gpsgend.v1.GeneratorService/Routes"
+	GeneratorService_RouteAt_FullMethodName         = "/proto.gpsgend.v1.GeneratorService/RouteAt"
+	GeneratorService_RouteByID_FullMethodName       = "/proto.gpsgend.v1.GeneratorService/RouteByID"
+	GeneratorService_ResetRoutes_FullMethodName     = "/proto.gpsgend.v1.GeneratorService/ResetRoutes"
+	GeneratorService_ResetNavigator_FullMethodName  = "/proto.gpsgend.v1.GeneratorService/ResetNavigator"
+	GeneratorService_ToNextRoute_FullMethodName     = "/proto.gpsgend.v1.GeneratorService/ToNextRoute"
+	GeneratorService_ToPrevRoute_FullMethodName     = "/proto.gpsgend.v1.GeneratorService/ToPrevRoute"
+	GeneratorService_MoveToRoute_FullMethodName     = "/proto.gpsgend.v1.GeneratorService/MoveToRoute"
+	GeneratorService_MoveToRouteByID_FullMethodName = "/proto.gpsgend.v1.GeneratorService/MoveToRouteByID"
+	GeneratorService_MoveToTrack_FullMethodName     = "/proto.gpsgend.v1.GeneratorService/MoveToTrack"
+	GeneratorService_MoveToTrackByID_FullMethodName = "/proto.gpsgend.v1.GeneratorService/MoveToTrackByID"
+	GeneratorService_MoveToSegment_FullMethodName   = "/proto.gpsgend.v1.GeneratorService/MoveToSegment"
+	GeneratorService_AddSensor_FullMethodName       = "/proto.gpsgend.v1.GeneratorService/AddSensor"
+	GeneratorService_RemoveSensor_FullMethodName    = "/proto.gpsgend.v1.GeneratorService/RemoveSensor"
+	GeneratorService_Sensors_FullMethodName         = "/proto.gpsgend.v1.GeneratorService/Sensors"
+	GeneratorService_ShutdownTracker_FullMethodName = "/proto.gpsgend.v1.GeneratorService/ShutdownTracker"
+	GeneratorService_ResumeTracker_FullMethodName   = "/proto.gpsgend.v1.GeneratorService/ResumeTracker"
 )
 
 // GeneratorServiceClient is the client API for GeneratorService service.
@@ -254,7 +62,7 @@ type GeneratorServiceClient interface {
 	TrackerState(ctx context.Context, in *TrackerStateRequest, opts ...grpc.CallOption) (*TrackerStateResponse, error)
 	AddRoutes(ctx context.Context, in *AddRoutesRequest, opts ...grpc.CallOption) (*AddRoutesResponse, error)
 	RemoveRoute(ctx context.Context, in *RemoveRouteRequest, opts ...grpc.CallOption) (*RemoveRouteResponse, error)
-	Routes(ctx context.Context, in *RotuesRequest, opts ...grpc.CallOption) (*RoutesResponse, error)
+	Routes(ctx context.Context, in *RoutesRequest, opts ...grpc.CallOption) (*RoutesResponse, error)
 	RouteAt(ctx context.Context, in *RouteAtRequest, opts ...grpc.CallOption) (*RouteAtResponse, error)
 	RouteByID(ctx context.Context, in *RouteByIDRequest, opts ...grpc.CallOption) (*RouteByIDResponse, error)
 	ResetRoutes(ctx context.Context, in *ResetRoutesRequest, opts ...grpc.CallOption) (*ResetRoutesResponse, error)
@@ -371,7 +179,7 @@ func (c *generatorServiceClient) RemoveRoute(ctx context.Context, in *RemoveRout
 	return out, nil
 }
 
-func (c *generatorServiceClient) Routes(ctx context.Context, in *RotuesRequest, opts ...grpc.CallOption) (*RoutesResponse, error) {
+func (c *generatorServiceClient) Routes(ctx context.Context, in *RoutesRequest, opts ...grpc.CallOption) (*RoutesResponse, error) {
 	out := new(RoutesResponse)
 	err := c.cc.Invoke(ctx, GeneratorService_Routes_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -538,7 +346,7 @@ type GeneratorServiceServer interface {
 	TrackerState(context.Context, *TrackerStateRequest) (*TrackerStateResponse, error)
 	AddRoutes(context.Context, *AddRoutesRequest) (*AddRoutesResponse, error)
 	RemoveRoute(context.Context, *RemoveRouteRequest) (*RemoveRouteResponse, error)
-	Routes(context.Context, *RotuesRequest) (*RoutesResponse, error)
+	Routes(context.Context, *RoutesRequest) (*RoutesResponse, error)
 	RouteAt(context.Context, *RouteAtRequest) (*RouteAtResponse, error)
 	RouteByID(context.Context, *RouteByIDRequest) (*RouteByIDResponse, error)
 	ResetRoutes(context.Context, *ResetRoutesRequest) (*ResetRoutesResponse, error)
@@ -592,7 +400,7 @@ func (UnimplementedGeneratorServiceServer) AddRoutes(context.Context, *AddRoutes
 func (UnimplementedGeneratorServiceServer) RemoveRoute(context.Context, *RemoveRouteRequest) (*RemoveRouteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveRoute not implemented")
 }
-func (UnimplementedGeneratorServiceServer) Routes(context.Context, *RotuesRequest) (*RoutesResponse, error) {
+func (UnimplementedGeneratorServiceServer) Routes(context.Context, *RoutesRequest) (*RoutesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Routes not implemented")
 }
 func (UnimplementedGeneratorServiceServer) RouteAt(context.Context, *RouteAtRequest) (*RouteAtResponse, error) {
@@ -837,7 +645,7 @@ func _GeneratorService_RemoveRoute_Handler(srv interface{}, ctx context.Context,
 }
 
 func _GeneratorService_Routes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RotuesRequest)
+	in := new(RoutesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -849,7 +657,7 @@ func _GeneratorService_Routes_Handler(srv interface{}, ctx context.Context, dec 
 		FullMethod: GeneratorService_Routes_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GeneratorServiceServer).Routes(ctx, req.(*RotuesRequest))
+		return srv.(GeneratorServiceServer).Routes(ctx, req.(*RoutesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1146,7 +954,7 @@ func _GeneratorService_ResumeTracker_Handler(srv interface{}, ctx context.Contex
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var GeneratorService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "grpc.GeneratorService",
+	ServiceName: "proto.gpsgend.v1.GeneratorService",
 	HandlerType: (*GeneratorServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -1259,5 +1067,5 @@ var GeneratorService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "internal/transport/grpc/service.proto",
+	Metadata: "proto/gpsgend/v1/generator_service.proto",
 }

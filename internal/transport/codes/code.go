@@ -2,7 +2,6 @@ package codes
 
 import (
 	stderrors "errors"
-	"net/http"
 )
 
 func FromError(err error) int {
@@ -12,5 +11,5 @@ func FromError(err error) int {
 			return code.Code
 		}
 	}
-	return http.StatusInternalServerError
+	return 0
 }

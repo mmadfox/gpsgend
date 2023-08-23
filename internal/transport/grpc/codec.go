@@ -3,15 +3,16 @@ package grpc
 import (
 	"encoding/json"
 
+	gpsgendproto "github.com/mmadfox/gpsgend/gen/proto/gpsgend/v1"
 	"github.com/mmadfox/gpsgend/internal/generator"
 	"github.com/mmadfox/gpsgend/internal/types"
 )
 
-func sensors2model(sensors []*types.Sensor) []*Sensor {
-	sensorsModel := make([]*Sensor, len(sensors))
+func sensors2model(sensors []*types.Sensor) []*gpsgendproto.Sensor {
+	sensorsModel := make([]*gpsgendproto.Sensor, len(sensors))
 	for i := 0; i < len(sensors); i++ {
 		sensor := sensors[i]
-		sensorsModel[i] = &Sensor{
+		sensorsModel[i] = &gpsgendproto.Sensor{
 			Id:        sensor.ID().String(),
 			Name:      sensor.Name(),
 			Min:       sensor.Min(),
@@ -23,7 +24,7 @@ func sensors2model(sensors []*types.Sensor) []*Sensor {
 	return sensorsModel
 }
 
-func trackerView2model(v *generator.TrackerView) (*Tracker, error) {
+func trackerView2model(v *generator.TrackerView) (*gpsgendproto.Tracker, error) {
 	var rawProps []byte
 	if len(v.Props) > 0 {
 		props, err := json.Marshal(v.Props)
@@ -32,32 +33,32 @@ func trackerView2model(v *generator.TrackerView) (*Tracker, error) {
 		}
 		rawProps = props
 	}
-	return &Tracker{
+	return &gpsgendproto.Tracker{
 		Id:       v.ID,
 		CustomId: v.CustomID,
-		Status: &Status{
+		Status: &gpsgendproto.Status{
 			Id:   int64(v.Status.ID),
 			Name: v.Status.Name,
 		},
 		Model: v.Model,
 		Color: v.Color,
 		Descr: v.Descr,
-		Offline: &Offline{
+		Offline: &gpsgendproto.Offline{
 			Min: int64(v.Offline.Min),
 			Max: int64(v.Offline.Max),
 		},
-		Elevation: &Elevation{
+		Elevation: &gpsgendproto.Elevation{
 			Min:       v.Elevation.Min,
 			Max:       v.Elevation.Max,
 			Amplitude: int64(v.Elevation.Amplitude),
 			Mode:      int64(v.Elevation.Mode),
 		},
-		Battery: &Battery{
+		Battery: &gpsgendproto.Battery{
 			Min:        v.Battery.Min,
 			Max:        v.Battery.Max,
 			ChargeTime: int64(v.Battery.ChargeTime),
 		},
-		Speed: &Speed{
+		Speed: &gpsgendproto.Speed{
 			Min:       v.Speed.Min,
 			Max:       v.Speed.Max,
 			Amplitude: int64(v.Speed.Amplitude),
@@ -73,7 +74,7 @@ func trackerView2model(v *generator.TrackerView) (*Tracker, error) {
 	}, nil
 }
 
-func tracker2model(t *generator.Tracker) (*Tracker, error) {
+func tracker2model(t *generator.Tracker) (*gpsgendproto.Tracker, error) {
 	var rawProps []byte
 	if len(t.Properties()) > 0 {
 		props, err := json.Marshal(t.Properties())
@@ -82,32 +83,32 @@ func tracker2model(t *generator.Tracker) (*Tracker, error) {
 		}
 		rawProps = props
 	}
-	return &Tracker{
+	return &gpsgendproto.Tracker{
 		Id:       t.ID().String(),
 		CustomId: t.UserID().String(),
-		Status: &Status{
+		Status: &gpsgendproto.Status{
 			Id:   int64(t.Status()),
 			Name: t.Status().String(),
 		},
 		Model: t.Model().String(),
 		Color: t.Color().String(),
 		Descr: t.Description().String(),
-		Offline: &Offline{
+		Offline: &gpsgendproto.Offline{
 			Min: int64(t.Offline().Min()),
 			Max: int64(t.Offline().Max()),
 		},
-		Elevation: &Elevation{
+		Elevation: &gpsgendproto.Elevation{
 			Min:       t.Elevation().Min(),
 			Max:       t.Elevation().Max(),
 			Amplitude: int64(t.Elevation().Amplitude()),
 			Mode:      int64(t.Elevation().Mode()),
 		},
-		Battery: &Battery{
+		Battery: &gpsgendproto.Battery{
 			Min:        t.Battery().Min(),
 			Max:        t.Battery().Max(),
 			ChargeTime: int64(t.Battery().ChargeTime()),
 		},
-		Speed: &Speed{
+		Speed: &gpsgendproto.Speed{
 			Min:       t.Speed().Min(),
 			Max:       t.Speed().Max(),
 			Amplitude: int64(t.Speed().Amplitude()),
@@ -123,8 +124,8 @@ func tracker2model(t *generator.Tracker) (*Tracker, error) {
 	}, nil
 }
 
-func navigator2model(n *types.Navigator) *Navigator {
-	return &Navigator{
+func navigator2model(n *types.Navigator) *gpsgendproto.Navigator {
+	return &gpsgendproto.Navigator{
 		Lon:             n.Lon,
 		Lat:             n.Lat,
 		Distance:        n.Distance,
