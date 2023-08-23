@@ -19,8 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	TrackerService_Subscribe_FullMethodName   = "/grpc.TrackerService/Subscribe"
-	TrackerService_Unsubscribe_FullMethodName = "/grpc.TrackerService/Unsubscribe"
+	TrackerService_Subscribe_FullMethodName      = "/grpc.TrackerService/Subscribe"
+	TrackerService_Unsubscribe_FullMethodName    = "/grpc.TrackerService/Unsubscribe"
+	TrackerService_GetClientsInfo_FullMethodName = "/grpc.TrackerService/GetClientsInfo"
 )
 
 // TrackerServiceClient is the client API for TrackerService service.
@@ -29,6 +30,7 @@ const (
 type TrackerServiceClient interface {
 	Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (TrackerService_SubscribeClient, error)
 	Unsubscribe(ctx context.Context, in *UnsubscribeRequest, opts ...grpc.CallOption) (*UnsubscribeResponse, error)
+	GetClientsInfo(ctx context.Context, in *GetClientsInfoRequest, opts ...grpc.CallOption) (*GetClientsInfoResponse, error)
 }
 
 type trackerServiceClient struct {
@@ -80,12 +82,22 @@ func (c *trackerServiceClient) Unsubscribe(ctx context.Context, in *UnsubscribeR
 	return out, nil
 }
 
+func (c *trackerServiceClient) GetClientsInfo(ctx context.Context, in *GetClientsInfoRequest, opts ...grpc.CallOption) (*GetClientsInfoResponse, error) {
+	out := new(GetClientsInfoResponse)
+	err := c.cc.Invoke(ctx, TrackerService_GetClientsInfo_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TrackerServiceServer is the server API for TrackerService service.
 // All implementations must embed UnimplementedTrackerServiceServer
 // for forward compatibility
 type TrackerServiceServer interface {
 	Subscribe(*SubscribeRequest, TrackerService_SubscribeServer) error
 	Unsubscribe(context.Context, *UnsubscribeRequest) (*UnsubscribeResponse, error)
+	GetClientsInfo(context.Context, *GetClientsInfoRequest) (*GetClientsInfoResponse, error)
 	mustEmbedUnimplementedTrackerServiceServer()
 }
 
@@ -98,6 +110,9 @@ func (UnimplementedTrackerServiceServer) Subscribe(*SubscribeRequest, TrackerSer
 }
 func (UnimplementedTrackerServiceServer) Unsubscribe(context.Context, *UnsubscribeRequest) (*UnsubscribeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Unsubscribe not implemented")
+}
+func (UnimplementedTrackerServiceServer) GetClientsInfo(context.Context, *GetClientsInfoRequest) (*GetClientsInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetClientsInfo not implemented")
 }
 func (UnimplementedTrackerServiceServer) mustEmbedUnimplementedTrackerServiceServer() {}
 
@@ -151,6 +166,24 @@ func _TrackerService_Unsubscribe_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TrackerService_GetClientsInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetClientsInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TrackerServiceServer).GetClientsInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TrackerService_GetClientsInfo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TrackerServiceServer).GetClientsInfo(ctx, req.(*GetClientsInfoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TrackerService_ServiceDesc is the grpc.ServiceDesc for TrackerService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -161,6 +194,10 @@ var TrackerService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Unsubscribe",
 			Handler:    _TrackerService_Unsubscribe_Handler,
+		},
+		{
+			MethodName: "GetClientsInfo",
+			Handler:    _TrackerService_GetClientsInfo_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

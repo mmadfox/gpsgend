@@ -858,6 +858,61 @@ func (x *Sensor) GetMode() int64 {
 	return 0
 }
 
+type ClientInfo struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Timestamp int64  `protobuf:"varint,2,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+}
+
+func (x *ClientInfo) Reset() {
+	*x = ClientInfo{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_internal_transport_grpc_types_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ClientInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClientInfo) ProtoMessage() {}
+
+func (x *ClientInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_internal_transport_grpc_types_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClientInfo.ProtoReflect.Descriptor instead.
+func (*ClientInfo) Descriptor() ([]byte, []int) {
+	return file_internal_transport_grpc_types_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *ClientInfo) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *ClientInfo) GetTimestamp() int64 {
+	if x != nil {
+		return x.Timestamp
+	}
+	return 0
+}
+
 var File_internal_transport_grpc_types_proto protoreflect.FileDescriptor
 
 var file_internal_transport_grpc_types_proto_rawDesc = []byte{
@@ -961,10 +1016,13 @@ var file_internal_transport_grpc_types_proto_rawDesc = []byte{
 	0x20, 0x01, 0x28, 0x01, 0x52, 0x03, 0x6d, 0x61, 0x78, 0x12, 0x1c, 0x0a, 0x09, 0x61, 0x6d, 0x70,
 	0x6c, 0x69, 0x74, 0x75, 0x64, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x61, 0x6d,
 	0x70, 0x6c, 0x69, 0x74, 0x75, 0x64, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x6d, 0x6f, 0x64, 0x65, 0x18,
-	0x06, 0x20, 0x01, 0x28, 0x03, 0x52, 0x04, 0x6d, 0x6f, 0x64, 0x65, 0x42, 0x1e, 0x5a, 0x1c, 0x69,
-	0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2f, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x70, 0x6f, 0x72,
-	0x74, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x3b, 0x67, 0x72, 0x70, 0x63, 0x62, 0x06, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x33,
+	0x06, 0x20, 0x01, 0x28, 0x03, 0x52, 0x04, 0x6d, 0x6f, 0x64, 0x65, 0x22, 0x3a, 0x0a, 0x0a, 0x43,
+	0x6c, 0x69, 0x65, 0x6e, 0x74, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x1c, 0x0a, 0x09, 0x74, 0x69, 0x6d,
+	0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x74, 0x69,
+	0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x1e, 0x5a, 0x1c, 0x69, 0x6e, 0x74, 0x65, 0x72,
+	0x6e, 0x61, 0x6c, 0x2f, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x70, 0x6f, 0x72, 0x74, 0x2f, 0x67, 0x72,
+	0x70, 0x63, 0x3b, 0x67, 0x72, 0x70, 0x63, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -979,18 +1037,19 @@ func file_internal_transport_grpc_types_proto_rawDescGZIP() []byte {
 	return file_internal_transport_grpc_types_proto_rawDescData
 }
 
-var file_internal_transport_grpc_types_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_internal_transport_grpc_types_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_internal_transport_grpc_types_proto_goTypes = []interface{}{
-	(*Tracker)(nil),   // 0: grpc.Tracker
-	(*Error)(nil),     // 1: grpc.Error
-	(*Filter)(nil),    // 2: grpc.Filter
-	(*Status)(nil),    // 3: grpc.Status
-	(*Offline)(nil),   // 4: grpc.Offline
-	(*Elevation)(nil), // 5: grpc.Elevation
-	(*Battery)(nil),   // 6: grpc.Battery
-	(*Speed)(nil),     // 7: grpc.Speed
-	(*Navigator)(nil), // 8: grpc.Navigator
-	(*Sensor)(nil),    // 9: grpc.Sensor
+	(*Tracker)(nil),    // 0: grpc.Tracker
+	(*Error)(nil),      // 1: grpc.Error
+	(*Filter)(nil),     // 2: grpc.Filter
+	(*Status)(nil),     // 3: grpc.Status
+	(*Offline)(nil),    // 4: grpc.Offline
+	(*Elevation)(nil),  // 5: grpc.Elevation
+	(*Battery)(nil),    // 6: grpc.Battery
+	(*Speed)(nil),      // 7: grpc.Speed
+	(*Navigator)(nil),  // 8: grpc.Navigator
+	(*Sensor)(nil),     // 9: grpc.Sensor
+	(*ClientInfo)(nil), // 10: grpc.ClientInfo
 }
 var file_internal_transport_grpc_types_proto_depIdxs = []int32{
 	3, // 0: grpc.Tracker.status:type_name -> grpc.Status
@@ -1131,6 +1190,18 @@ func file_internal_transport_grpc_types_proto_init() {
 				return nil
 			}
 		}
+		file_internal_transport_grpc_types_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ClientInfo); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -1138,7 +1209,7 @@ func file_internal_transport_grpc_types_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_internal_transport_grpc_types_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

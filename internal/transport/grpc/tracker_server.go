@@ -4,25 +4,28 @@ import (
 	context "context"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 )
 
 type TrackerServer struct {
 	UnimplementedTrackerServiceServer
+
 	mu      sync.RWMutex
 	clients map[uuid.UUID]*client
 }
 
 func NewTrackServer() *TrackerServer {
 	return &TrackerServer{
-		clients: make(map[uuid.UUID]*client),
+		UnimplementedTrackerServiceServer: UnimplementedTrackerServiceServer{},
+		clients:                           make(map[uuid.UUID]*client),
 	}
 }
 
 func (s *TrackerServer) OnPacket(data []byte) {
 	s.mu.RLock()
-	defer s.mu.RLock()
+	defer s.mu.RUnlock()
 
 	req := &SubscribeResponse{Packet: data}
 	for _, cli := range s.clients {
@@ -45,13 +48,15 @@ func (s *TrackerServer) Subscribe(req *SubscribeRequest, stream TrackerService_S
 
 	s.registerCliet(cli)
 
+	defer func() {
+		s.unregisterClient(cli)
+	}()
+
 	for {
 		select {
 		case <-stream.Context().Done():
-			s.unregisterClient(cli)
 			return nil
 		case <-cli.close:
-			s.unregisterClient(cli)
 			return nil
 		}
 	}
@@ -82,6 +87,24 @@ func (s *TrackerServer) Unsubscribe(ctx context.Context, req *UnsubscribeRequest
 	return new(UnsubscribeResponse), nil
 }
 
+func (s *TrackerServer) GetClientsInfo(ctx context.Context, _ *GetClientsInfoRequest) (*GetClientsInfoResponse, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	resp := GetClientsInfoResponse{
+		Clients: make([]*ClientInfo, 0, len(s.clients)),
+	}
+
+	for _, cli := range s.clients {
+		resp.Clients = append(resp.Clients, &ClientInfo{
+			Id:        cli.id.String(),
+			Timestamp: cli.createdAt.Unix(),
+		})
+	}
+
+	return &resp, nil
+}
+
 func (s *TrackerServer) registerCliet(cli *client) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -95,15 +118,17 @@ func (s *TrackerServer) unregisterClient(cli *client) {
 }
 
 type client struct {
-	id     uuid.UUID
-	stream TrackerService_SubscribeServer
-	close  chan struct{}
+	id        uuid.UUID
+	stream    TrackerService_SubscribeServer
+	close     chan struct{}
+	createdAt time.Time
 }
 
 func newClient(id uuid.UUID, stream TrackerService_SubscribeServer) *client {
 	return &client{
-		id:     id,
-		stream: stream,
-		close:  make(chan struct{}),
+		id:        id,
+		stream:    stream,
+		close:     make(chan struct{}),
+		createdAt: time.Now(),
 	}
 }

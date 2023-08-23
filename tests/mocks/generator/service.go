@@ -205,17 +205,17 @@ func (mr *MockServiceMockRecorder) RemoveSensor(ctx, trackerID, sensorID interfa
 }
 
 // RemoveTracker mocks base method.
-func (m *MockService) RemoveTracker(ctx context.Context, trackID types.ID) error {
+func (m *MockService) RemoveTracker(ctx context.Context, trackerID types.ID) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RemoveTracker", ctx, trackID)
+	ret := m.ctrl.Call(m, "RemoveTracker", ctx, trackerID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // RemoveTracker indicates an expected call of RemoveTracker.
-func (mr *MockServiceMockRecorder) RemoveTracker(ctx, trackID interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) RemoveTracker(ctx, trackerID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveTracker", reflect.TypeOf((*MockService)(nil).RemoveTracker), ctx, trackID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveTracker", reflect.TypeOf((*MockService)(nil).RemoveTracker), ctx, trackerID)
 }
 
 // ResetNavigator mocks base method.
@@ -292,18 +292,18 @@ func (mr *MockServiceMockRecorder) RouteByID(ctx, trackerID, routeID interface{}
 }
 
 // Routes mocks base method.
-func (m *MockService) Routes(ctx context.Context, trackerID, routeID types.ID) ([]*go_gpsgen.Route, error) {
+func (m *MockService) Routes(ctx context.Context, trackerID types.ID) ([]*go_gpsgen.Route, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Routes", ctx, trackerID, routeID)
+	ret := m.ctrl.Call(m, "Routes", ctx, trackerID)
 	ret0, _ := ret[0].([]*go_gpsgen.Route)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Routes indicates an expected call of Routes.
-func (mr *MockServiceMockRecorder) Routes(ctx, trackerID, routeID interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) Routes(ctx, trackerID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Routes", reflect.TypeOf((*MockService)(nil).Routes), ctx, trackerID, routeID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Routes", reflect.TypeOf((*MockService)(nil).Routes), ctx, trackerID)
 }
 
 // SearchTrackers mocks base method.
@@ -322,10 +322,10 @@ func (mr *MockServiceMockRecorder) SearchTrackers(ctx, f interface{}) *gomock.Ca
 }
 
 // Sensors mocks base method.
-func (m *MockService) Sensors(ctx context.Context, trackerID types.ID) ([]*go_gpsgen.Sensor, error) {
+func (m *MockService) Sensors(ctx context.Context, trackerID types.ID) ([]*types.Sensor, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Sensors", ctx, trackerID)
-	ret0, _ := ret[0].([]*go_gpsgen.Sensor)
+	ret0, _ := ret[0].([]*types.Sensor)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

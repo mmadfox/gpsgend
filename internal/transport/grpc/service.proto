@@ -9,6 +9,7 @@ import "internal/transport/grpc/types.proto";
 service TrackerService {
     rpc Subscribe(SubscribeRequest) returns (stream SubscribeResponse) {}
     rpc Unsubscribe(UnsubscribeRequest) returns (UnsubscribeResponse) {}
+    rpc GetClientsInfo(GetClientsInfoRequest) returns (GetClientsInfoResponse) {}
 }
 
 service GeneratorService {
@@ -39,6 +40,12 @@ service GeneratorService {
     rpc Sensors(SensorsRequest) returns (SensorsResponse) {}
     rpc ShutdownTracker(ShutdownTrackerRequest) returns (ShutdownTrackerResponse) {}
     rpc ResumeTracker(ResumeTrackerRequest) returns (ResumeTrackerResponse) {}
+}
+
+message GetClientsInfoRequest {}
+
+message GetClientsInfoResponse {
+    repeated ClientInfo clients = 1;
 }
 
 message SubscribeRequest {
