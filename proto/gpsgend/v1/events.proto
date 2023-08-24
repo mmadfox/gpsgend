@@ -1,0 +1,125 @@
+syntax = "proto3";
+
+package proto.gpsgend.v1;
+
+option go_package = "proto/gpsgend/v1;gpsgendproto";
+
+message Event {
+    enum Kind {
+        TRACKER_UNKNOWN = 0;
+        TRACKER_CREATED = 1;
+        TRACKER_REMOVED = 2;
+        TRACKER_UPDATED = 3;
+        TRACKER_STARTED = 4; 
+        TRACKER_STOPPED = 6;
+        TRACKER_ROUTE_ADDED = 7;
+        TRACKER_ROUTE_REMOVED = 8;
+        TRACKER_ROUTES_RESETED = 9;
+        TRACKER_NAVIGATOR_RESETED = 10;
+        TRACKER_NAVIGATOR_JUMPED = 11;
+        TRACKER_SENSOR_ADDED = 12;
+        TRACKER_SENSOR_REMOVED = 13;
+        TRACKER_SHUTDOWNED = 14;
+        TRACKER_RESUMED = 15;
+        TRACKER_CHANGED = 16;
+    }
+
+    message TrackerCreated {
+        string tracker_id = 1;
+        int64 created_at = 2;
+    }
+
+    message TrackerRemoved {
+        string tracker_id = 1;
+        int64 updated_at = 2;
+    }
+
+    message TrackerUpdated {
+       string tracker_id = 1;
+       int64 updated_at = 2; 
+    }
+
+    message TrackerStarted {
+       string tracker_id = 1;
+       int64 updated_at = 2; 
+    }
+
+    message TrackerStopped {
+       string tracker_id = 1;
+       int64 updated_at = 2; 
+    }
+
+    message TrackerRouteAdded {
+       string tracker_id = 1;
+       string route_id = 2;
+       int64 updated_at = 3;  
+    }
+
+    message TrackerRouteRemoved {
+       string tracker_id = 1;
+       string route_id = 2;
+       int64 updated_at = 3;  
+    }
+
+    message TrackerRoutesReseted {
+       string tracker_id = 1; 
+       int64 updated_at = 2; 
+    }
+  
+    message TrackerNavigatorReseted {
+       string tracker_id = 1; 
+       int64 updated_at = 2; 
+    }
+
+    message TrackerNavigatorJumped {
+       string tracker_id = 1; 
+       int64 updated_at = 2; 
+    }
+
+    message TrackerSensorAdded {
+       string tracker_id = 1; 
+       string senesor_id = 2;
+       int64 updated_at = 3; 
+    }
+    
+    message TrackerSensorRemoved {
+       string tracker_id = 1; 
+       string senesor_id = 2;
+       int64 updated_at = 3; 
+    }
+
+    message TrackerShutdowned {
+       string tracker_id = 1; 
+       int64 updated_at = 3; 
+    }
+
+    message TrackerResumed {
+       string tracker_id = 1; 
+       int64 updated_at = 3; 
+    }
+
+    message TrackerChanged {
+       string tracker_id = 1; 
+       bytes packet = 2;
+       int64 updated_at = 3;  
+    }
+
+    Kind kind = 1;
+
+    oneof payload {
+        TrackerCreated tracker_created = 2;
+        TrackerRemoved tracker_removed = 3;
+        TrackerUpdated tracker_updated = 4;
+        TrackerStarted tracker_started = 5;
+        TrackerStopped tracker_stopped = 6;
+        TrackerRouteAdded tracker_route_added = 7;
+        TrackerRouteRemoved tracker_route_removed = 8;
+        TrackerRoutesReseted tracker_routes_reseted = 9;
+        TrackerNavigatorReseted tracker_navigator_reseted = 10;
+        TrackerNavigatorJumped tracker_navigator_jumped = 11;
+        TrackerSensorAdded tracker_sensor_added = 12;
+        TrackerSensorRemoved tracker_sensor_removed = 13;
+        TrackerShutdowned tracker_shutdowned = 14;
+        TrackerResumed tracker_resumed = 15;
+    }
+}
