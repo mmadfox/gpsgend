@@ -7,6 +7,7 @@ declare -a files=(
     "internal/generator/bootstraper.go"
     "internal/generator/projection.go"
     "internal/generator/service.go"
+    "internal/generator/eventpublisher.go"
     # storage
     "internal/storage/mongodb/collection.go"
 )

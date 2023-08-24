@@ -49,9 +49,9 @@ message Event {
        int64 updated_at = 2; 
     }
 
-    message TrackerRouteAdded {
+    message TrackerRoutesAdded {
        string tracker_id = 1;
-       string route_id = 2;
+       repeated string route_id = 2;
        int64 updated_at = 3;  
     }
 
@@ -112,7 +112,7 @@ message Event {
         TrackerUpdated tracker_updated = 4;
         TrackerStarted tracker_started = 5;
         TrackerStopped tracker_stopped = 6;
-        TrackerRouteAdded tracker_route_added = 7;
+        TrackerRoutesAdded tracker_route_added = 7;
         TrackerRouteRemoved tracker_route_removed = 8;
         TrackerRoutesReseted tracker_routes_reseted = 9;
         TrackerNavigatorReseted tracker_navigator_reseted = 10;

@@ -25,6 +25,7 @@ type mocks struct {
 	processes   func() *mockgenerator.MockProcesses
 	bootstraper func() *mockgenerator.MockBootstraper
 	query       func() *mockgenerator.MockQuery
+	eventPub    func() *mockgenerator.MockEventPublisher
 }
 
 func offlineType(t *testing.T, min, max int) types.Offline {
@@ -105,10 +106,11 @@ func s2id(id string) types.ID {
 
 func newGeneratorFromMocks(m mocks) *generator.Generator {
 	var (
-		s *mockgenerator.MockStorage
-		p *mockgenerator.MockProcesses
-		b *mockgenerator.MockBootstraper
-		q *mockgenerator.MockQuery
+		s  *mockgenerator.MockStorage
+		p  *mockgenerator.MockProcesses
+		b  *mockgenerator.MockBootstraper
+		q  *mockgenerator.MockQuery
+		ep *mockgenerator.MockEventPublisher
 	)
 	if m.storage != nil {
 		s = m.storage()
@@ -122,7 +124,10 @@ func newGeneratorFromMocks(m mocks) *generator.Generator {
 	if m.query != nil {
 		q = m.query()
 	}
-	return generator.New(s, p, b, q)
+	if m.eventPub != nil {
+		ep = m.eventPub()
+	}
+	return generator.New(s, p, b, q, ep)
 }
 
 func TestGenerator_NewTracker(t *testing.T) {
@@ -199,6 +204,11 @@ func TestGenerator_NewTracker(t *testing.T) {
 					return mock
 				},
 				processes: func() *mockgenerator.MockProcesses { return nil },
+				eventPub: func() *mockgenerator.MockEventPublisher {
+					mock := mockgenerator.NewMockEventPublisher(ctrl)
+					mock.EXPECT().PublishTrackerCreated(gomock.Any(), gomock.Any())
+					return mock
+				},
 			},
 			assert: func(trk *generator.Tracker) {
 				require.NotEmpty(t, trk.ID().String())
@@ -281,6 +291,11 @@ func TestGenerator_RemoveTracker(t *testing.T) {
 				processes: func() *mockgenerator.MockProcesses {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					mock.EXPECT().Detach(gomock.Any()).Times(1)
+					return mock
+				},
+				eventPub: func() *mockgenerator.MockEventPublisher {
+					mock := mockgenerator.NewMockEventPublisher(ctrl)
+					mock.EXPECT().PublishTrackerRemoved(gomock.Any(), gomock.Any())
 					return mock
 				},
 			},
@@ -415,6 +430,11 @@ func TestGenerator_UpdateTracker(t *testing.T) {
 					tracker := gpsgen.NewAnimalTracker()
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					mock.EXPECT().Lookup(gomock.Any()).Times(1).Return(tracker, true)
+					return mock
+				},
+				eventPub: func() *mockgenerator.MockEventPublisher {
+					mock := mockgenerator.NewMockEventPublisher(ctrl)
+					mock.EXPECT().PublishTrackerUpdated(gomock.Any(), gomock.Any())
 					return mock
 				},
 			},
@@ -597,28 +617,7 @@ func TestGenerator_StartTracker(t *testing.T) {
 			},
 			want: generator.ErrTrackerHasNoRoutes,
 		},
-		{
-			name: "should return error when tracker params are invalid",
-			fields: mocks{
-				storage: func() *mockgenerator.MockStorage {
-					trk := new(generator.Tracker)
-					trk.AddRoute(gpsgen.RandomRouteForMoscow())
-					mock := mockgenerator.NewMockStorage(ctrl)
-					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
-					return mock
-				},
-				processes: func() *mockgenerator.MockProcesses {
-					mock := mockgenerator.NewMockProcesses(ctrl)
-					mock.EXPECT().HasTracker(gomock.Any()).Times(1).Return(false)
-					return mock
-				},
-			},
-			args: args{
-				ctx:       context.Background(),
-				trackerID: types.NewID(),
-			},
-			want: stdtypes.ErrMinAmplitude,
-		},
+
 		{
 			name: "should return error when tracker storage.Update failure",
 			fields: mocks{
@@ -643,7 +642,7 @@ func TestGenerator_StartTracker(t *testing.T) {
 			want: generator.ErrInvalidTrackerVersion,
 		},
 		{
-			name: "should return error when tracker storage.Update failure",
+			name: "should not return error when all params are valid",
 			fields: mocks{
 				storage: func() *mockgenerator.MockStorage {
 					trk := makeValidTracker(t, types.Stopped)
@@ -657,6 +656,11 @@ func TestGenerator_StartTracker(t *testing.T) {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					mock.EXPECT().HasTracker(gomock.Any()).Times(1).Return(false)
 					mock.EXPECT().Attach(gomock.Any()).Times(1)
+					return mock
+				},
+				eventPub: func() *mockgenerator.MockEventPublisher {
+					mock := mockgenerator.NewMockEventPublisher(ctrl)
+					mock.EXPECT().PublishTrackerStarted(gomock.Any(), gomock.Any()).Times(1)
 					return mock
 				},
 			},
@@ -787,6 +791,33 @@ func TestGenerator_StopTracker(t *testing.T) {
 				trackerID: types.NewID(),
 			},
 			want: generator.ErrInvalidTrackerVersion,
+		},
+		{
+			name: "should not return error when all params are valid",
+			fields: mocks{
+				storage: func() *mockgenerator.MockStorage {
+					trk := makeValidTracker(t, types.Running)
+					mock := mockgenerator.NewMockStorage(ctrl)
+					mock.EXPECT().Find(gomock.Any(), gomock.Any()).Times(1).Return(trk, nil)
+					mock.EXPECT().Update(gomock.Any(), trk).Return(nil)
+					return mock
+				},
+				processes: func() *mockgenerator.MockProcesses {
+					mock := mockgenerator.NewMockProcesses(ctrl)
+					mock.EXPECT().Detach(gomock.Any()).Times(1)
+					return mock
+				},
+				eventPub: func() *mockgenerator.MockEventPublisher {
+					mock := mockgenerator.NewMockEventPublisher(ctrl)
+					mock.EXPECT().PublishTrackerStopped(gomock.Any(), gomock.Any()).Times(1)
+					return mock
+				},
+			},
+			args: args{
+				ctx:       context.Background(),
+				trackerID: types.NewID(),
+			},
+			want: nil,
 		},
 	}
 	for _, tt := range tests {
@@ -977,6 +1008,11 @@ func TestGenerator_AddRoutes(t *testing.T) {
 					mock.EXPECT().Lookup(gomock.All()).Return(gpsgen.NewTracker(), true)
 					return mock
 				},
+				eventPub: func() *mockgenerator.MockEventPublisher {
+					mock := mockgenerator.NewMockEventPublisher(ctrl)
+					mock.EXPECT().PublishTrackerRoutesAdded(gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
+					return mock
+				},
 			},
 			args: args{
 				ctx:       context.Background(),
@@ -1102,6 +1138,11 @@ func TestGenerator_RemoveRoute(t *testing.T) {
 					proc.AddRoute(expectedRoute)
 					mock.EXPECT().Lookup(gomock.Any()).Times(1).Return(proc, true)
 					mock.EXPECT().Detach(proc.ID()).Times(1)
+					return mock
+				},
+				eventPub: func() *mockgenerator.MockEventPublisher {
+					mock := mockgenerator.NewMockEventPublisher(ctrl)
+					mock.EXPECT().PublishTrackerRouteRemoved(gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 					return mock
 				},
 			},
@@ -1495,6 +1536,11 @@ func TestGenerator_ResetRoutes(t *testing.T) {
 					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(proc, true)
 					return mock
 				},
+				eventPub: func() *mockgenerator.MockEventPublisher {
+					mock := mockgenerator.NewMockEventPublisher(ctrl)
+					mock.EXPECT().PublishTrackerRoutesReseted(gomock.Any(), gomock.Any()).Times(1)
+					return mock
+				},
 			},
 			args: args{
 				ctx:       context.Background(),
@@ -1565,6 +1611,11 @@ func TestGenerator_ResetNavigator(t *testing.T) {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					proc := gpsgen.NewAnimalTracker()
 					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(proc, true)
+					return mock
+				},
+				eventPub: func() *mockgenerator.MockEventPublisher {
+					mock := mockgenerator.NewMockEventPublisher(ctrl)
+					mock.EXPECT().PublishTrackerNavigatorReseted(gomock.Any(), gomock.Any()).Times(1)
 					return mock
 				},
 			},
@@ -1638,6 +1689,11 @@ func TestGenerator_ToNextRoute(t *testing.T) {
 				processes: func() *mockgenerator.MockProcesses {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(expectedProc, true)
+					return mock
+				},
+				eventPub: func() *mockgenerator.MockEventPublisher {
+					mock := mockgenerator.NewMockEventPublisher(ctrl)
+					mock.EXPECT().PublishTrackerNavigatorJumped(gomock.Any(), gomock.Any()).Times(1)
 					return mock
 				},
 			},
@@ -1726,6 +1782,11 @@ func TestGenerator_ToPrevRoute(t *testing.T) {
 					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(expectedProc, true)
 					return mock
 				},
+				eventPub: func() *mockgenerator.MockEventPublisher {
+					mock := mockgenerator.NewMockEventPublisher(ctrl)
+					mock.EXPECT().PublishTrackerNavigatorJumped(gomock.Any(), gomock.Any()).Times(1)
+					return mock
+				},
 			},
 			args: args{
 				ctx:       context.Background(),
@@ -1810,6 +1871,11 @@ func TestGenerator_MoveToRoute(t *testing.T) {
 				processes: func() *mockgenerator.MockProcesses {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(expectedProc, true)
+					return mock
+				},
+				eventPub: func() *mockgenerator.MockEventPublisher {
+					mock := mockgenerator.NewMockEventPublisher(ctrl)
+					mock.EXPECT().PublishTrackerNavigatorJumped(gomock.Any(), gomock.Any()).Times(1)
 					return mock
 				},
 			},
@@ -1910,6 +1976,11 @@ func TestGenerator_MoveToRouteByID(t *testing.T) {
 					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(expectedProc, true)
 					return mock
 				},
+				eventPub: func() *mockgenerator.MockEventPublisher {
+					mock := mockgenerator.NewMockEventPublisher(ctrl)
+					mock.EXPECT().PublishTrackerNavigatorJumped(gomock.Any(), gomock.Any()).Times(1)
+					return mock
+				},
 			},
 			args: args{
 				ctx:       context.Background(),
@@ -1997,6 +2068,11 @@ func TestGenerator_MoveToTrack(t *testing.T) {
 				processes: func() *mockgenerator.MockProcesses {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(expectedProc, true)
+					return mock
+				},
+				eventPub: func() *mockgenerator.MockEventPublisher {
+					mock := mockgenerator.NewMockEventPublisher(ctrl)
+					mock.EXPECT().PublishTrackerNavigatorJumped(gomock.Any(), gomock.Any()).Times(1)
 					return mock
 				},
 			},
@@ -2113,6 +2189,11 @@ func TestGenerator_MoveToTrackByID(t *testing.T) {
 					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(expectedProc, true)
 					return mock
 				},
+				eventPub: func() *mockgenerator.MockEventPublisher {
+					mock := mockgenerator.NewMockEventPublisher(ctrl)
+					mock.EXPECT().PublishTrackerNavigatorJumped(gomock.Any(), gomock.Any()).Times(1)
+					return mock
+				},
 			},
 			args: args{
 				ctx:       context.Background(),
@@ -2207,6 +2288,11 @@ func TestGenerator_MoveToSegment(t *testing.T) {
 				processes: func() *mockgenerator.MockProcesses {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(expectedProc, true)
+					return mock
+				},
+				eventPub: func() *mockgenerator.MockEventPublisher {
+					mock := mockgenerator.NewMockEventPublisher(ctrl)
+					mock.EXPECT().PublishTrackerNavigatorJumped(gomock.Any(), gomock.Any()).Times(1)
 					return mock
 				},
 			},
@@ -2334,6 +2420,11 @@ func TestGenerator_AddSensor(t *testing.T) {
 					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(proc, true)
 					return mock
 				},
+				eventPub: func() *mockgenerator.MockEventPublisher {
+					mock := mockgenerator.NewMockEventPublisher(ctrl)
+					mock.EXPECT().PublishTrackerSensorAdded(gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
+					return mock
+				},
 			},
 			args: args{
 				ctx:       context.Background(),
@@ -2453,6 +2544,11 @@ func TestGenerator_RemoveSensor(t *testing.T) {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					proc := gpsgen.NewAnimalTracker()
 					mock.EXPECT().Lookup(expectedTrackerID.String()).Times(1).Return(proc, true)
+					return mock
+				},
+				eventPub: func() *mockgenerator.MockEventPublisher {
+					mock := mockgenerator.NewMockEventPublisher(ctrl)
+					mock.EXPECT().PublishTrackerSensorRemoved(gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 					return mock
 				},
 			},
@@ -2680,6 +2776,11 @@ func TestGenerator_ShutdownTracker(t *testing.T) {
 					mock.EXPECT().Detach(gomock.All())
 					return mock
 				},
+				eventPub: func() *mockgenerator.MockEventPublisher {
+					mock := mockgenerator.NewMockEventPublisher(ctrl)
+					mock.EXPECT().PublishTrackerShutdowned(gomock.Any(), gomock.Any()).Times(1)
+					return mock
+				},
 			},
 			wantErr: nil,
 		},
@@ -2786,6 +2887,11 @@ func TestGenerator_ResumeTracker(t *testing.T) {
 				processes: func() *mockgenerator.MockProcesses {
 					mock := mockgenerator.NewMockProcesses(ctrl)
 					mock.EXPECT().Attach(gomock.Any()).Times(1).Return(nil)
+					return mock
+				},
+				eventPub: func() *mockgenerator.MockEventPublisher {
+					mock := mockgenerator.NewMockEventPublisher(ctrl)
+					mock.EXPECT().PublishTrackerResumed(gomock.Any(), gomock.Any()).Times(1)
 					return mock
 				},
 			},

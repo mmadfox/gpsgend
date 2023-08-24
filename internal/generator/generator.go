@@ -15,6 +15,7 @@ type Generator struct {
 	processes   Processes
 	bootstraper Bootstraper
 	query       Query
+	eventPub    EventPublisher
 }
 
 // New creates a new instance of the Generator.
@@ -23,12 +24,14 @@ func New(
 	p Processes,
 	b Bootstraper,
 	q Query,
+	ep EventPublisher,
 ) *Generator {
 	return &Generator{
 		trackers:    s,
 		processes:   p,
 		bootstraper: b,
 		query:       q,
+		eventPub:    ep,
 	}
 }
 
@@ -69,6 +72,8 @@ func (g *Generator) NewTracker(ctx context.Context, opts NewTrackerOptions) (*Tr
 		return nil, err
 	}
 
+	g.eventPub.PublishTrackerCreated(ctx, newTracker.ID())
+
 	return newTracker, nil
 }
 
@@ -81,7 +86,14 @@ func (g *Generator) SearchTrackers(ctx context.Context, f Filter) (SearchResult,
 // RemoveTracker removes a tracker from storage and detaches it from any associated processes.
 func (g *Generator) RemoveTracker(ctx context.Context, trackerID types.ID) error {
 	g.processes.Detach(trackerID.String())
-	return g.trackers.Delete(ctx, trackerID)
+
+	if err := g.trackers.Delete(ctx, trackerID); err != nil {
+		return err
+	}
+
+	g.eventPub.PublishTrackerRemoved(ctx, trackerID)
+
+	return nil
 }
 
 // UpdateTracker updates the information of a tracker, validates options, and manages related processes.
@@ -115,6 +127,9 @@ func (g *Generator) UpdateTracker(
 	}
 
 	g.updateTrackerProcess(trackerID.String(), opts)
+
+	g.eventPub.PublishTrackerUpdated(ctx, trackerID)
+
 	return nil
 }
 
@@ -151,6 +166,9 @@ func (g *Generator) StartTracker(ctx context.Context, trackerID types.ID) error 
 	}
 
 	g.addProc(newProc)
+
+	g.eventPub.PublishTrackerStarted(ctx, trackerID)
+
 	return nil
 }
 
@@ -173,7 +191,13 @@ func (g *Generator) StopTracker(ctx context.Context, trackerID types.ID) error {
 		_ = g.processes.Detach(trackerID.String())
 	}()
 
-	return g.trackers.Update(ctx, tracker)
+	if err := g.trackers.Update(ctx, tracker); err != nil {
+		return err
+	}
+
+	g.eventPub.PublishTrackerStopped(ctx, trackerID)
+
+	return nil
 }
 
 // TrackerState retrieves the state of a running tracker process.
@@ -216,6 +240,8 @@ func (g *Generator) AddRoutes(ctx context.Context, trackerID types.ID, newRoutes
 		proc.AddRoute(currRoutes...)
 	}
 
+	g.eventPub.PublishTrackerRoutesAdded(ctx, trackerID, newRoutes)
+
 	return nil
 }
 
@@ -249,6 +275,9 @@ func (g *Generator) RemoveRoute(ctx context.Context, trackerID types.ID, routeID
 			g.removeProc(proc)
 		}
 	}
+
+	g.eventPub.PublishTrackerRouteRemoved(ctx, trackerID, routeID)
+
 	return nil
 }
 
@@ -332,6 +361,8 @@ func (g *Generator) ResetRoutes(ctx context.Context, trackerID types.ID) (bool, 
 		proc.ResetRoutes()
 	}
 
+	g.eventPub.PublishTrackerRoutesReseted(ctx, trackerID)
+
 	return true, nil
 }
 
@@ -347,6 +378,9 @@ func (g *Generator) ResetNavigator(ctx context.Context, trackerID types.ID) erro
 	}
 
 	proc.ResetNavigator()
+
+	g.eventPub.PublishTrackerNavigatorReseted(ctx, trackerID)
+
 	return nil
 }
 
@@ -363,6 +397,10 @@ func (g *Generator) ToNextRoute(ctx context.Context, trackerID types.ID) (types.
 	}
 
 	next := proc.ToNextRoute()
+
+	if next {
+		g.eventPub.PublishTrackerNavigatorJumped(ctx, trackerID)
+	}
 
 	return types.NavigatorFromProc(proc), next, nil
 }
@@ -381,6 +419,10 @@ func (g *Generator) ToPrevRoute(ctx context.Context, trackerID types.ID) (types.
 
 	next := proc.ToPrevRoute()
 
+	if next {
+		g.eventPub.PublishTrackerNavigatorJumped(ctx, trackerID)
+	}
+
 	return types.NavigatorFromProc(proc), next, nil
 }
 
@@ -397,6 +439,10 @@ func (g *Generator) MoveToRoute(ctx context.Context, trackerID types.ID, routeIn
 	}
 
 	next := proc.MoveToRoute(routeIndex)
+
+	if next {
+		g.eventPub.PublishTrackerNavigatorJumped(ctx, trackerID)
+	}
 
 	return types.NavigatorFromProc(proc), next, nil
 }
@@ -419,6 +465,10 @@ func (g *Generator) MoveToRouteByID(ctx context.Context, trackerID types.ID, rou
 
 	next := proc.MoveToRouteByID(routeID.String())
 
+	if next {
+		g.eventPub.PublishTrackerNavigatorJumped(ctx, trackerID)
+	}
+
 	return types.NavigatorFromProc(proc), next, nil
 }
 
@@ -435,6 +485,10 @@ func (g *Generator) MoveToTrack(ctx context.Context, trackerID types.ID, routeIn
 	}
 
 	next := proc.MoveToTrack(routeIndex, trackIndex)
+
+	if next {
+		g.eventPub.PublishTrackerNavigatorJumped(ctx, trackerID)
+	}
 
 	return types.NavigatorFromProc(proc), next, nil
 }
@@ -461,6 +515,10 @@ func (g *Generator) MoveToTrackByID(ctx context.Context, trackerID, routeID, tra
 
 	next := proc.MoveToTrackByID(routeID.String(), trackID.String())
 
+	if next {
+		g.eventPub.PublishTrackerNavigatorJumped(ctx, trackerID)
+	}
+
 	return types.NavigatorFromProc(proc), next, nil
 }
 
@@ -477,6 +535,10 @@ func (g *Generator) MoveToSegment(ctx context.Context, trackerID types.ID, route
 	}
 
 	next := proc.MoveToSegment(routeIndex, trackIndex, segmentIndex)
+
+	if next {
+		g.eventPub.PublishTrackerNavigatorJumped(ctx, trackerID)
+	}
 
 	return types.NavigatorFromProc(proc), next, nil
 }
@@ -514,6 +576,8 @@ func (g *Generator) AddSensor(
 		proc.AddSensor(newSensor)
 	}
 
+	g.eventPub.PublishTrackerSensorAdded(ctx, trackerID, sensorConf.ID())
+
 	return nil
 }
 
@@ -544,6 +608,8 @@ func (g *Generator) RemoveSensor(
 	if ok {
 		proc.RemoveSensor(sensorID.String())
 	}
+
+	g.eventPub.PublishTrackerSensorRemoved(ctx, trackerID, sensorID)
 
 	return g.trackers.Update(ctx, tracker)
 }
@@ -598,6 +664,8 @@ func (g *Generator) ShutdownTracker(ctx context.Context, trackerID types.ID) err
 		return ErrTrackerNotRunning
 	}
 
+	g.eventPub.PublishTrackerShutdowned(ctx, trackerID)
+
 	return nil
 }
 
@@ -622,6 +690,8 @@ func (g *Generator) ResumeTracker(ctx context.Context, trackerID types.ID) error
 	}
 
 	g.addProc(proc)
+	g.eventPub.PublishTrackerResumed(ctx, trackerID)
+
 	return nil
 }
 
