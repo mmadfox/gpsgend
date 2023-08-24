@@ -12,6 +12,10 @@ func (t ID) String() string {
 	return t.value.String()
 }
 
+func (t ID) IsEmpty() bool {
+	return t.value == uuid.Nil
+}
+
 func ParseID(id string) (ID, error) {
 	uid, err := uuid.Parse(id)
 	if err != nil {

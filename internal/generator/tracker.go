@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/mmadfox/go-gpsgen"
+	"github.com/mmadfox/go-gpsgen/curve"
 	"github.com/mmadfox/go-gpsgen/properties"
 	stdtypes "github.com/mmadfox/go-gpsgen/types"
 	"github.com/mmadfox/gpsgend/internal/types"
@@ -39,6 +40,7 @@ type Tracker struct {
 	updatedAt      time.Time
 	runningAt      time.Time
 	stoppedAt      time.Time
+	version        int
 }
 
 // ID returns the unique identifier of the tracker.
@@ -371,6 +373,160 @@ func (t *Tracker) Routes() ([]*gpsgen.Route, error) {
 	return gpsgen.DecodeRoutes(t.routesSnapshot)
 }
 
+func (t *Tracker) TakeSnapshot(snap *TrackerSnapshot) {
+	if snap == nil {
+		return
+	}
+	if !t.id.IsEmpty() {
+		snap.ID = t.id.String()
+	}
+	snap.CustomID = t.userID.String()
+	snap.Status.ID = int(t.status)
+	snap.Status.Name = t.status.String()
+	snap.Model = t.model.String()
+	snap.Descr = t.description.String()
+	snap.Color = t.color.String()
+	snap.Offline.Min = t.offline.Min()
+	snap.Offline.Max = t.offline.Max()
+	snap.Elevation.Min = t.elevation.Min()
+	snap.Elevation.Max = t.elevation.Max()
+	snap.Elevation.Amplitude = t.Elevation().Amplitude()
+	snap.Elevation.Mode = int(t.Elevation().Mode())
+	snap.Battery.Min = t.battery.Min()
+	snap.Battery.Max = t.battery.Max()
+	snap.Battery.ChargeTime = t.Battery().ChargeTime()
+	snap.Speed.Min = t.speed.Min()
+	snap.Speed.Max = t.speed.Max()
+	snap.Speed.Amplitude = t.speed.Amplitude()
+	snap.Props = t.props
+	snap.NumRoutes = t.NumRoutes()
+	snap.NumSensors = t.NumSensors()
+	snap.SkipOffline = t.skipOffline
+	snap.Snapshot = t.snapshot
+	snap.Routes = t.routesSnapshot
+	snap.CreatedAt = t.createdAt.Unix()
+	snap.UpdatedAt = t.updatedAt.Unix()
+	snap.RunningAt = t.runningAt.Unix()
+	snap.StoppedAt = t.stoppedAt.Unix()
+	if len(t.sensors) > 0 {
+		snap.Sensors = make([]SensorSnapshot, 0, len(t.sensors))
+		for _, sensor := range t.sensors {
+			snap.Sensors = append(snap.Sensors, SensorSnapshot{
+				ID:        sensor.ID().String(),
+				Name:      sensor.Name(),
+				Min:       sensor.Min(),
+				Max:       sensor.Max(),
+				Amplitude: sensor.Amplitude(),
+				Mode:      int(sensor.Mode()),
+			})
+		}
+	}
+	snap.Version = t.version
+}
+
+func (t *Tracker) FromSnapshot(snap *TrackerSnapshot) error {
+	if snap == nil {
+		return nil
+	}
+
+	t.routesSnapshot = snap.Routes
+	t.version = snap.Version
+
+	trackeID, err := types.ParseID(snap.ID)
+	if err != nil {
+		return fmt.Errorf("%w: can't parse type tracker.id", err)
+	}
+	t.id = trackeID
+
+	if len(snap.CustomID) > 0 {
+		customID, err := types.ParseCustomID(snap.CustomID)
+		if err != nil {
+			return fmt.Errorf("%w: can't parse type tracker.customID", err)
+		}
+		t.userID = customID
+	}
+
+	status, err := types.ParseDeviceStatus(snap.Status.ID)
+	if err != nil {
+		return fmt.Errorf("%w: can't parse type tracker.status", err)
+	}
+	t.status = status
+
+	if len(snap.Model) > 0 {
+		model, err := types.ParseModel(snap.Model)
+		if err != nil {
+			return fmt.Errorf("%w: can't parse type tracker.model", err)
+		}
+		t.model = model
+	}
+
+	if len(snap.Color) > 0 {
+		color, err := types.ParseColor(snap.Color)
+		if err != nil {
+			return fmt.Errorf("%w: can't parse type tracker.color", err)
+		}
+		t.color = color
+	}
+
+	if len(snap.Descr) > 0 {
+		descr, err := types.ParseDescription(snap.Descr)
+		if err != nil {
+			return fmt.Errorf("%w: can't parse type tracker.description", err)
+		}
+		t.description = descr
+	}
+
+	if !snap.SkipOffline {
+		offline, err := types.ParseOffline(snap.Offline.Min, snap.Offline.Max)
+		if err != nil {
+			return fmt.Errorf("%w: can't parse type tracker.offline", err)
+		}
+		t.offline = offline
+	}
+
+	elevation, err := types.ParseElevation(
+		snap.Elevation.Min,
+		snap.Elevation.Max,
+		snap.Elevation.Amplitude,
+		curve.CurveMode(snap.Elevation.Mode),
+	)
+	if err != nil {
+		return fmt.Errorf("%w: can't parse type tracker.elevation", err)
+	}
+	t.elevation = elevation
+
+	battery, err := types.ParseBattery(snap.Battery.Min, snap.Battery.Max, snap.Battery.ChargeTime)
+	if err != nil {
+		return fmt.Errorf("%w: can't parse type tracker.battery", err)
+	}
+	t.battery = battery
+
+	speed, err := types.ParseSpeed(snap.Speed.Min, snap.Speed.Max, snap.Speed.Amplitude)
+	if err != nil {
+		return fmt.Errorf("%w: can't parse type tracker.speed", err)
+	}
+	t.speed = speed
+
+	t.props = snap.Props
+	if len(snap.Sensors) > 0 {
+		t.sensors = make(map[types.ID]*types.Sensor, len(snap.Sensors))
+		for i := 0; i < len(snap.Sensors); i++ {
+			sn := snap.Sensors[i]
+			sid, err := types.ParseID(sn.ID)
+			if err != nil {
+				return fmt.Errorf("%w: can't parse type tracker.sensor[%d].id", err, i)
+			}
+			sensor, err := types.ParseSensor(sid, sn.Name, sn.Min, sn.Max, sn.Amplitude, sn.Mode)
+			if err != nil {
+				return fmt.Errorf("%w: can't parse type tracker.sensor[%d]", err, i)
+			}
+			t.sensors[sid] = sensor
+		}
+	}
+
+	return nil
+}
+
 func (t *Tracker) appendRoutes(newRoutes []*gpsgen.Route) ([]*gpsgen.Route, error) {
 	seen := make(map[string]struct{})
 	new := make([]*gpsgen.Route, 0, len(newRoutes)+t.numRoutes)
@@ -440,6 +596,10 @@ loop:
 
 // AddSensor adds one sensors to the tracker.
 func (t *Tracker) AddSensor(newSensor *types.Sensor) error {
+	if t.sensors == nil {
+		t.sensors = make(map[types.ID]*types.Sensor)
+	}
+
 	if newSensor == nil {
 		return ErrNoSensor
 	}

@@ -22,7 +22,7 @@ func NewTrackerBuilder() *TrackerBuilder {
 }
 
 func (b *TrackerBuilder) ID(id types.ID) *TrackerBuilder {
-	if err := validateType(id, "tracker.id"); err != nil {
+	if err := validateType(id, "can't parse type tracker.id"); err != nil {
 		b.appendError(err)
 	} else {
 		b.device.id = id
@@ -31,7 +31,7 @@ func (b *TrackerBuilder) ID(id types.ID) *TrackerBuilder {
 }
 
 func (b *TrackerBuilder) Status(status types.DeviceStatus) *TrackerBuilder {
-	if err := validateType(status, "tracker.status"); err != nil {
+	if err := validateType(status, "can't parse type tracker.status"); err != nil {
 		b.appendError(err)
 	} else {
 		b.device.status = status
@@ -40,7 +40,7 @@ func (b *TrackerBuilder) Status(status types.DeviceStatus) *TrackerBuilder {
 }
 
 func (b *TrackerBuilder) Model(model types.Model) *TrackerBuilder {
-	if err := validateType(model, "tracker.model"); err != nil {
+	if err := validateType(model, "can't parse type tracker.model"); err != nil {
 		b.appendError(err)
 	} else {
 		b.device.model = model
@@ -49,7 +49,7 @@ func (b *TrackerBuilder) Model(model types.Model) *TrackerBuilder {
 }
 
 func (b *TrackerBuilder) Color(color types.Color) *TrackerBuilder {
-	if err := validateType(color, "tracker.color"); err != nil {
+	if err := validateType(color, "can't parse type tracker.color"); err != nil {
 		b.appendError(err)
 	} else {
 		b.device.color = color
@@ -58,7 +58,7 @@ func (b *TrackerBuilder) Color(color types.Color) *TrackerBuilder {
 }
 
 func (b *TrackerBuilder) CustomID(id types.CustomID) *TrackerBuilder {
-	if err := validateType(id, "tracker.userID"); err != nil {
+	if err := validateType(id, "can't parse type tracker.userID"); err != nil {
 		b.appendError(err)
 	} else {
 		b.device.userID = id
@@ -75,7 +75,7 @@ func (b *TrackerBuilder) Props(p properties.Properties) *TrackerBuilder {
 }
 
 func (b *TrackerBuilder) Description(descr types.Description) *TrackerBuilder {
-	if err := validateType(descr, "tracker.description"); err != nil {
+	if err := validateType(descr, "can't parse type tracker.description"); err != nil {
 		b.appendError(err)
 	} else {
 		b.device.description = descr
@@ -84,7 +84,7 @@ func (b *TrackerBuilder) Description(descr types.Description) *TrackerBuilder {
 }
 
 func (b *TrackerBuilder) Offline(offline types.Offline) *TrackerBuilder {
-	if err := validateType(offline, "offline"); err != nil {
+	if err := validateType(offline, "can't parse type offline"); err != nil {
 		b.appendError(err)
 	} else {
 		b.device.offline = offline
@@ -98,7 +98,7 @@ func (b *TrackerBuilder) SkipOffline(flag bool) *TrackerBuilder {
 }
 
 func (b *TrackerBuilder) Elevation(elevation types.Elevation) *TrackerBuilder {
-	if err := validateType(elevation, "tracker.elevation"); err != nil {
+	if err := validateType(elevation, "can't parse type tracker.elevation"); err != nil {
 		b.appendError(err)
 	} else {
 		b.device.elevation = elevation
@@ -107,7 +107,7 @@ func (b *TrackerBuilder) Elevation(elevation types.Elevation) *TrackerBuilder {
 }
 
 func (b *TrackerBuilder) Battery(battery types.Battery) *TrackerBuilder {
-	if err := validateType(battery, "tracker.battery"); err != nil {
+	if err := validateType(battery, "can't parse type tracker.battery"); err != nil {
 		b.appendError(err)
 	} else {
 		b.device.battery = battery
@@ -116,7 +116,7 @@ func (b *TrackerBuilder) Battery(battery types.Battery) *TrackerBuilder {
 }
 
 func (b *TrackerBuilder) Speed(speed types.Speed) *TrackerBuilder {
-	if err := validateType(speed, "tracker.speed"); err != nil {
+	if err := validateType(speed, "can't parse type tracker.speed"); err != nil {
 		b.appendError(err)
 	} else {
 		b.device.speed = speed

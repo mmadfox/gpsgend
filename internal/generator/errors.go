@@ -20,13 +20,21 @@ var (
 	ErrTrackerNotPaused        = errors.New("gpsgend/generator: tracker not paused")
 	ErrTrackerOff              = errors.New("gpsgend/generator: tracker is off")
 	ErrParamsEmpty             = errors.New("gpsgend/generator: params empty")
-	ErrInvalidTrackerVersion   = errors.New("gpsgend/generator: invalid tracker version")
 	ErrTrackerNotFound         = errors.New("gpsgend/generator: tracker not found")
 	ErrRouteNotFound           = errors.New("gpsgend/generator: route not found")
 	ErrSensorNotFound          = errors.New("gpsgend/generator: sensor not found")
 	ErrLoadingTracker          = errors.New("gpsgend/generator: trackers loading error")
 	ErrUnloadingTracker        = errors.New("gpsgend/generator: trackers unloading error")
 	ErrSensorAlreadyExists     = errors.New("gpsgned/generator: sensor already exists")
+	ErrNoTracker               = errors.New("gpsgend/generator: no tracker")
+
+	ErrBrokenTracker         = errors.New("gpsgend/generator: broken tracker data")
+	ErrInvalidTrackerVersion = errors.New("gpsgend/generator: invalid tracker version")
+
+	ErrStorageInsert = errors.New("gpsgend/generator: insert into storage")
+	ErrStorageUpdate = errors.New("gpsgend/generator: update in storage")
+	ErrStorageFind   = errors.New("gpsgned/generator: find in storage")
+	ErrStorageDelete = errors.New("gpsgned/generator: delete from storage")
 )
 
 func errTrackerOff(t *Tracker) error {

@@ -1,11 +1,14 @@
 #!/bin/bash
 
 declare -a files=(
+    # service
     "internal/generator/storage.go"
     "internal/generator/processes.go"
     "internal/generator/bootstraper.go"
     "internal/generator/projection.go"
     "internal/generator/service.go"
+    # storage
+    "internal/storage/mongodb/collection.go"
 )
 
 path="$(pwd)"
