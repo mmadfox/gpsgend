@@ -2,9 +2,7 @@ package grpc
 
 import (
 	context "context"
-	"fmt"
 	"sync"
-	"time"
 
 	"github.com/google/uuid"
 	gpsgendproto "github.com/mmadfox/gpsgend/gen/proto/gpsgend/v1"
@@ -13,52 +11,50 @@ import (
 type TrackerServer struct {
 	gpsgendproto.UnimplementedTrackerServiceServer
 
-	mu      sync.RWMutex
-	clients map[uuid.UUID]*client
+	broker Broker
 }
 
-func NewTrackServer() *TrackerServer {
+func NewTrackServer(b Broker) *TrackerServer {
 	return &TrackerServer{
 		UnimplementedTrackerServiceServer: gpsgendproto.UnimplementedTrackerServiceServer{},
-		clients:                           make(map[uuid.UUID]*client),
+		broker:                            b,
 	}
 }
 
-func (s *TrackerServer) OnPacket(data []byte) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
-	req := &gpsgendproto.SubscribeResponse{Packet: data}
-	for _, cli := range s.clients {
-		if err := cli.stream.Send(req); err != nil {
-			select {
-			case cli.close <- struct{}{}:
-			default:
-			}
-		}
-	}
-}
-
-func (s *TrackerServer) Subscribe(req *gpsgendproto.SubscribeRequest, stream gpsgendproto.TrackerService_SubscribeServer) error {
+func (s *TrackerServer) Subscribe(
+	req *gpsgendproto.SubscribeRequest,
+	stream gpsgendproto.TrackerService_SubscribeServer,
+) error {
 	cid, err := uuid.Parse(req.ClientId)
 	if err != nil {
 		return err
 	}
 
-	cli := newClient(cid, stream)
-
-	s.registerCliet(cli)
+	cli := newClient()
+	s.broker.RegisterClient(cid, cli)
 
 	defer func() {
-		s.unregisterClient(cli)
+		s.broker.Unregister(cid)
+		cli.Close()
+		close(cli.out)
 	}()
+
+	resp := new(gpsgendproto.SubscribeResponse)
 
 	for {
 		select {
 		case <-stream.Context().Done():
 			return nil
-		case <-cli.close:
+		case <-cli.closeCh:
 			return nil
+		case data, ok := <-cli.out:
+			if !ok {
+				return nil
+			}
+			resp.Event = data
+			if err := stream.Send(resp); err != nil {
+				return err
+			}
 		}
 	}
 }
@@ -71,65 +67,41 @@ func (s *TrackerServer) Unsubscribe(ctx context.Context, req *gpsgendproto.Unsub
 		}, nil
 	}
 
-	s.mu.RLock()
-	cli, ok := s.clients[cid]
-	s.mu.RUnlock()
-	if !ok {
+	if err := s.broker.Unregister(cid); err != nil {
 		return &gpsgendproto.UnsubscribeResponse{
-			Error: &gpsgendproto.Error{Msg: fmt.Sprintf("client %s not found", req.ClientId)},
+			Error: newError(err),
 		}, nil
-	}
-
-	select {
-	case cli.close <- struct{}{}:
-	default:
 	}
 
 	return new(gpsgendproto.UnsubscribeResponse), nil
 }
 
 func (s *TrackerServer) GetClientsInfo(ctx context.Context, _ *gpsgendproto.GetClientsInfoRequest) (*gpsgendproto.GetClientsInfoResponse, error) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
-	resp := gpsgendproto.GetClientsInfoResponse{
-		Clients: make([]*gpsgendproto.ClientInfo, 0, len(s.clients)),
-	}
-
-	for _, cli := range s.clients {
-		resp.Clients = append(resp.Clients, &gpsgendproto.ClientInfo{
-			Id:        cli.id.String(),
-			Timestamp: cli.createdAt.Unix(),
-		})
-	}
-
-	return &resp, nil
-}
-
-func (s *TrackerServer) registerCliet(cli *client) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	s.clients[cli.id] = cli
-}
-
-func (s *TrackerServer) unregisterClient(cli *client) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	delete(s.clients, cli.id)
+	return &gpsgendproto.GetClientsInfoResponse{}, nil
 }
 
 type client struct {
-	id        uuid.UUID
-	stream    gpsgendproto.TrackerService_SubscribeServer
-	close     chan struct{}
-	createdAt time.Time
+	out       chan []byte
+	closeCh   chan struct{}
+	onceClose sync.Once
 }
 
-func newClient(id uuid.UUID, stream gpsgendproto.TrackerService_SubscribeServer) *client {
+func newClient() *client {
 	return &client{
-		id:        id,
-		stream:    stream,
-		close:     make(chan struct{}),
-		createdAt: time.Now(),
+		out:     make(chan []byte, 1),
+		closeCh: make(chan struct{}),
+	}
+}
+
+func (c *client) Close() {
+	c.onceClose.Do(func() {
+		close(c.closeCh)
+	})
+}
+
+func (c *client) Send(data []byte) {
+	select {
+	case c.out <- data:
+	default:
 	}
 }

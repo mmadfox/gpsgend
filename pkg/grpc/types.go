@@ -93,8 +93,3 @@ type Navigator struct {
 type SearchResult struct {
 	Trackers []*Tracker
 }
-
-type Watcher struct {
-	ID        string
-	StartedAt time.Time
-}

@@ -51,7 +51,7 @@ message Event {
 
     message TrackerRoutesAdded {
        string tracker_id = 1;
-       repeated string route_id = 2;
+       repeated string routes_id = 2;
        int64 updated_at = 3;  
     }
 
@@ -99,27 +99,26 @@ message Event {
     }
 
     message TrackerChanged {
-       string tracker_id = 1; 
-       bytes packet = 2;
-       int64 updated_at = 3;  
+       bytes packet = 1;
     }
 
     Kind kind = 1;
 
     oneof payload {
-        TrackerCreated tracker_created = 2;
-        TrackerRemoved tracker_removed = 3;
-        TrackerUpdated tracker_updated = 4;
-        TrackerStarted tracker_started = 5;
-        TrackerStopped tracker_stopped = 6;
-        TrackerRoutesAdded tracker_route_added = 7;
-        TrackerRouteRemoved tracker_route_removed = 8;
-        TrackerRoutesReseted tracker_routes_reseted = 9;
-        TrackerNavigatorReseted tracker_navigator_reseted = 10;
-        TrackerNavigatorJumped tracker_navigator_jumped = 11;
-        TrackerSensorAdded tracker_sensor_added = 12;
-        TrackerSensorRemoved tracker_sensor_removed = 13;
-        TrackerShutdowned tracker_shutdowned = 14;
-        TrackerResumed tracker_resumed = 15;
+        TrackerCreated tracker_created_event = 2;
+        TrackerRemoved tracker_removed_event = 3;
+        TrackerUpdated tracker_updated_event = 4;
+        TrackerStarted tracker_started_event = 5;
+        TrackerStopped tracker_stopped_event = 6;
+        TrackerRoutesAdded tracker_routes_added_event = 7;
+        TrackerRouteRemoved tracker_route_removed_event = 8;
+        TrackerRoutesReseted tracker_routes_reseted_event = 9;
+        TrackerNavigatorReseted tracker_navigator_reseted_event = 10;
+        TrackerNavigatorJumped tracker_navigator_jumped_event = 11;
+        TrackerSensorAdded tracker_sensor_added_event = 12;
+        TrackerSensorRemoved tracker_sensor_removed_event = 13;
+        TrackerShutdowned tracker_shutdowned_event = 14;
+        TrackerResumed tracker_resumed_event = 15;
+        TrackerChanged tracker_changed_event = 16;
     }
 }

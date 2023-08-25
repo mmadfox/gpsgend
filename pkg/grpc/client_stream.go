@@ -7,29 +7,16 @@ import (
 	"github.com/mmadfox/go-gpsgen"
 	gpsgenproto "github.com/mmadfox/go-gpsgen/proto"
 	gpsgendproto "github.com/mmadfox/gpsgend/gen/proto/gpsgend/v1"
+	"google.golang.org/protobuf/proto"
 )
 
-const waitStream = 3 * time.Second
-
-func (c *Client) ActiveWatchers(ctx context.Context) ([]Watcher, error) {
-	req := gpsgendproto.GetClientsInfoRequest{}
-
-	resp, err := c.trackerCli.GetClientsInfo(ctx, &req)
-	if err != nil {
-		return nil, toError(err)
-	}
-
-	watchers := make([]Watcher, len(resp.Clients))
-	for i := 0; i < len(resp.Clients); i++ {
-		cli := resp.Clients[i]
-		watchers[i] = Watcher{
-			ID:        cli.Id,
-			StartedAt: time.Unix(cli.Timestamp, 0),
-		}
-	}
-
-	return watchers, nil
+type Watcher interface {
+	OnEvent(e *gpsgendproto.Event)
+	OnPacket(*gpsgenproto.Packet)
+	OnError(error) bool
 }
+
+const waitStream = 3 * time.Second
 
 func (c *Client) Unwatch(ctx context.Context) error {
 	req := gpsgendproto.UnsubscribeRequest{ClientId: c.id.String()}
@@ -45,15 +32,10 @@ func (c *Client) Unwatch(ctx context.Context) error {
 	return nil
 }
 
-func (c *Client) Watch(
-	ctx context.Context,
-	onPacket func(*gpsgenproto.Packet),
-	onError func(error) bool,
-) error {
-	var (
-		stream gpsgendproto.TrackerService_SubscribeClient
-		err    error
-	)
+func (c *Client) Watch(ctx context.Context, w Watcher) error {
+	var stream gpsgendproto.TrackerService_SubscribeClient
+	var err error
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -65,10 +47,8 @@ func (c *Client) Watch(
 			stream, err = c.subscribe(ctx)
 			if err != nil {
 				stream = nil
-				if onError != nil {
-					if stop := onError(err); stop {
-						return nil
-					}
+				if stop := w.OnError(err); stop {
+					return err
 				}
 				time.Sleep(waitStream)
 				continue
@@ -78,25 +58,32 @@ func (c *Client) Watch(
 		resp, err := stream.Recv()
 		if err != nil {
 			stream = nil
-			if onError != nil {
-				if stop := onError(err); stop {
-					return nil
-				}
+			if stop := w.OnError(err); stop {
+				return err
 			}
 			time.Sleep(waitStream)
 			continue
 		}
-		if onPacket != nil {
-			packet, err := gpsgen.PacketFromBytes(resp.Packet)
-			if err != nil {
-				if onError != nil {
-					if stop := onError(err); stop {
-						return nil
-					}
-				}
+
+		event := new(gpsgendproto.Event)
+		if err := proto.Unmarshal(resp.Event, event); err != nil {
+			if stop := w.OnError(err); stop {
+				return err
+			}
+		}
+
+		if event.Kind == gpsgendproto.Event_TRACKER_CHANGED {
+			payload, ok := event.Payload.(*gpsgendproto.Event_TrackerChangedEvent)
+			if !ok {
 				continue
 			}
-			onPacket(packet)
+			pck, err := gpsgen.PacketFromBytes(payload.TrackerChangedEvent.Packet)
+			if stop := w.OnError(err); stop {
+				return err
+			}
+			w.OnPacket(pck)
+		} else {
+			w.OnEvent(event)
 		}
 	}
 }

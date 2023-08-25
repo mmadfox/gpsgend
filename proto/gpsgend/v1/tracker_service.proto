@@ -23,7 +23,7 @@ message SubscribeRequest {
 }
 
 message SubscribeResponse {
-    bytes packet = 1;
+    bytes event = 1;
 }
 
 message UnsubscribeRequest {
