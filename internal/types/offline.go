@@ -20,6 +20,10 @@ func ParseOffline(min int, max int) (Offline, error) {
 	return offline, nil
 }
 
+func (o Offline) IsEmpty() bool {
+	return o.min == 0 && o.max == 0
+}
+
 func (o Offline) String() string {
 	return fmt.Sprintf("Offline{min:%d, max:%d}", o.min, o.max)
 }

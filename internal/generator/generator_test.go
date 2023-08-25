@@ -135,7 +135,7 @@ func TestGenerator_NewTracker(t *testing.T) {
 
 	type args struct {
 		ctx  context.Context
-		opts generator.NewTrackerOptions
+		opts *generator.NewTrackerOptions
 	}
 	tests := []struct {
 		name    string
@@ -144,11 +144,12 @@ func TestGenerator_NewTracker(t *testing.T) {
 		assert  func(*generator.Tracker)
 		wantErr bool
 	}{
+
 		{
 			name: "should return error when options is empty",
 			args: args{
 				ctx:  context.Background(),
-				opts: generator.NewTrackerOptions{},
+				opts: nil,
 			},
 			fields: mocks{
 				storage:   func() *mockgenerator.MockStorage { return nil },
@@ -160,7 +161,7 @@ func TestGenerator_NewTracker(t *testing.T) {
 			name: "should return error when storage.Insert failure",
 			args: args{
 				ctx: context.Background(),
-				opts: generator.NewTrackerOptions{
+				opts: &generator.NewTrackerOptions{
 					Offline:   offlineType(t, 1, 10),
 					Battery:   batteryType(t, 1.0, 100.0, time.Hour),
 					Speed:     speedType(t, 1.0, 3.0, 8),
@@ -183,7 +184,7 @@ func TestGenerator_NewTracker(t *testing.T) {
 			name: "should return new tracker when all params are valid",
 			args: args{
 				ctx: context.Background(),
-				opts: generator.NewTrackerOptions{
+				opts: &generator.NewTrackerOptions{
 					Model:       modelPtrType(t, "Tracker-N2x91"),
 					Color:       colorPtrType(t, "#ff0000"),
 					UserID:      customIDPtrType(t, uuid.NewString()),
@@ -229,6 +230,11 @@ func TestGenerator_NewTracker(t *testing.T) {
 				require.Equal(t, 10, trk.Offline().Max())
 				require.NotEmpty(t, trk.Properties())
 				require.True(t, trk.SkipOffline())
+				require.Equal(t, types.Stopped, trk.Status())
+				require.NotZero(t, trk.CreatedAt())
+				require.NotZero(t, trk.UpdatedAt())
+				require.Zero(t, trk.RunningAt())
+				require.Zero(t, trk.StoppedAt())
 			},
 		},
 	}

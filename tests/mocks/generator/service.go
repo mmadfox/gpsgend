@@ -53,7 +53,7 @@ func (mr *MockServiceMockRecorder) AddRoutes(ctx, trackerID, newRoutes interface
 }
 
 // AddSensor mocks base method.
-func (m *MockService) AddSensor(ctx context.Context, trackerID types.ID, sensor *go_gpsgen.Sensor) error {
+func (m *MockService) AddSensor(ctx context.Context, trackerID types.ID, sensor *types.Sensor) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddSensor", ctx, trackerID, sensor)
 	ret0, _ := ret[0].(error)
@@ -162,7 +162,7 @@ func (mr *MockServiceMockRecorder) MoveToTrackByID(ctx, trackerID, routeID, trac
 }
 
 // NewTracker mocks base method.
-func (m *MockService) NewTracker(ctx context.Context, opts generator.NewTrackerOptions) (*generator.Tracker, error) {
+func (m *MockService) NewTracker(ctx context.Context, opts *generator.NewTrackerOptions) (*generator.Tracker, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "NewTracker", ctx, opts)
 	ret0, _ := ret[0].(*generator.Tracker)

@@ -18,7 +18,7 @@ func TestMain(m *testing.M) {
 	os.Exit(ret)
 }
 
-func TestClient_NewTracker(t *testing.T) {
+func TestClient_AddTracker(t *testing.T) {
 	tracker, err := gpsgendclient.DecodeTracker(expectedTracker)
 	require.NoError(t, err)
 
@@ -57,8 +57,8 @@ func TestClient_NewTracker(t *testing.T) {
 			if tt.mock != nil {
 				tt.mock()
 			}
-			opts := gpsgendclient.NewTrackerOptions{}
-			got, err := c.NewTracker(context.Background(), opts)
+			opts := gpsgendclient.NewAddTrackerOptions()
+			got, err := c.AddTracker(context.Background(), opts)
 			generatorHandler.reset()
 			if tt.wantErr != nil {
 				require.EqualValues(t, tt.wantErr, err)

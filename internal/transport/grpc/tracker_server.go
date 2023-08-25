@@ -88,7 +88,7 @@ type client struct {
 
 func newClient() *client {
 	return &client{
-		out:     make(chan []byte, 1),
+		out:     make(chan []byte, 24),
 		closeCh: make(chan struct{}),
 	}
 }

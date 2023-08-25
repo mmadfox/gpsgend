@@ -1,0 +1,26 @@
+service: gpsgend
+
+logger:
+  format: text # json
+  level: info # info, warn, debug, error
+
+generator:
+  flushInterval: 3s
+  packetSize: 256
+  numWorker: 4  
+
+eventBroker:
+  history:
+    enable: true 
+    bufferCapacity: 24
+    period: 60s
+
+transport:
+  grpc:
+    listen: 0.0.0.0:15015
+
+storage:    
+  mongodb:
+    uri: mongodb://root:root@localhost:27017
+    collectionName: trackers 
+    databaseName: gpsgend

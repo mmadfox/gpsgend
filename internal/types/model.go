@@ -1,6 +1,9 @@
 package types
 
-import "github.com/mmadfox/go-gpsgen/types"
+import (
+	"github.com/mmadfox/go-gpsgen/random"
+	"github.com/mmadfox/go-gpsgen/types"
+)
 
 type Model struct {
 	val string
@@ -16,6 +19,10 @@ func ParseModel(val string) (Model, error) {
 		return Model{}, err
 	}
 	return model, nil
+}
+
+func RandomModel() Model {
+	return Model{val: "Model-" + random.String(8)}
 }
 
 func (m Model) Validate() error {

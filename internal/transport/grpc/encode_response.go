@@ -169,9 +169,9 @@ func encodeMoveToSegmentResponse(nav *types.Navigator, ok bool) (*gpsgendproto.M
 	}, nil
 }
 
-func encodeAddSensorResponse(s *gpsgen.Sensor) (*gpsgendproto.AddSensorResponse, error) {
+func encodeAddSensorResponse(s *types.Sensor) (*gpsgendproto.AddSensorResponse, error) {
 	return &gpsgendproto.AddSensorResponse{
-		SensorId: s.ID(),
+		SensorId: s.ID().String(),
 	}, nil
 }
 

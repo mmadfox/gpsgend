@@ -4,9 +4,9 @@ logger:
   format: text # json
   level: info # 
 
-api:
-  http:
-    addr: 0.0.0.0:1 
+transport:
+  grpc:
+    listen: 0.0.0.0:1 
 
 storage:    
   mongodb:

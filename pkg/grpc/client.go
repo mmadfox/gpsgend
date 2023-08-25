@@ -29,8 +29,8 @@ func (c *Client) ID() uuid.UUID {
 	return c.id
 }
 
-func (c *Client) NewTracker(ctx context.Context, opts NewTrackerOptions) (*Tracker, error) {
-	req, err := encodeNewTrackerRequest(&opts)
+func (c *Client) AddTracker(ctx context.Context, opts *AddTrackerOptions) (*Tracker, error) {
+	req, err := encodeNewTrackerRequest(opts)
 	if err != nil {
 		return nil, err
 	}
@@ -171,7 +171,7 @@ func (c *Client) TrackerState(ctx context.Context, trackerID string) (*gpsgenpro
 	return m, nil
 }
 
-func (c *Client) AddRoutes(ctx context.Context, trackerID string, newRoutes []*gpsgen.Route) error {
+func (c *Client) AddRoutes(ctx context.Context, trackerID string, newRoutes ...*gpsgen.Route) error {
 	if err := validateID(trackerID, "tracker.id"); err != nil {
 		return err
 	}

@@ -10,7 +10,7 @@ import (
 	"github.com/mmadfox/gpsgend/internal/types"
 )
 
-const Cap = 64
+const Cap = 24
 
 type Broker struct {
 	out     chan *gpsgendproto.Event
@@ -35,6 +35,11 @@ func (b *Broker) RegisterClient(id uuid.UUID, c Client) {
 
 func (b *Broker) Unregister(id uuid.UUID) error {
 	return b.hub.Unregister(id)
+}
+
+func (b *Broker) PublishTrackerChanged(ctx context.Context, data []byte) {
+	event := makeTrackerChangedEvent(data)
+	b.send(event)
 }
 
 func (b *Broker) PublishTrackerCreated(ctx context.Context, trackerID types.ID) {

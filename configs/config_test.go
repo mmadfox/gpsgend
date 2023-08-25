@@ -33,7 +33,7 @@ func TestFromFile(t *testing.T) {
 				conf.Service = "gpsgend"
 				conf.Logger.Format = "text"
 				conf.Logger.Level = "info"
-				conf.API.HTTP.Addr = "0.0.0.0:1"
+				conf.Transport.GRPC.Listen = "0.0.0.0:1"
 				conf.Storage.Mongodb.CollectionName = "devices"
 				conf.Storage.Mongodb.DatabaseName = "gpsgend"
 				conf.Storage.Mongodb.URI = "mongodb://127.0.0.1:27017/gpsgend"

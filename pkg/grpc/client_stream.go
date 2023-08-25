@@ -78,8 +78,11 @@ func (c *Client) Watch(ctx context.Context, w Watcher) error {
 				continue
 			}
 			pck, err := gpsgen.PacketFromBytes(payload.TrackerChangedEvent.Packet)
-			if stop := w.OnError(err); stop {
-				return err
+			if err != nil {
+				if stop := w.OnError(err); stop {
+					return err
+				}
+				continue
 			}
 			w.OnPacket(pck)
 		} else {

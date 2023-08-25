@@ -36,6 +36,26 @@ func (m *MockCollection) EXPECT() *MockCollectionMockRecorder {
 	return m.recorder
 }
 
+// BulkWrite mocks base method.
+func (m *MockCollection) BulkWrite(ctx context.Context, models []mongo.WriteModel, opts ...*options.BulkWriteOptions) (*mongo.BulkWriteResult, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, models}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "BulkWrite", varargs...)
+	ret0, _ := ret[0].(*mongo.BulkWriteResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BulkWrite indicates an expected call of BulkWrite.
+func (mr *MockCollectionMockRecorder) BulkWrite(ctx, models interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, models}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BulkWrite", reflect.TypeOf((*MockCollection)(nil).BulkWrite), varargs...)
+}
+
 // DeleteOne mocks base method.
 func (m *MockCollection) DeleteOne(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
 	m.ctrl.T.Helper()
@@ -54,6 +74,26 @@ func (mr *MockCollectionMockRecorder) DeleteOne(ctx, filter interface{}, opts ..
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, filter}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteOne", reflect.TypeOf((*MockCollection)(nil).DeleteOne), varargs...)
+}
+
+// Find mocks base method.
+func (m *MockCollection) Find(ctx context.Context, filter interface{}, opts ...*options.FindOptions) (*mongo.Cursor, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, filter}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Find", varargs...)
+	ret0, _ := ret[0].(*mongo.Cursor)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Find indicates an expected call of Find.
+func (mr *MockCollectionMockRecorder) Find(ctx, filter interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, filter}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Find", reflect.TypeOf((*MockCollection)(nil).Find), varargs...)
 }
 
 // FindOne mocks base method.

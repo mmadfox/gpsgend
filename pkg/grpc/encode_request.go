@@ -7,7 +7,7 @@ import (
 	gpsgendproto "github.com/mmadfox/gpsgend/gen/proto/gpsgend/v1"
 )
 
-func encodeNewTrackerRequest(opts *NewTrackerOptions) (*gpsgendproto.NewTrackerRequest, error) {
+func encodeNewTrackerRequest(opts *AddTrackerOptions) (*gpsgendproto.NewTrackerRequest, error) {
 	var rawProps []byte
 	if len(opts.Props) > 0 {
 		data, err := json.Marshal(opts.Props)
@@ -30,7 +30,7 @@ func encodeNewTrackerRequest(opts *NewTrackerOptions) (*gpsgendproto.NewTrackerR
 		Elevation: &gpsgendproto.Elevation{
 			Min:       opts.Elevation.Min,
 			Max:       opts.Elevation.Max,
-			Amplitude: int64(opts.Elevation.Max),
+			Amplitude: int64(opts.Elevation.Amplitude),
 			Mode:      int64(opts.Elevation.Mode),
 		},
 		Battery: &gpsgendproto.Battery{

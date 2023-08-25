@@ -9,7 +9,7 @@ import (
 )
 
 type Service interface {
-	NewTracker(ctx context.Context, opts NewTrackerOptions) (*Tracker, error)
+	NewTracker(ctx context.Context, opts *NewTrackerOptions) (*Tracker, error)
 	SearchTrackers(ctx context.Context, f Filter) (SearchResult, error)
 	RemoveTracker(ctx context.Context, trackerID types.ID) error
 	UpdateTracker(ctx context.Context, trackerID types.ID, opts UpdateTrackerOptions) error
@@ -31,7 +31,7 @@ type Service interface {
 	MoveToTrack(ctx context.Context, trackerID types.ID, routeIndex, trackIndex int) (types.Navigator, bool, error)
 	MoveToTrackByID(ctx context.Context, trackerID, routeID, trackID types.ID) (types.Navigator, bool, error)
 	MoveToSegment(ctx context.Context, trackerID types.ID, routeIndex, trackIndex, segmentIndex int) (types.Navigator, bool, error)
-	AddSensor(ctx context.Context, trackerID types.ID, sensor *gpsgen.Sensor) error
+	AddSensor(ctx context.Context, trackerID types.ID, sensor *types.Sensor) error
 	RemoveSensor(ctx context.Context, trackerID types.ID, sensorID types.ID) error
 	Sensors(ctx context.Context, trackerID types.ID) ([]*types.Sensor, error)
 	ShutdownTracker(ctx context.Context, trackerID types.ID) error

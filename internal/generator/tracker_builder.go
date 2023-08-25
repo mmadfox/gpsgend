@@ -67,10 +67,7 @@ func (b *TrackerBuilder) CustomID(id types.CustomID) *TrackerBuilder {
 }
 
 func (b *TrackerBuilder) Props(p properties.Properties) *TrackerBuilder {
-	if b.device.props == nil {
-		b.device.props = properties.Make()
-	}
-	b.device.props.Merge(p)
+	b.device.props = p
 	return b
 }
 

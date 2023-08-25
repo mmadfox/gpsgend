@@ -9,4 +9,5 @@ type Processes interface {
 	Attach(d *gpsgen.Device) error
 	Detach(deviceID string) error
 	Lookup(deviceID string) (*gpsgen.Device, bool)
+	Each(func(n int, p *gpsgen.Device) bool)
 }

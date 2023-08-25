@@ -20,6 +20,17 @@ func makeTrackerCreatedEvent(trackerID types.ID) *gpsgendproto.Event {
 	}
 }
 
+func makeTrackerChangedEvent(data []byte) *gpsgendproto.Event {
+	return &gpsgendproto.Event{
+		Kind: gpsgendproto.Event_TRACKER_CHANGED,
+		Payload: &gpsgendproto.Event_TrackerChangedEvent{
+			TrackerChangedEvent: &gpsgendproto.Event_TrackerChanged{
+				Packet: data,
+			},
+		},
+	}
+}
+
 func makeTrackerRemovedEvent(trackerID types.ID) *gpsgendproto.Event {
 	return &gpsgendproto.Event{
 		Kind: gpsgendproto.Event_TRACKER_REMOVED,

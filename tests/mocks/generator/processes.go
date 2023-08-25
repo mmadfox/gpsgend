@@ -62,6 +62,18 @@ func (mr *MockProcessesMockRecorder) Detach(deviceID interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Detach", reflect.TypeOf((*MockProcesses)(nil).Detach), deviceID)
 }
 
+// Each mocks base method.
+func (m *MockProcesses) Each(arg0 func(int, *go_gpsgen.Device) bool) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "Each", arg0)
+}
+
+// Each indicates an expected call of Each.
+func (mr *MockProcessesMockRecorder) Each(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Each", reflect.TypeOf((*MockProcesses)(nil).Each), arg0)
+}
+
 // HasTracker mocks base method.
 func (m *MockProcesses) HasTracker(deviceID string) bool {
 	m.ctrl.T.Helper()

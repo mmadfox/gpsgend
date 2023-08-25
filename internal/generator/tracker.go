@@ -135,7 +135,8 @@ func (t *Tracker) NewProcess() (newProc *gpsgen.Device, err error) {
 	}
 
 	if t.numRoutes == 0 {
-		return nil, ErrTrackerHasNoRoutes
+		return nil, fmt.Errorf("%w, please add routes and try again",
+			ErrTrackerHasNoRoutes)
 	}
 
 	opts := gpsgen.NewDeviceOptions()
@@ -431,6 +432,14 @@ func (t *Tracker) FromSnapshot(snap *TrackerSnapshot) error {
 
 	t.routesSnapshot = snap.Routes
 	t.version = snap.Version
+	t.numRoutes = snap.NumRoutes
+	t.skipOffline = snap.SkipOffline
+	t.props = snap.Props
+	t.updatedAt = time.Unix(snap.UpdatedAt, 0)
+	t.createdAt = time.Unix(snap.CreatedAt, 0)
+	t.runningAt = time.Unix(snap.RunningAt, 0)
+	t.stoppedAt = time.Unix(snap.StoppedAt, 0)
+	t.snapshot = snap.Snapshot
 
 	trackeID, err := types.ParseID(snap.ID)
 	if err != nil {
@@ -507,7 +516,6 @@ func (t *Tracker) FromSnapshot(snap *TrackerSnapshot) error {
 	}
 	t.speed = speed
 
-	t.props = snap.Props
 	if len(snap.Sensors) > 0 {
 		t.sensors = make(map[types.ID]*types.Sensor, len(snap.Sensors))
 		for i := 0; i < len(snap.Sensors); i++ {

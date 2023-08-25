@@ -27,6 +27,7 @@ var (
 	ErrUnloadingTracker        = errors.New("gpsgend/generator: trackers unloading error")
 	ErrSensorAlreadyExists     = errors.New("gpsgned/generator: sensor already exists")
 	ErrNoTracker               = errors.New("gpsgend/generator: no tracker")
+	ErrInvalidParams           = errors.New("gpsgend/generator: invalid params")
 
 	ErrBrokenTracker         = errors.New("gpsgend/generator: broken tracker data")
 	ErrInvalidTrackerVersion = errors.New("gpsgend/generator: invalid tracker version")

@@ -27,6 +27,11 @@ func ParseColor(color string) (Color, error) {
 	return Color{value: rgb, ok: 1}, nil
 }
 
+func RandomColor() Color {
+	rgb := colorful.FastHappyColor()
+	return Color{value: rgb, ok: 1}
+}
+
 func (t Color) Validate() error {
 	if t.ok != 1 {
 		return fmt.Errorf("gpsgend/types: invalid color")

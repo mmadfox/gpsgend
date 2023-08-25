@@ -8,6 +8,9 @@ import (
 )
 
 type Collection interface {
+	Find(ctx context.Context, filter interface{},
+		opts ...*options.FindOptions) (cur *mongo.Cursor, err error)
+
 	FindOne(ctx context.Context, filter interface{},
 		opts ...*options.FindOneOptions) *mongo.SingleResult
 
@@ -19,4 +22,7 @@ type Collection interface {
 
 	UpdateOne(ctx context.Context, filter interface{}, update interface{},
 		opts ...*options.UpdateOptions) (*mongo.UpdateResult, error)
+
+	BulkWrite(ctx context.Context, models []mongo.WriteModel,
+		opts ...*options.BulkWriteOptions) (*mongo.BulkWriteResult, error)
 }

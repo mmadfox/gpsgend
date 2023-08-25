@@ -4,9 +4,10 @@ import (
 	"time"
 
 	"github.com/mmadfox/go-gpsgen/properties"
+	"github.com/mmadfox/go-gpsgen/types"
 )
 
-type NewTrackerOptions struct {
+type AddTrackerOptions struct {
 	Model       string // Model of the device.
 	Color       string // Color of the device.
 	CustomID    string // Custom ID associated with the device.
@@ -14,12 +15,12 @@ type NewTrackerOptions struct {
 	Props       properties.Properties
 	SkipOffline bool // Skip offline mode.
 	Offline     struct {
-		Min int
-		Max int
+		Min int // seconds
+		Max int // seconds
 	}
 	Elevation struct {
-		Min       float64
-		Max       float64
+		Min       float64 // meters
+		Max       float64 // meters
 		Amplitude int
 		Mode      int
 	}
@@ -33,4 +34,19 @@ type NewTrackerOptions struct {
 		Max       float64
 		Amplitude int
 	}
+}
+
+func NewAddTrackerOptions() *AddTrackerOptions {
+	opts := AddTrackerOptions{}
+	opts.Speed.Min = 1
+	opts.Speed.Max = 6
+	opts.Speed.Amplitude = 4
+	opts.Elevation.Amplitude = 8
+	opts.Elevation.Max = 300
+	opts.Elevation.Mode = types.WithSensorRandomMode | types.WithSensorStartMode | types.WithSensorEndMode
+	opts.Battery.Max = 100
+	opts.Battery.ChargeTime = 7 * time.Hour
+	opts.Offline.Min = 5
+	opts.Offline.Max = 60
+	return &opts
 }

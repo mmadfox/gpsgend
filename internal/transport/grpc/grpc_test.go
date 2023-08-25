@@ -20,17 +20,6 @@ type conns struct {
 	broker        *broker.Broker
 }
 
-// func TestMain(m *testing.M) {
-// 	setup()
-// 	go func() {
-// 		br.Run()
-// 	}()
-// 	ret := m.Run()
-// 	teardown()
-// 	br.Close()
-// 	os.Exit(ret)
-// }
-
 func freePort() (int, error) {
 	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
 	if err != nil {

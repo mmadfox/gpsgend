@@ -2,6 +2,7 @@ package generator
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/mmadfox/go-gpsgen"
@@ -36,16 +37,28 @@ func New(
 }
 
 // NewTracker creates a new tracker instance with the given options and inserts it into storage.
-func (g *Generator) NewTracker(ctx context.Context, opts NewTrackerOptions) (*Tracker, error) {
+func (g *Generator) NewTracker(ctx context.Context, opts *NewTrackerOptions) (*Tracker, error) {
+	if opts == nil {
+		return nil, fmt.Errorf("%w: new tracker", ErrInvalidParams)
+	}
+
 	trackerBuilder := NewTrackerBuilder()
 	trackerBuilder.ID(types.NewID())
+	trackerBuilder.Status(types.Stopped)
+	trackerBuilder.SkipOffline(opts.SkipOffline)
 
 	if opts.Model != nil {
 		trackerBuilder.Model(*opts.Model)
+	} else {
+		trackerBuilder.Model(types.RandomModel())
 	}
+
 	if opts.Color != nil {
 		trackerBuilder.Color(*opts.Color)
+	} else {
+		trackerBuilder.Color(types.RandomColor())
 	}
+
 	if opts.UserID != nil {
 		trackerBuilder.CustomID(*opts.UserID)
 	}
@@ -56,12 +69,13 @@ func (g *Generator) NewTracker(ctx context.Context, opts NewTrackerOptions) (*Tr
 		trackerBuilder.Props(*opts.Props)
 	}
 
-	trackerBuilder.SkipOffline(opts.SkipOffline)
+	now := time.Now()
 	trackerBuilder.Offline(opts.Offline)
 	trackerBuilder.Elevation(opts.Elevation)
 	trackerBuilder.Speed(opts.Speed)
 	trackerBuilder.Battery(opts.Battery)
-	trackerBuilder.CreatedAt(time.Now())
+	trackerBuilder.CreatedAt(now)
+	trackerBuilder.UpdatedAt(now)
 
 	newTracker, err := trackerBuilder.Build()
 	if err != nil {
