@@ -22,6 +22,7 @@ import (
 	"github.com/mmadfox/gpsgend/internal/generator"
 	storagemongo "github.com/mmadfox/gpsgend/internal/storage/mongodb"
 	transportgrpc "github.com/mmadfox/gpsgend/internal/transport/grpc"
+	transportws "github.com/mmadfox/gpsgend/internal/transport/websocket"
 	"github.com/oklog/run"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -70,14 +71,12 @@ func main() {
 	go func() {
 		eventBroker.Run()
 	}()
-	defer eventBroker.Close()
 
 	// processes
 	processes := gpsgen.New(conf.GeneratorOpts())
 	go func() {
 		processes.Run()
 	}()
-	defer processes.Close()
 
 	processes.OnError(func(err error) {
 		logger.Error("GPS data generation error", "err", err)
@@ -129,6 +128,16 @@ func main() {
 		}, func(error) {
 			logger.Info("gRPC server stopped")
 			grpcListener.Close()
+		})
+	}
+	{
+		wsAddr := conf.Transport.Websocket.Listen
+		wsServer := transportws.New(wsAddr, eventBroker, logger)
+		g.Add(func() error {
+			logger.Info("Websocket server running", "addr", wsAddr)
+			return wsServer.Listen()
+		}, func(error) {
+			wsServer.Close()
 		})
 	}
 	{

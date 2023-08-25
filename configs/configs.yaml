@@ -18,6 +18,8 @@ eventBroker:
 transport:
   grpc:
     listen: 0.0.0.0:15015
+  websocket:
+    listen: 0.0.0.0:15025
 
 storage:    
   mongodb:

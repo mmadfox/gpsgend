@@ -37,6 +37,10 @@ type Config struct {
 		GRPC struct {
 			Listen string `yaml:"listen"`
 		} `yaml:"grpc"`
+
+		Websocket struct {
+			Listen string `yaml:"listen"`
+		} `yaml:"websocket"`
 	} `yaml:"transport"`
 
 	Storage struct {

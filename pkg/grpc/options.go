@@ -15,12 +15,12 @@ type AddTrackerOptions struct {
 	Props       properties.Properties
 	SkipOffline bool // Skip offline mode.
 	Offline     struct {
-		Min int // seconds
-		Max int // seconds
+		Min int
+		Max int
 	}
 	Elevation struct {
-		Min       float64 // meters
-		Max       float64 // meters
+		Min       float64
+		Max       float64
 		Amplitude int
 		Mode      int
 	}
