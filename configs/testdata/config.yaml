@@ -1,0 +1,15 @@
+service: gpsgend
+
+logger:
+  format: text # json
+  level: info # 
+
+api:
+  http:
+    addr: 0.0.0.0:1 
+
+storage:    
+  mongodb:
+    uri: mongodb://127.0.0.1:27017/gpsgend
+    collectionName: devices  
+    databaseName: gpsgend
