@@ -67,7 +67,7 @@ func main() {
 	}
 
 	// events broker
-	eventBroker := broker.New()
+	eventBroker := broker.New(conf.EventBrokerOpts())
 	go func() {
 		eventBroker.Run()
 	}()
@@ -137,6 +137,7 @@ func main() {
 			logger.Info("Websocket server running", "addr", wsAddr)
 			return wsServer.Listen()
 		}, func(error) {
+			logger.Info("Websocket server stopped")
 			wsServer.Close()
 		})
 	}
@@ -147,8 +148,8 @@ func main() {
 			signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
 			logger.Info("Generator running")
 			select {
-			case sig := <-c:
-				return fmt.Errorf("received signal %s", sig)
+			case <-c:
+				return nil
 			case <-cancelInterrupt:
 				return nil
 			}
@@ -169,7 +170,11 @@ func main() {
 		})
 	}
 
-	logger.Error("Exit", "err", g.Run())
+	if err := g.Run(); err != nil {
+		logger.Error("Exit", "err", err)
+	} else {
+		logger.Info("Exit OK")
+	}
 }
 
 func usageFor(fs *flag.FlagSet, short string) func() {

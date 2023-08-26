@@ -8,7 +8,9 @@ import (
 )
 
 func Test_history_ReadFrom(t *testing.T) {
-	h := newHistory()
+	timePeriod := 5 * time.Minute
+	queueCap := 64
+	h := newHistory(timePeriod, queueCap)
 
 	h.Append(historyItem{
 		data:      []byte("-"),

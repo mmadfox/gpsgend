@@ -10,8 +10,6 @@ import (
 	"github.com/mmadfox/gpsgend/internal/types"
 )
 
-const Cap = 24
-
 type Broker struct {
 	out     chan *gpsgendproto.Event
 	hub     *hub
@@ -20,10 +18,19 @@ type Broker struct {
 	once    sync.Once
 }
 
-func New() *Broker {
+func New(opts *Options) *Broker {
+	if opts == nil {
+		opts = DefaultOptions()
+	} else {
+		opts.sanitize()
+	}
 	b := Broker{
-		out:     make(chan *gpsgendproto.Event, Cap),
-		hub:     newHub(),
+		out: make(chan *gpsgendproto.Event, 1),
+		hub: newHub(
+			opts.HistoryEnable,
+			opts.HistoryTimePeriod,
+			opts.HistoryQueueCapacity,
+		),
 		closeCh: make(chan struct{}),
 	}
 	return &b

@@ -12,8 +12,8 @@ generator:
 eventBroker:
   history:
     enable: true 
-    bufferCapacity: 24
-    period: 60s
+    queueCapacity: 64 
+    timePeriod: 60s
 
 transport:
   grpc:

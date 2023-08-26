@@ -7,6 +7,7 @@ import (
 
 	"github.com/gofiber/contrib/websocket"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/google/uuid"
 	transporthttp "github.com/mmadfox/gpsgend/internal/transport/http"
 )
@@ -44,6 +45,7 @@ func New(
 		DisableStartupMessage: true,
 	})
 
+	app.Use(requestid.New())
 	app.Use(transporthttp.LoggingMiddleware(logger))
 
 	app.Use("/gpsgend/ws", func(c *fiber.Ctx) error {
@@ -57,7 +59,14 @@ func New(
 	app.Get("/gpsgend/ws", websocket.New(func(c *websocket.Conn) {
 		ticker := time.NewTicker(pingPeriod)
 
-		cid := uuid.New()
+		var cid uuid.UUID
+		rid, ok := c.Locals("requestid").(string)
+		if ok {
+			cid, _ = uuid.Parse(rid)
+		} else {
+			cid = uuid.New()
+		}
+
 		cli := newClient()
 		broker.RegisterClient(cid, cli)
 
@@ -91,6 +100,7 @@ func New(
 				logger.Debug("ping message")
 
 				c.SetWriteDeadline(time.Now().Add(writeWait))
+
 				if err := c.WriteMessage(websocket.PingMessage, nil); err != nil {
 					logger.Error("filed to write ping message to websocket", "err", err)
 					return

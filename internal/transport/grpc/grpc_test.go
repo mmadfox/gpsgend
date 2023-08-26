@@ -48,7 +48,7 @@ func setup() (*conns, func()) {
 		panic(err)
 	}
 	con := conns{
-		broker: broker.New(),
+		broker: broker.New(nil),
 	}
 	con.listener = lis
 	grpcServer := grpc.NewServer([]grpc.ServerOption{}...)

@@ -11,26 +11,37 @@ import (
 )
 
 type hub struct {
-	mu      sync.RWMutex
-	clients map[uuid.UUID]Client
-	history *history
+	mu            sync.RWMutex
+	clients       map[uuid.UUID]Client
+	history       *history
+	historyEnable bool
 }
 
-func newHub() *hub {
+func newHub(
+	historyEnable bool,
+	historyTimePeriod time.Duration,
+	historyQueueCap int,
+) *hub {
 	return &hub{
 		clients: make(map[uuid.UUID]Client),
-		history: newHistory(),
+		history: newHistory(
+			historyTimePeriod,
+			historyQueueCap,
+		),
+		historyEnable: historyEnable,
 	}
 }
 
 func (h *hub) Broadcast(e *gpsgendproto.Event) {
 	data, _ := proto.Marshal(e)
 
-	if e.Kind != gpsgendproto.Event_TRACKER_CHANGED {
-		h.history.Append(historyItem{
-			timestamp: time.Now().Unix(),
-			data:      data,
-		})
+	if h.historyEnable {
+		if e.Kind != gpsgendproto.Event_TRACKER_CHANGED {
+			h.history.Append(historyItem{
+				timestamp: time.Now().Unix(),
+				data:      data,
+			})
+		}
 	}
 
 	h.mu.RLock()
@@ -61,9 +72,11 @@ func (h *hub) Register(cid uuid.UUID, cli Client) {
 	h.clients[cid] = cli
 	h.mu.Unlock()
 
-	h.history.ReadFrom(time.Now(), func(i historyItem) {
-		cli.Send(i.data)
-	})
+	if h.historyEnable {
+		h.history.ReadFrom(time.Now(), func(i historyItem) {
+			cli.Send(i.data)
+		})
+	}
 }
 
 func (h *hub) Unregister(cid uuid.UUID) error {

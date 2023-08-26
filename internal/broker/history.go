@@ -5,23 +5,22 @@ import (
 	"time"
 )
 
-const (
-	cap    = 64
-	window = 5 * time.Minute
-)
-
 type history struct {
-	mu   sync.RWMutex
-	data []historyItem
-	head int
-	tail int
+	mu         sync.RWMutex
+	data       []historyItem
+	timePeriod time.Duration
+	queueCap   int
+	head       int
+	tail       int
 }
 
-func newHistory() *history {
+func newHistory(timePeriod time.Duration, queueCap int) *history {
 	return &history{
-		data: make([]historyItem, cap),
-		head: -1,
-		tail: 0,
+		timePeriod: timePeriod,
+		queueCap:   queueCap,
+		data:       make([]historyItem, queueCap),
+		head:       -1,
+		tail:       0,
 	}
 }
 
@@ -44,9 +43,9 @@ func (h *history) Append(item historyItem) {
 func (h *history) ReadFrom(now time.Time, fn func(historyItem)) {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
-	from := now.Add(-window).Unix()
+	from := now.Add(-h.timePeriod).Unix()
 	to := now.Unix()
-	for i := 0; i < cap; i++ {
+	for i := 0; i < h.queueCap; i++ {
 		index := h.mod(i + h.tail)
 		item := h.data[index]
 		if item.timestamp > from && item.timestamp <= to {
@@ -56,5 +55,5 @@ func (h *history) ReadFrom(now time.Time, fn func(historyItem)) {
 }
 
 func (h *history) mod(i int) int {
-	return i % cap
+	return i % h.queueCap
 }

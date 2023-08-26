@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/mmadfox/go-gpsgen"
+	"github.com/mmadfox/gpsgend/internal/broker"
 	"gopkg.in/yaml.v3"
 )
 
@@ -19,9 +20,9 @@ type Config struct {
 
 	EventBroker struct {
 		History struct {
-			Enable         bool          `yaml:"enable"`
-			Period         time.Duration `yaml:"period"`
-			BufferCapacity int           `yaml:"bufferCapacity"`
+			Enable        bool          `yaml:"enable"`
+			TimePeriod    time.Duration `yaml:"timePeriod"`
+			QueueCapacity int           `yaml:"queueCapacity"`
 		} `yaml:"history"`
 	} `yaml:"eventBroker"`
 
@@ -67,6 +68,16 @@ func (c *Config) GeneratorOpts() *gpsgen.Options {
 	if c.Generator.NumWorker > 0 {
 		opts.NumWorkers = c.Generator.NumWorker
 	}
+
+	return opts
+}
+
+func (c *Config) EventBrokerOpts() *broker.Options {
+	opts := broker.DefaultOptions()
+
+	opts.HistoryEnable = c.EventBroker.History.Enable
+	opts.HistoryQueueCapacity = c.EventBroker.History.QueueCapacity
+	opts.HistoryTimePeriod = c.EventBroker.History.TimePeriod
 
 	return opts
 }
