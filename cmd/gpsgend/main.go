@@ -20,6 +20,7 @@ import (
 	gpsgendproto "github.com/mmadfox/gpsgend/gen/proto/gpsgend/v1"
 	"github.com/mmadfox/gpsgend/internal/broker"
 	"github.com/mmadfox/gpsgend/internal/generator"
+	generatorlogging "github.com/mmadfox/gpsgend/internal/logging"
 	storagemongo "github.com/mmadfox/gpsgend/internal/storage/mongodb"
 	transportgrpc "github.com/mmadfox/gpsgend/internal/transport/grpc"
 	transporthttp "github.com/mmadfox/gpsgend/internal/transport/http"
@@ -86,7 +87,7 @@ func main() {
 		eventBroker.PublishTrackerChanged(ctx, b)
 	})
 
-	// generator service
+	// generator
 	gen := generator.New(
 		monogoStorage,
 		processes,
@@ -94,6 +95,9 @@ func main() {
 		mongoQuery,
 		eventBroker,
 	)
+
+	// main service
+	svc := generatorlogging.With(logger)(gen)
 
 	// bootstrap processes
 	if err := gen.Run(ctx); err != nil {
@@ -117,12 +121,13 @@ func main() {
 			}
 			baseServer := grpc.NewServer([]grpc.ServerOption{
 				grpc.ChainUnaryInterceptor(
+					transportgrpc.InterceptorRequestID(),
 					logging.UnaryServerInterceptor(
 						transportgrpc.InterceptorLogger(logger), opts...),
 				),
 			}...)
 			trackerServer := transportgrpc.NewTrackServer(eventBroker)
-			generatorServer := transportgrpc.NewGeneratorServer(gen)
+			generatorServer := transportgrpc.NewGeneratorServer(svc)
 			gpsgendproto.RegisterTrackerServiceServer(baseServer, trackerServer)
 			gpsgendproto.RegisterGeneratorServiceServer(baseServer, generatorServer)
 			return baseServer.Serve(grpcListener)
@@ -133,7 +138,7 @@ func main() {
 	}
 	{
 		httpAddr := conf.Transport.HTTP.Listen
-		httpServer := transporthttp.New(httpAddr, gen, logger)
+		httpServer := transporthttp.New(httpAddr, svc, logger)
 		g.Add(func() error {
 			logger.Info("HTTP server is running", "addr", httpAddr)
 			return httpServer.Listen()
