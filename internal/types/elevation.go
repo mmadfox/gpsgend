@@ -51,6 +51,9 @@ func (e Elevation) Validate() error {
 	if e.min < MinElevationValue {
 		return ErrInvalidMinValue
 	}
+	if e.max == 0 {
+		return ErrInvalidMaxValue
+	}
 	if e.max > MaxElevationValue {
 		return ErrInvalidMaxValue
 	}

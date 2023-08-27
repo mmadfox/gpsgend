@@ -39,6 +39,10 @@ type Config struct {
 			Listen string `yaml:"listen"`
 		} `yaml:"grpc"`
 
+		HTTP struct {
+			Listen string `yaml:"listen"`
+		} `yaml:"http"`
+
 		Websocket struct {
 			Listen string `yaml:"listen"`
 		} `yaml:"websocket"`

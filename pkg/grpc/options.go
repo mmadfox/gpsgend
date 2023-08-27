@@ -50,3 +50,17 @@ func NewAddTrackerOptions() *AddTrackerOptions {
 	opts.Offline.Max = 60
 	return &opts
 }
+
+type UpdateTrackerOptions struct {
+	Model    string
+	Color    string
+	CustomID string
+	Descr    string
+}
+
+func (o *UpdateTrackerOptions) isEmpty() bool {
+	return len(o.Model) == 0 &&
+		len(o.Color) == 0 &&
+		len(o.CustomID) == 0 &&
+		len(o.Descr) == 0
+}

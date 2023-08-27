@@ -40,6 +40,10 @@ func LoggingMiddleware(logger *slog.Logger) fiber.Handler {
 			logger.LogAttrs(ctx, slog.LevelInfo, "Incoming request", attributes...)
 		}
 
+		if err != nil {
+			logger.LogAttrs(ctx, slog.LevelError, err.Error(), attributes...)
+		}
+
 		return err
 	}
 }

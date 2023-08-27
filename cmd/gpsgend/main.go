@@ -22,6 +22,7 @@ import (
 	"github.com/mmadfox/gpsgend/internal/generator"
 	storagemongo "github.com/mmadfox/gpsgend/internal/storage/mongodb"
 	transportgrpc "github.com/mmadfox/gpsgend/internal/transport/grpc"
+	transporthttp "github.com/mmadfox/gpsgend/internal/transport/http"
 	transportws "github.com/mmadfox/gpsgend/internal/transport/websocket"
 	"github.com/oklog/run"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -109,7 +110,7 @@ func main() {
 			os.Exit(1)
 		}
 		g.Add(func() error {
-			logger.Info("gRPC server running", "addr", grpcAddr)
+			logger.Info("gRPC server is running", "addr", grpcAddr)
 
 			opts := []logging.Option{
 				logging.WithLogOnEvents(logging.StartCall, logging.FinishCall),
@@ -131,10 +132,21 @@ func main() {
 		})
 	}
 	{
+		httpAddr := conf.Transport.HTTP.Listen
+		httpServer := transporthttp.New(httpAddr, gen, logger)
+		g.Add(func() error {
+			logger.Info("HTTP server is running", "addr", httpAddr)
+			return httpServer.Listen()
+		}, func(error) {
+			logger.Info("HTTP server stopped")
+			httpServer.Close()
+		})
+	}
+	{
 		wsAddr := conf.Transport.Websocket.Listen
 		wsServer := transportws.New(wsAddr, eventBroker, logger)
 		g.Add(func() error {
-			logger.Info("Websocket server running", "addr", wsAddr)
+			logger.Info("Websocket server is running", "addr", wsAddr)
 			return wsServer.Listen()
 		}, func(error) {
 			logger.Info("Websocket server stopped")
@@ -146,7 +158,7 @@ func main() {
 		g.Add(func() error {
 			c := make(chan os.Signal, 1)
 			signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
-			logger.Info("Generator running")
+			logger.Info("Geodata generator is running")
 			select {
 			case <-c:
 				return nil

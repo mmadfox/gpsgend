@@ -12,10 +12,12 @@ generator:
 eventBroker:
   history:
     enable: true 
-    queueCapacity: 64 
-    timePeriod: 60s
+    queueCapacity: 16        # circular queue capacity for events
+    timePeriod: 60s          # send history for a period to a new client 
 
 transport:
+  http:
+    listen: 0.0.0.0:15005
   grpc:
     listen: 0.0.0.0:15015
   websocket:

@@ -19,6 +19,12 @@ type Battery struct {
 }
 
 func ParseBattery(min float64, max float64, chargeTime time.Duration) (Battery, error) {
+	if max == 0 {
+		max = 100
+	}
+	if chargeTime == 0 {
+		chargeTime = 5 * time.Hour
+	}
 	battery := Battery{
 		min:        min,
 		max:        max,

@@ -2,7 +2,6 @@ package generator
 
 import (
 	"context"
-	"time"
 
 	"github.com/mmadfox/go-gpsgen/properties"
 )
@@ -59,12 +58,12 @@ type TrackerView struct {
 		Max       float64 `json:"max"`
 		Amplitude int     `json:"amplitude"`
 	} `json:"speed"`
-	Props       properties.Properties `json:"props"`
+	Props       properties.Properties `json:"props,omitempty"`
 	NumSensors  int                   `json:"numSensors"`
 	NumRoutes   int                   `json:"numRoutes"`
 	SkipOffline bool                  `json:"skipOffline"`
-	CreatedAt   time.Time             `json:"createdAt"`
-	UpdatedAt   time.Time             `json:"updatedAt"`
-	RunningAt   time.Time             `json:"runningAt"`
-	StoppedAt   time.Time             `json:"stoppedAt"`
+	CreatedAt   int64                 `json:"createdAt"`
+	UpdatedAt   int64                 `json:"updatedAt"`
+	RunningAt   int64                 `json:"runningAt,omitempty"`
+	StoppedAt   int64                 `json:"stoppedAt,omitempty"`
 }

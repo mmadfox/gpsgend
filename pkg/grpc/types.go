@@ -46,20 +46,6 @@ type Tracker struct {
 	StoppedAt   time.Time
 }
 
-type UpdateTrackerOptions struct {
-	Model    string
-	Color    string
-	CustomID string
-	Descr    string
-}
-
-func (o *UpdateTrackerOptions) isEmpty() bool {
-	return len(o.Model) == 0 &&
-		len(o.Color) == 0 &&
-		len(o.CustomID) == 0 &&
-		len(o.Descr) == 0
-}
-
 type Sensor struct {
 	ID        string
 	Name      string

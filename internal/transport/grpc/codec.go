@@ -67,10 +67,10 @@ func trackerView2model(v *generator.TrackerView) (*gpsgendproto.Tracker, error) 
 		NumSensors:  int64(v.NumSensors),
 		NumRoutes:   int64(v.NumRoutes),
 		SkipOffline: v.SkipOffline,
-		CreatedAt:   v.CreatedAt.Unix(),
-		UpdatedAt:   v.UpdatedAt.Unix(),
-		RunningAt:   v.RunningAt.Unix(),
-		StoppedAt:   v.StoppedAt.Unix(),
+		CreatedAt:   v.CreatedAt,
+		UpdatedAt:   v.UpdatedAt,
+		RunningAt:   v.RunningAt,
+		StoppedAt:   v.StoppedAt,
 	}, nil
 }
 
