@@ -6,3 +6,15 @@
 gpsgend - tracker server based on predefined routes (GPX, GeoJSON)
 
 This server can be used in testing and debugging applications or devices dependent on GPS/GLONASS/ETC, allowing you to simulate locations for checking their functionality without actual movement.
+
+## Run server locally
+
+```sh
+$ make app
+```
+
+OR
+
+```sh
+$ docker-compose up --build
+```

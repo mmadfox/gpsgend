@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  gpsgend:
+    hostname: "gpsgend"
+    build:
+      context: .
+      dockerfile: ./deployments/gpsgend.dockerfile
+    ports:
+      - "5005:15005"
+      - "5015:15015"
+      - "5025:15025"
+    depends_on:
+      - mongodb
+    networks:
+      - gpsgend
+
+  mongodb:
+    image: mongo:6-jammy
+    ports:
+      - "27020:27017"
+    networks:
+      - gpsgend
+
+  gpsgend-bootstrap:
+    build:
+      context: .
+      dockerfile: ./deployments/gpsgend-bootstrap.dockerfile
+    depends_on:
+      - gpsgend
+      - mongodb
+    networks:
+      - gpsgend
+
+volumes:
+  data:
+
+networks:
+  gpsgend:
+    driver: bridge

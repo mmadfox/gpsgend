@@ -90,7 +90,7 @@ func FromFile(filename string) (*Config, error) {
 	conf := new(Config)
 	data, err := os.ReadFile(filename)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read gpsgend config: error %w", err)
+		return nil, fmt.Errorf("failed to read gpsgend config [%s]: error %w", filename, err)
 	}
 	if err := yaml.Unmarshal(data, conf); err != nil {
 		return nil, err

@@ -1,0 +1,30 @@
+service: gpsgend
+
+logger:
+  format: text # json
+  level: info # info, warn, debug, error
+
+generator:
+  flushInterval: 3s
+  packetSize: 256
+  numWorker: 4  
+
+eventBroker:
+  history:
+    enable: true 
+    queueCapacity: 16        # circular queue capacity for events
+    timePeriod: 60s          # send history for a period to a new client 
+
+transport:
+  http:
+    listen: 0.0.0.0:15005
+  grpc:
+    listen: 0.0.0.0:15015
+  websocket:
+    listen: 0.0.0.0:15025
+
+storage:    
+  mongodb:
+    uri: mongodb://mongodb:27017
+    collectionName: trackers 
+    databaseName: gpsgend

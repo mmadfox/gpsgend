@@ -1,8 +1,20 @@
 
+.PHONY: docker-gpsgend
+docker-gpsgend:
+	@docker build -t github.com/mmadfox/gpsgend/mock:latest -f \
+	    ./docker/gpsgend.dockerfile  .
+
 .PHONY: docker-mock
 docker-mock:
 	@docker build -t github.com/mmadfox/gpsgend/mock:latest -f    \
            ./docker/mockgen.dockerfile .
+
+.PHONY app:
+app:
+	@docker-compose up --build 
+
+clean:
+	@docker-compose down	
 
 .PHONY: mock
 mocks: docker-mock
