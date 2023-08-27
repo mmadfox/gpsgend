@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -196,4 +197,56 @@ func decodeAddSensorRequest(c *fiber.Ctx) (*types.Sensor, error) {
 		return nil, fmt.Errorf("%w: %v", errBadRequest, err)
 	}
 	return types.NewSensor(req.Name, req.Min, req.Max, req.Amplitude, req.Mode)
+}
+
+func decodeSearchTrackersRequest(c *fiber.Ctx) (generator.Filter, error) {
+	q := c.Queries()
+	filter := generator.Filter{}
+
+	if limitStr, ok := q["limit"]; ok {
+		limit, err := strconv.ParseInt(limitStr, 10, 64)
+		if err != nil {
+			return filter, fmt.Errorf("%w: failed to decode limit param: %v",
+				errBadRequest, err)
+		}
+		filter.Limit = limit
+	} else {
+		filter.Limit = 50
+	}
+
+	if offsetStr, ok := q["offset"]; ok {
+		offset, err := strconv.ParseInt(offsetStr, 10, 64)
+		if err != nil {
+			return filter, fmt.Errorf("%w: failed to decode offset param: %v",
+				errBadRequest, err)
+		}
+		filter.Offset = offset
+	}
+
+	if trackerIDsStr, ok := q["id"]; ok {
+		rawIDs := strings.Split(trackerIDsStr, ",")
+		filter.TrackerIDs = make([]string, 0, len(rawIDs))
+		for i := 0; i < len(rawIDs); i++ {
+			id := strings.TrimSpace(rawIDs[i])
+			if len(id) == 0 {
+				return filter, fmt.Errorf("%w: failed to decode id param", errBadRequest)
+			}
+			filter.TrackerIDs = append(filter.TrackerIDs, id)
+		}
+	}
+
+	if statusStr, ok := q["status"]; ok {
+		status, err := strconv.Atoi(statusStr)
+		if err != nil {
+			return filter, fmt.Errorf("%w: failed to decode status param: %v",
+				errBadRequest, err)
+		}
+		filter.Status = status
+	}
+
+	if term, ok := q["term"]; ok {
+		filter.Term = strings.TrimSpace(term)
+	}
+
+	return filter, nil
 }

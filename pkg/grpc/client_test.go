@@ -106,9 +106,7 @@ func TestClient_SearchTrackers(t *testing.T) {
 			name: "should not return error when all params are valid",
 			args: args{
 				f: gpsgendclient.Filter{
-					Model:  "model",
-					Descr:  "desct",
-					Color:  "color",
+					Term:   "term",
 					Status: 1,
 					Limit:  1,
 					Offset: 1,
@@ -119,8 +117,6 @@ func TestClient_SearchTrackers(t *testing.T) {
 					req, ok := r.(*gpsgendproto.SearchTrackersRequest)
 					require.True(t, ok)
 					require.NotNil(t, req.Filter)
-					require.Equal(t, f.Model, req.Filter.Model)
-					require.Equal(t, f.Color, req.Filter.Color)
 				}
 				generatorHandler.want = expectedTracker
 			},

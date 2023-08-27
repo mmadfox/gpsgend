@@ -395,7 +395,7 @@ func (t *Tracker) TakeSnapshot(snap *TrackerSnapshot) {
 	snap.Elevation.Mode = int(t.Elevation().Mode())
 	snap.Battery.Min = t.battery.Min()
 	snap.Battery.Max = t.battery.Max()
-	snap.Battery.ChargeTime = t.Battery().ChargeTime()
+	snap.Battery.ChargeTime = t.Battery().ChargeTime().Seconds()
 	snap.Speed.Min = t.speed.Min()
 	snap.Speed.Max = t.speed.Max()
 	snap.Speed.Amplitude = t.speed.Amplitude()
@@ -504,7 +504,10 @@ func (t *Tracker) FromSnapshot(snap *TrackerSnapshot) error {
 	}
 	t.elevation = elevation
 
-	battery, err := types.ParseBattery(snap.Battery.Min, snap.Battery.Max, snap.Battery.ChargeTime)
+	battery, err := types.ParseBattery(
+		snap.Battery.Min,
+		snap.Battery.Max,
+		time.Duration(snap.Battery.ChargeTime)*time.Second)
 	if err != nil {
 		return fmt.Errorf("%w: can't parse type tracker.battery", err)
 	}

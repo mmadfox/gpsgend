@@ -19,7 +19,16 @@ func EnsureIndexes(ctx context.Context, c *mongo.Collection) error {
 	indexes = append(indexes, mongo.IndexModel{
 		Keys: bson.M{"status.id": 1},
 	})
-	// TODO:
+	indexes = append(indexes, mongo.IndexModel{
+		Keys: bson.M{"created_at": -1},
+	})
+	indexes = append(indexes, mongo.IndexModel{
+		Keys: bson.D{
+			{Key: "model", Value: "text"},
+			{Key: "description", Value: "text"},
+			{Key: "color", Value: "text"},
+		},
+	})
 	opts := options.CreateIndexes().SetMaxTime(10 * time.Second)
 	if _, err := c.Indexes().CreateMany(
 		ctx,

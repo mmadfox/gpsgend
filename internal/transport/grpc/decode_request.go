@@ -114,12 +114,11 @@ func decodeSearchTrackersRequest(req *gpsgendproto.SearchTrackersRequest) (gener
 		return filter, nil
 	}
 	return generator.Filter{
-		Model:  req.Filter.Model,
-		Descr:  req.Filter.Descr,
-		Color:  req.Filter.Color,
-		Status: int(req.Filter.Status),
-		Limit:  req.Filter.Limit,
-		Offset: req.Filter.Offset,
+		Term:       req.Filter.Term,
+		TrackerIDs: req.Filter.TrackerId,
+		Status:     int(req.Filter.Status),
+		Limit:      req.Filter.Limit,
+		Offset:     req.Filter.Offset,
 	}, nil
 }
 

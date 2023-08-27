@@ -287,7 +287,8 @@ message SearchTrackersRequest {
 
 message SearchTrackersResponse {
      repeated Tracker trackers = 1;
-     Error error = 2;
+     int64 next = 2;
+     Error error = 3;
 }
 
 message NewTrackerRequest {

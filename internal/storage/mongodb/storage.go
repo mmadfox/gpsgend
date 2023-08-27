@@ -98,7 +98,8 @@ func (s *Storage) Update(ctx context.Context, t *generator.Tracker) error {
 		"version":      doc.Version,
 	}
 	doc.Version += 1
-	doc.ID = "" // reset for update
+	// reset for updates
+	doc.ID = ""
 
 	update := bson.M{"$set": doc}
 	res, err := s.collection.UpdateOne(ctx, filter, update)

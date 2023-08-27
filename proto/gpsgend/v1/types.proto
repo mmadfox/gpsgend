@@ -31,12 +31,11 @@ message Error {
 }
 
 message Filter {
-    string model = 1;
-	string descr = 2;
-	string color = 3;
-	int64 status = 4;
-	int64 limit = 5; 
-	int64 offset = 6;
+    repeated string tracker_id = 1;
+    string term = 2;
+	int64 status = 3;
+	int64 limit = 4; 
+	int64 offset = 5;
 }
 
 message Status {

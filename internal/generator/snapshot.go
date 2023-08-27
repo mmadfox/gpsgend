@@ -1,8 +1,6 @@
 package generator
 
 import (
-	"time"
-
 	"github.com/mmadfox/go-gpsgen/properties"
 )
 
@@ -27,9 +25,9 @@ type TrackerSnapshot struct {
 		Mode      int     `json:"mode" bson:"mode"`
 	} `json:"elevation" bson:"elevation"`
 	Battery struct {
-		Min        float64       `json:"min" bson:"min"`
-		Max        float64       `json:"max" bson:"max"`
-		ChargeTime time.Duration `json:"chargeTime" bson:"charge_time"`
+		Min        float64 `json:"min" bson:"min"`
+		Max        float64 `json:"max" bson:"max"`
+		ChargeTime float64 `json:"chargeTime" bson:"charge_time"`
 	} `json:"battery" bson:"battery"`
 	Speed struct {
 		Min       float64 `json:"min" bson:"min"`

@@ -39,6 +39,7 @@ func New(addr string, gen generator.Service, logger *slog.Logger) *Server {
 	app.Use(pprof.New(pprof.Config{Prefix: "/debug"}))
 	app.Use(LoggingMiddleware(logger))
 
+	app.Get(v1("/trackers"), srv.searchTrackers)
 	app.Post(v1("/trackers"), srv.addTracker)
 	app.Delete(v1("/trackers/:trackerID"), srv.removeTracker)
 	app.Patch(v1("/trackers/:trackerID"), srv.updateTracker)
@@ -81,6 +82,20 @@ func (s *Server) Close() error {
 
 func v1(s string) string {
 	return "/gpsgend/v1" + s
+}
+
+func (s *Server) searchTrackers(c *fiber.Ctx) error {
+	filter, err := decodeSearchTrackersRequest(c)
+	if err != nil {
+		return err
+	}
+
+	result, err := s.generator.SearchTrackers(c.Context(), filter)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(result)
 }
 
 func (s *Server) addTracker(c *fiber.Ctx) error {

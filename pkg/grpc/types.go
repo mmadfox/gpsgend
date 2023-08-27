@@ -55,12 +55,11 @@ type Sensor struct {
 }
 
 type Filter struct {
-	Model  string
-	Descr  string
-	Color  string
-	Status int
-	Limit  int64
-	Offset int64
+	TrackerIDs []string
+	Term       string
+	Status     int
+	Limit      int64
+	Offset     int64
 }
 
 type Navigator struct {
@@ -78,4 +77,5 @@ type Navigator struct {
 
 type SearchResult struct {
 	Trackers []*Tracker
+	Next     int64
 }

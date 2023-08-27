@@ -47,7 +47,6 @@ func (l logging) NewTracker(ctx context.Context, opts *generator.NewTrackerOptio
 func (l logging) SearchTrackers(ctx context.Context, f generator.Filter) (res generator.SearchResult, err error) {
 	call := "Call generator.SearchTrackers"
 	attrs := newAttrs(ctx)
-	attrs = append(attrs, "filter", f)
 	params := slog.Group("params", attrs...)
 
 	defer func(start time.Time) {

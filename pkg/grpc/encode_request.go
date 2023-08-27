@@ -49,12 +49,11 @@ func encodeNewTrackerRequest(opts *AddTrackerOptions) (*gpsgendproto.NewTrackerR
 func encodeSearchTrackersRequest(f *Filter) *gpsgendproto.SearchTrackersRequest {
 	return &gpsgendproto.SearchTrackersRequest{
 		Filter: &gpsgendproto.Filter{
-			Model:  f.Model,
-			Descr:  f.Descr,
-			Color:  f.Color,
-			Status: int64(f.Status),
-			Limit:  f.Limit,
-			Offset: f.Offset,
+			TrackerId: f.TrackerIDs,
+			Term:      f.Term,
+			Status:    int64(f.Status),
+			Limit:     f.Limit,
+			Offset:    f.Offset,
 		},
 	}
 }

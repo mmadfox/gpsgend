@@ -36,6 +36,7 @@ var (
 	ErrStorageUpdate = errors.New("gpsgend/generator: update in storage")
 	ErrStorageFind   = errors.New("gpsgned/generator: find in storage")
 	ErrStorageDelete = errors.New("gpsgned/generator: delete from storage")
+	ErrStorageSearch = errors.New("gpsgned/generator: search in storage")
 )
 
 func errTrackerOff(t *Tracker) error {

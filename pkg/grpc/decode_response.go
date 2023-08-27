@@ -20,6 +20,7 @@ func decodeSearchTrackersResponse(resp *gpsgendproto.SearchTrackersResponse) (Se
 	}
 	sr := SearchResult{
 		Trackers: make([]*Tracker, len(resp.Trackers)),
+		Next:     resp.Next,
 	}
 	for i := 0; i < len(resp.Trackers); i++ {
 		trk, err := DecodeTracker(resp.Trackers[i])

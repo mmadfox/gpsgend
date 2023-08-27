@@ -58,15 +58,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	db := mongoConn.Database(conf.Storage.Mongodb.DatabaseName)
-	col := db.Collection(conf.Storage.Mongodb.CollectionName)
-	monogoStorage := storagemongo.New(col)
-	mongoBootstraper := storagemongo.NewBootstraper(col)
-	mongoQuery := storagemongo.NewQuery(col)
-	if err := storagemongo.EnsureIndexes(ctx, col); err != nil {
-		logger.Error("Failed to create indexes in mongo", "err", err)
-		os.Exit(1)
-	}
+	mongoStorage, mongoQuery, mongoBootstraper := setupStorage(ctx, mongoConn, conf, logger)
 
 	// events broker
 	eventBroker := broker.New(conf.EventBrokerOpts())
@@ -89,7 +81,7 @@ func main() {
 
 	// generator
 	gen := generator.New(
-		monogoStorage,
+		mongoStorage,
 		processes,
 		mongoBootstraper,
 		mongoQuery,
@@ -214,6 +206,28 @@ func setupMongodb(ctx context.Context, uri string) (*mongo.Client, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	return mongo.Connect(ctx, opts)
+}
+
+func setupStorage(
+	ctx context.Context,
+	cli *mongo.Client,
+	conf *config.Config,
+	logger *slog.Logger,
+) (
+	generator.Storage,
+	generator.Query,
+	generator.Bootstraper,
+) {
+	db := cli.Database(conf.Storage.Mongodb.DatabaseName)
+	col := db.Collection(conf.Storage.Mongodb.CollectionName)
+	monogoStorage := storagemongo.New(col)
+	mongoBootstraper := storagemongo.NewBootstraper(col)
+	mongoQuery := storagemongo.NewQuery(col)
+	if err := storagemongo.EnsureIndexes(ctx, col); err != nil {
+		logger.Error("Failed to create indexes in mongo", "err", err)
+		os.Exit(1)
+	}
+	return monogoStorage, mongoQuery, mongoBootstraper
 }
 
 func setupLogger(conf *config.Config) *slog.Logger {

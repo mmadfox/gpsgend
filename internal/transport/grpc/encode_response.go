@@ -25,7 +25,7 @@ func encodeNewTrackerResponse(t *generator.Tracker) (*gpsgendproto.NewTrackerRes
 func encodeSearchTrackersResponse(result generator.SearchResult) (*gpsgendproto.SearchTrackersResponse, error) {
 	trackers := make([]*gpsgendproto.Tracker, len(result.Trackers))
 	for i := 0; i < len(result.Trackers); i++ {
-		model, err := trackerView2model(result.Trackers[i])
+		model, err := trackerView2model(&result.Trackers[i])
 		if err != nil {
 			return nil, err
 		}
@@ -33,6 +33,7 @@ func encodeSearchTrackersResponse(result generator.SearchResult) (*gpsgendproto.
 	}
 	return &gpsgendproto.SearchTrackersResponse{
 		Trackers: trackers,
+		Next:     result.Next,
 	}, nil
 }
 
