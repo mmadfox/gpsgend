@@ -33,7 +33,9 @@ func encodeTrackerStateResponse(c *fiber.Ctx, state *gpsgenproto.Device) error {
 	if err != nil {
 		return err
 	}
-	return c.JSON(d)
+	c.Set(fiber.HeaderContentType, fiber.MIMEApplicationJSONCharsetUTF8)
+	_, err = c.Write(d)
+	return err
 }
 
 func encodeSuccessResponse(c *fiber.Ctx) error {
@@ -49,6 +51,7 @@ func encodeRoutes(c *fiber.Ctx, routes []*gpsgen.Route) error {
 	if err != nil {
 		return err
 	}
+	c.Set(fiber.HeaderContentType, fiber.MIMEApplicationJSONCharsetUTF8)
 	_, err = c.Write(data)
 	return err
 }
@@ -58,6 +61,7 @@ func encodeRoute(c *fiber.Ctx, route *gpsgen.Route) error {
 	if err != nil {
 		return err
 	}
+	c.Set(fiber.HeaderContentType, fiber.MIMEApplicationJSONCharsetUTF8)
 	_, err = c.Write(data)
 	return err
 }

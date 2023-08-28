@@ -184,6 +184,7 @@ func (t *Tracker) NewProcess() (newProc *gpsgen.Device, err error) {
 
 	t.status = types.Running
 	t.runningAt = time.Now()
+	t.stoppedAt = time.Time{}
 	return
 }
 
@@ -301,15 +302,15 @@ func (t *Tracker) RemoveRoute(routeID types.ID) error {
 		return nil
 	}
 
-	return fmt.Errorf("%w Tracker{ID:%s}",
+	return fmt.Errorf("%w Tracker{%s}",
 		ErrRouteNotFound, t.id)
 }
 
 // RouteAt returns the route at the specified index.
 func (t *Tracker) RouteAt(index int) (*gpsgen.Route, error) {
 	if index <= 0 || index > t.numRoutes {
-		return nil, fmt.Errorf("%w by index for Tracker{ID:%s}",
-			ErrRouteNotFound, t.id)
+		return nil, fmt.Errorf("%w by index [%d] for Tracker{%s}",
+			ErrRouteNotFound, index, t.id)
 	}
 
 	routes, err := gpsgen.DecodeRoutes(t.routesSnapshot)
@@ -339,8 +340,8 @@ func (t *Tracker) RouteByID(routeID types.ID) (route *gpsgen.Route, err error) {
 		}
 	}
 	if route == nil {
-		err = fmt.Errorf("%w by id Tracker{ID:%s}",
-			ErrRouteNotFound, t.id)
+		err = fmt.Errorf("%w by id [%s] for Tracker{%s}",
+			ErrRouteNotFound, routeID, t.id)
 	}
 	return
 }
@@ -650,7 +651,7 @@ func (t *Tracker) RemoveSensorByID(id types.ID) error {
 
 	_, ok := t.sensors[id]
 	if !ok {
-		return fmt.Errorf("%w for Tracker{ID:%s}", ErrSensorNotFound, t.id)
+		return fmt.Errorf("%w for Tracker{%s}", ErrSensorNotFound, t.id)
 	}
 
 	delete(t.sensors, id)
@@ -675,6 +676,8 @@ func (t *Tracker) Sensors() []*types.Sensor {
 func (t *Tracker) ResetStatus() {
 	t.status = types.Stopped
 	t.updatedAt = time.Now()
+	t.runningAt = time.Time{}
+	t.stoppedAt = time.Time{}
 }
 
 // ShutdownProcess saves the current GPS device state and pauses the tracker's process.
@@ -727,4 +730,14 @@ func (t *Tracker) makeTrackerSensorsFromConf() ([]*gpsgen.Sensor, error) {
 		sensors = append(sensors, sensor)
 	}
 	return sensors, nil
+}
+
+func (t *Tracker) run() {
+	t.runningAt = time.Now()
+	t.updatedAt = time.Now()
+	if t.status == types.Running {
+		return
+	}
+	t.status = types.Running
+	t.stoppedAt = time.Time{}
 }

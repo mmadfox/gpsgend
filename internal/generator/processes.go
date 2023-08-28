@@ -8,6 +8,7 @@ type Processes interface {
 	HasTracker(deviceID string) bool
 	Attach(d *gpsgen.Device) error
 	Detach(deviceID string) error
+	NumDevices() int
 	Lookup(deviceID string) (*gpsgen.Device, bool)
 	Each(func(n int, p *gpsgen.Device) bool)
 }

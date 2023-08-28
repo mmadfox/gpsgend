@@ -2,11 +2,13 @@ package mongodb
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/mmadfox/gpsgend/internal/generator"
 	"github.com/mmadfox/gpsgend/internal/types"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 const (
@@ -51,6 +53,10 @@ func (s *Storage) Find(ctx context.Context, trackerID types.ID) (*generator.Trac
 	filter := bson.M{fieldTrackerID: trackerID.String()}
 	result := s.collection.FindOne(ctx, filter)
 	if result.Err() != nil {
+		if errors.Is(result.Err(), mongo.ErrNoDocuments) {
+			return nil, fmt.Errorf("%w: %v",
+				generator.ErrTrackerNotFound, result.Err())
+		}
 		return nil, fmt.Errorf("%w: %v",
 			generator.ErrStorageFind, result.Err())
 	}

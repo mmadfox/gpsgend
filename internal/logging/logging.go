@@ -29,7 +29,7 @@ func With(logger *slog.Logger) middleware.Middleware {
 }
 
 func (l logging) NewTracker(ctx context.Context, opts *generator.NewTrackerOptions) (trk *generator.Tracker, err error) {
-	call := "Call generator.NewTracker"
+	call := "call generator.NewTracker"
 	attrs := newAttrs(ctx)
 	params := slog.Group("params", attrs...)
 
@@ -45,7 +45,7 @@ func (l logging) NewTracker(ctx context.Context, opts *generator.NewTrackerOptio
 }
 
 func (l logging) SearchTrackers(ctx context.Context, f generator.Filter) (res generator.SearchResult, err error) {
-	call := "Call generator.SearchTrackers"
+	call := "call generator.SearchTrackers"
 	attrs := newAttrs(ctx)
 	params := slog.Group("params", attrs...)
 
@@ -61,7 +61,7 @@ func (l logging) SearchTrackers(ctx context.Context, f generator.Filter) (res ge
 }
 
 func (l logging) RemoveTracker(ctx context.Context, trackerID types.ID) (err error) {
-	call := "Call generator.RemoveTracker"
+	call := "call generator.RemoveTracker"
 	attrs := newAttrs(ctx)
 	attrs = append(attrs, "trackerID", trackerID)
 	params := slog.Group("params", attrs...)
@@ -78,7 +78,7 @@ func (l logging) RemoveTracker(ctx context.Context, trackerID types.ID) (err err
 }
 
 func (l logging) UpdateTracker(ctx context.Context, trackerID types.ID, opts generator.UpdateTrackerOptions) (err error) {
-	call := "Call generator.UpdateTracker"
+	call := "call generator.UpdateTracker"
 	attrs := newAttrs(ctx)
 	attrs = append(attrs, "trackerID", trackerID)
 	params := slog.Group("params", attrs...)
@@ -95,7 +95,7 @@ func (l logging) UpdateTracker(ctx context.Context, trackerID types.ID, opts gen
 }
 
 func (l logging) FindTracker(ctx context.Context, trackerID types.ID) (trk *generator.Tracker, err error) {
-	call := "Call generator.FindTracker"
+	call := "call generator.FindTracker"
 	attrs := newAttrs(ctx)
 	attrs = append(attrs, "trackerID", trackerID)
 	params := slog.Group("params", attrs...)
@@ -112,7 +112,7 @@ func (l logging) FindTracker(ctx context.Context, trackerID types.ID) (trk *gene
 }
 
 func (l logging) StartTracker(ctx context.Context, trackerID types.ID) (err error) {
-	call := "Call generator.StartTracker"
+	call := "call generator.StartTracker"
 	attrs := newAttrs(ctx)
 	attrs = append(attrs, "trackerID", trackerID)
 	params := slog.Group("params", attrs...)
@@ -129,7 +129,7 @@ func (l logging) StartTracker(ctx context.Context, trackerID types.ID) (err erro
 }
 
 func (l logging) StopTracker(ctx context.Context, trackerID types.ID) (err error) {
-	call := "Call generator.StopTracker"
+	call := "call generator.StopTracker"
 	attrs := newAttrs(ctx)
 	attrs = append(attrs, "trackerID", trackerID)
 	params := slog.Group("params", attrs...)
@@ -146,7 +146,7 @@ func (l logging) StopTracker(ctx context.Context, trackerID types.ID) (err error
 }
 
 func (l logging) TrackerState(ctx context.Context, trackerID types.ID) (state *proto.Device, err error) {
-	call := "Call generator.TrackerState"
+	call := "call generator.TrackerState"
 	attrs := newAttrs(ctx)
 	attrs = append(attrs, "trackerID", trackerID)
 	params := slog.Group("params", attrs...)
@@ -163,7 +163,7 @@ func (l logging) TrackerState(ctx context.Context, trackerID types.ID) (state *p
 }
 
 func (l logging) AddRoutes(ctx context.Context, trackerID types.ID, newRoutes []*gpsgen.Route) (err error) {
-	call := "Call generator.AddRoutes"
+	call := "call generator.AddRoutes"
 	attrs := newAttrs(ctx)
 	attrs = append(attrs, "trackerID", trackerID)
 	attrs = append(attrs, "routes", len(newRoutes))
@@ -181,7 +181,7 @@ func (l logging) AddRoutes(ctx context.Context, trackerID types.ID, newRoutes []
 }
 
 func (l logging) RemoveRoute(ctx context.Context, trackerID types.ID, routeID types.ID) (err error) {
-	call := "Call generator.RemoveRoute"
+	call := "call generator.RemoveRoute"
 	attrs := newAttrs(ctx)
 	attrs = append(attrs, "trackerID", trackerID)
 	attrs = append(attrs, "routeID", routeID)
@@ -199,7 +199,7 @@ func (l logging) RemoveRoute(ctx context.Context, trackerID types.ID, routeID ty
 }
 
 func (l logging) Routes(ctx context.Context, trackerID types.ID) (routes []*gpsgen.Route, err error) {
-	call := "Call generator.Routes"
+	call := "call generator.Routes"
 	attrs := newAttrs(ctx)
 	attrs = append(attrs, "trackerID", trackerID)
 	params := slog.Group("params", attrs...)
@@ -216,7 +216,7 @@ func (l logging) Routes(ctx context.Context, trackerID types.ID) (routes []*gpsg
 }
 
 func (l logging) RouteAt(ctx context.Context, trackerID types.ID, routeIndex int) (route *gpsgen.Route, err error) {
-	call := "Call generator.RouteAt"
+	call := "call generator.RouteAt"
 	attrs := newAttrs(ctx)
 	attrs = append(attrs, "trackerID", trackerID)
 	attrs = append(attrs, "routeIndex", routeIndex)
@@ -234,7 +234,7 @@ func (l logging) RouteAt(ctx context.Context, trackerID types.ID, routeIndex int
 }
 
 func (l logging) RouteByID(ctx context.Context, trackerID, routeID types.ID) (route *gpsgen.Route, err error) {
-	call := "Call generator.RouteByID"
+	call := "call generator.RouteByID"
 	attrs := newAttrs(ctx)
 	attrs = append(attrs, "trackerID", trackerID)
 	attrs = append(attrs, "routeID", routeID)
@@ -252,7 +252,7 @@ func (l logging) RouteByID(ctx context.Context, trackerID, routeID types.ID) (ro
 }
 
 func (l logging) ResetRoutes(ctx context.Context, trackerID types.ID) (ok bool, err error) {
-	call := "Call generator.ResetRoutes"
+	call := "call generator.ResetRoutes"
 	attrs := newAttrs(ctx)
 	attrs = append(attrs, "trackerID", trackerID)
 	params := slog.Group("params", attrs...)
@@ -269,7 +269,7 @@ func (l logging) ResetRoutes(ctx context.Context, trackerID types.ID) (ok bool, 
 }
 
 func (l logging) ResetNavigator(ctx context.Context, trackerID types.ID) (err error) {
-	call := "Call generator.ResetNavigator"
+	call := "call generator.ResetNavigator"
 	attrs := newAttrs(ctx)
 	attrs = append(attrs, "trackerID", trackerID)
 	params := slog.Group("params", attrs...)
@@ -286,7 +286,7 @@ func (l logging) ResetNavigator(ctx context.Context, trackerID types.ID) (err er
 }
 
 func (l logging) ToNextRoute(ctx context.Context, trackerID types.ID) (nav types.Navigator, ok bool, err error) {
-	call := "Call generator.ToNextRoute"
+	call := "call generator.ToNextRoute"
 	attrs := newAttrs(ctx)
 	attrs = append(attrs, "trackerID", trackerID)
 	params := slog.Group("params", attrs...)
@@ -303,7 +303,7 @@ func (l logging) ToNextRoute(ctx context.Context, trackerID types.ID) (nav types
 }
 
 func (l logging) ToPrevRoute(ctx context.Context, trackerID types.ID) (nav types.Navigator, ok bool, err error) {
-	call := "Call generator.ToPrevRoute"
+	call := "call generator.ToPrevRoute"
 	attrs := newAttrs(ctx)
 	attrs = append(attrs, "trackerID", trackerID)
 	params := slog.Group("params", attrs...)
@@ -320,7 +320,7 @@ func (l logging) ToPrevRoute(ctx context.Context, trackerID types.ID) (nav types
 }
 
 func (l logging) MoveToRoute(ctx context.Context, trackerID types.ID, routeIndex int) (nav types.Navigator, ok bool, err error) {
-	call := "Call generator.MoveToRoute"
+	call := "call generator.MoveToRoute"
 	attrs := newAttrs(ctx)
 	attrs = append(attrs, "trackerID", trackerID)
 	attrs = append(attrs, "routeIndex", routeIndex)
@@ -338,7 +338,7 @@ func (l logging) MoveToRoute(ctx context.Context, trackerID types.ID, routeIndex
 }
 
 func (l logging) MoveToRouteByID(ctx context.Context, trackerID types.ID, routeID types.ID) (nav types.Navigator, ok bool, err error) {
-	call := "Call generator.MoveToRouteByID"
+	call := "call generator.MoveToRouteByID"
 	attrs := newAttrs(ctx)
 	attrs = append(attrs, "trackerID", trackerID)
 	attrs = append(attrs, "routeID", routeID)
@@ -356,7 +356,7 @@ func (l logging) MoveToRouteByID(ctx context.Context, trackerID types.ID, routeI
 }
 
 func (l logging) MoveToTrack(ctx context.Context, trackerID types.ID, routeIndex, trackIndex int) (nav types.Navigator, ok bool, err error) {
-	call := "Call generator.MoveToTrack"
+	call := "call generator.MoveToTrack"
 	attrs := newAttrs(ctx)
 	attrs = append(attrs, "trackerID", trackerID)
 	attrs = append(attrs, "routeIndex", routeIndex)
@@ -375,7 +375,7 @@ func (l logging) MoveToTrack(ctx context.Context, trackerID types.ID, routeIndex
 }
 
 func (l logging) MoveToTrackByID(ctx context.Context, trackerID, routeID, trackID types.ID) (nav types.Navigator, ok bool, err error) {
-	call := "Call generator.MoveToTrackByID"
+	call := "call generator.MoveToTrackByID"
 	attrs := newAttrs(ctx)
 	attrs = append(attrs, "trackerID", trackerID)
 	attrs = append(attrs, "routeID", routeID)
@@ -394,7 +394,7 @@ func (l logging) MoveToTrackByID(ctx context.Context, trackerID, routeID, trackI
 }
 
 func (l logging) MoveToSegment(ctx context.Context, trackerID types.ID, routeIndex, trackIndex, segmentIndex int) (nav types.Navigator, ok bool, err error) {
-	call := "Call generator.MoveToSegment"
+	call := "call generator.MoveToSegment"
 	attrs := newAttrs(ctx)
 	attrs = append(attrs, "trackerID", trackerID)
 	attrs = append(attrs, "routeIndex", routeIndex)
@@ -414,7 +414,7 @@ func (l logging) MoveToSegment(ctx context.Context, trackerID types.ID, routeInd
 }
 
 func (l logging) AddSensor(ctx context.Context, trackerID types.ID, sensor *types.Sensor) (err error) {
-	call := "Call generator.AddSensor"
+	call := "call generator.AddSensor"
 	attrs := newAttrs(ctx)
 	attrs = append(attrs, "trackerID", trackerID)
 	attrs = append(attrs, "sensorID", sensor.ID())
@@ -432,7 +432,7 @@ func (l logging) AddSensor(ctx context.Context, trackerID types.ID, sensor *type
 }
 
 func (l logging) RemoveSensor(ctx context.Context, trackerID types.ID, sensorID types.ID) (err error) {
-	call := "Call generator.RemoveSensor"
+	call := "call generator.RemoveSensor"
 	attrs := newAttrs(ctx)
 	attrs = append(attrs, "trackerID", trackerID)
 	attrs = append(attrs, "sensorID", sensorID)
@@ -450,7 +450,7 @@ func (l logging) RemoveSensor(ctx context.Context, trackerID types.ID, sensorID 
 }
 
 func (l logging) Sensors(ctx context.Context, trackerID types.ID) (sensors []*types.Sensor, err error) {
-	call := "Call generator.Sensors"
+	call := "call generator.Sensors"
 	attrs := newAttrs(ctx)
 	attrs = append(attrs, "trackerID", trackerID)
 	params := slog.Group("params", attrs...)
@@ -467,7 +467,7 @@ func (l logging) Sensors(ctx context.Context, trackerID types.ID) (sensors []*ty
 }
 
 func (l logging) ShutdownTracker(ctx context.Context, trackerID types.ID) (err error) {
-	call := "Call generator.ShutdownTracker"
+	call := "call generator.ShutdownTracker"
 	attrs := newAttrs(ctx)
 	attrs = append(attrs, "trackerID", trackerID)
 	params := slog.Group("params", attrs...)
@@ -484,7 +484,7 @@ func (l logging) ShutdownTracker(ctx context.Context, trackerID types.ID) (err e
 }
 
 func (l logging) ResumeTracker(ctx context.Context, trackerID types.ID) (err error) {
-	call := "Call generator.ResumeTracker"
+	call := "call generator.ResumeTracker"
 	attrs := newAttrs(ctx)
 	attrs = append(attrs, "trackerID", trackerID)
 	params := slog.Group("params", attrs...)
@@ -498,6 +498,39 @@ func (l logging) ResumeTracker(ctx context.Context, trackerID types.ID) (err err
 	}(time.Now())
 
 	return l.service.ResumeTracker(ctx, trackerID)
+}
+
+func (l logging) Stats(ctx context.Context) (item []generator.StatsItem, err error) {
+	call := "call generator.Stats"
+	attrs := newAttrs(ctx)
+	params := slog.Group("params", attrs...)
+
+	defer func(start time.Time) {
+		if err != nil {
+			l.logger.Error(call, params, slog.Duration("took", time.Since(start)), "err", err)
+		} else {
+			l.logger.Info(call, params, "found", len(item), slog.Duration("took", time.Since(start)))
+		}
+	}(time.Now())
+
+	return l.service.Stats(ctx)
+}
+
+func (l logging) Sync(ctx context.Context, trackerID types.ID) (err error) {
+	call := "call generator.Sync"
+	attrs := newAttrs(ctx)
+	attrs = append(attrs, "trackerID", trackerID)
+	params := slog.Group("params", attrs...)
+
+	defer func(start time.Time) {
+		if err != nil {
+			l.logger.Error(call, params, slog.Duration("took", time.Since(start)), "err", err)
+		} else {
+			l.logger.Info(call, params, slog.Duration("took", time.Since(start)))
+		}
+	}(time.Now())
+
+	return l.service.Sync(ctx, trackerID)
 }
 
 func newAttrs(ctx context.Context) []any {

@@ -40,13 +40,15 @@ func New(addr string, gen generator.Service, logger *slog.Logger) *Server {
 	app.Use(LoggingMiddleware(logger))
 
 	app.Get(v1("/trackers"), srv.searchTrackers)
+	app.Get(v1("/trackers/stats"), srv.stats)
 	app.Post(v1("/trackers"), srv.addTracker)
 	app.Delete(v1("/trackers/:trackerID"), srv.removeTracker)
+	app.Patch(v1("/trackers/:trackerID/sync"), srv.sync)
 	app.Patch(v1("/trackers/:trackerID"), srv.updateTracker)
 	app.Get(v1("/trackers/:trackerID"), srv.findTracker)
 	app.Patch(v1("/trackers/:trackerID/start"), srv.startTracker)
 	app.Patch(v1("/trackers/:trackerID/stop"), srv.stopTracker)
-	app.Patch(v1("/trackers/:trackerID/state"), srv.getTrackerState)
+	app.Get(v1("/trackers/:trackerID/state"), srv.getTrackerState)
 	app.Post(v1("/trackers/:trackerID/routes"), srv.addRoutes)
 	app.Delete(v1("/trackers/:trackerID/routes"), srv.resetRoutes)
 	app.Delete(v1("/trackers/:trackerID/routes/:routeID"), srv.removeRoute)
@@ -82,6 +84,28 @@ func (s *Server) Close() error {
 
 func v1(s string) string {
 	return "/gpsgend/v1" + s
+}
+
+func (s *Server) sync(c *fiber.Ctx) error {
+	trackerID, err := decodeID(c, "trackerID")
+	if err != nil {
+		return err
+	}
+
+	if err := s.generator.Sync(c.Context(), trackerID); err != nil {
+		return err
+	}
+
+	return encodeSuccessResponse(c)
+}
+
+func (s *Server) stats(c *fiber.Ctx) error {
+	result, err := s.generator.Stats(c.Context())
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(result)
 }
 
 func (s *Server) searchTrackers(c *fiber.Ctx) error {

@@ -36,6 +36,26 @@ func (m *MockCollection) EXPECT() *MockCollectionMockRecorder {
 	return m.recorder
 }
 
+// Aggregate mocks base method.
+func (m *MockCollection) Aggregate(ctx context.Context, pipeline interface{}, opts ...*options.AggregateOptions) (*mongo.Cursor, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, pipeline}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Aggregate", varargs...)
+	ret0, _ := ret[0].(*mongo.Cursor)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Aggregate indicates an expected call of Aggregate.
+func (mr *MockCollectionMockRecorder) Aggregate(ctx, pipeline interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, pipeline}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Aggregate", reflect.TypeOf((*MockCollection)(nil).Aggregate), varargs...)
+}
+
 // BulkWrite mocks base method.
 func (m *MockCollection) BulkWrite(ctx context.Context, models []mongo.WriteModel, opts ...*options.BulkWriteOptions) (*mongo.BulkWriteResult, error) {
 	m.ctrl.T.Helper()

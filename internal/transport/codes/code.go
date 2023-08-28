@@ -9,7 +9,7 @@ const (
 	// default
 	CodeUnknown = 0
 
-	// block: 1 .. 100
+	// block: 1 .. 100 // invalid params, types, etc...
 	CodeInvalidMinValue      = 1
 	CodeInvalidMaxValue      = 2
 	CodeInvalidRangeValue    = 3
@@ -20,8 +20,9 @@ const (
 	CodeInvalidName          = 8
 	CodeInvalidID            = 9
 	CodeParamsEmpty          = 10
+	CodeInvalidParams        = 11
 
-	// block: 100 .. 300
+	// block: 100 .. 300 // service errors
 	CodeTrackerIsAlreadyRunning = 101
 	CodeTrackerIsAlreadyStopped = 102
 	CodeTrackerHasNoRoutes      = 103
@@ -34,15 +35,23 @@ const (
 	CodeTrackerNotRunning       = 110
 	CodeTrackerNotPaused        = 111
 	CodeTrackerOff              = 112
-	CodeInvalidTrackerVersion   = 113
 	CodeLoadingTracker          = 114
 	CodeUnloadingTracker        = 115
+	CodeSensorAlreadyExists     = 116
 
-	// block: 300 .. 400
+	// block: 300 .. 400 // not found
 	CodeTrackNotFound   = 300
 	CodeTrackerNotFound = 301
 	CodeRouteNotFound   = 302
 	CodeSensorNotFound  = 303
+	CodeNoTracker       = 304
+
+	// block 500 .. 600 // internal error
+	CodeInvalidTrackerVersion = 501
+	CodeStorageInsert         = 502
+	CodeStorageUpdate         = 503
+	CodeStorageDelete         = 504
+	CodeStorageSearch         = 505
 )
 
 func FromError(err error) int {
@@ -71,5 +80,10 @@ func ToHTTP(code int) int {
 	if code > 300 && code <= 400 {
 		return http.StatusNotFound
 	}
+
+	if code > 500 && code <= 600 {
+		return http.StatusInternalServerError
+	}
+
 	return 0
 }

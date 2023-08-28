@@ -194,6 +194,17 @@ func encodeResumeTrackerResponse() (*gpsgendproto.ResumeTrackerResponse, error) 
 	return &gpsgendproto.ResumeTrackerResponse{}, nil
 }
 
+func encodeStatsResponse(stats []generator.StatsItem) (*gpsgendproto.StatsResponse, error) {
+	items := stats2model(stats)
+	return &gpsgendproto.StatsResponse{
+		Stats: items,
+	}, nil
+}
+
+func encodeSyncResponse() (*gpsgendproto.SyncResponse, error) {
+	return &gpsgendproto.SyncResponse{}, nil
+}
+
 func encodeNewTrackerErrorResponse(err error) (*gpsgendproto.NewTrackerResponse, error) {
 	return &gpsgendproto.NewTrackerResponse{
 		Error: newError(err),
@@ -352,6 +363,18 @@ func encodeShutdownTrackerErrorResponse(err error) (*gpsgendproto.ShutdownTracke
 
 func encodeResumeTrackerErrorResponse(err error) (*gpsgendproto.ResumeTrackerResponse, error) {
 	return &gpsgendproto.ResumeTrackerResponse{
+		Error: newError(err),
+	}, nil
+}
+
+func encodeStatsErrorResponse(err error) (*gpsgendproto.StatsResponse, error) {
+	return &gpsgendproto.StatsResponse{
+		Error: newError(err),
+	}, nil
+}
+
+func encodeSyncErrorResponse(err error) (*gpsgendproto.SyncResponse, error) {
+	return &gpsgendproto.SyncResponse{
 		Error: newError(err),
 	}, nil
 }

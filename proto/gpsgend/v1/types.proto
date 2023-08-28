@@ -25,6 +25,11 @@ message Tracker {
     int64 stopped_at = 18;
 }
 
+message StatsItem {
+    string status = 1;
+    int64 total = 2;
+}
+
 message Error {
     int64 code = 1;
     string msg = 2;
@@ -70,14 +75,16 @@ message Speed {
 message Navigator {
     double lon = 1; 
     double lat = 2; 
-    double distance = 3;
-    double route_distance = 4;
-    int64 route_index = 5;
-    double track_distance = 6;
-    int64 track_index = 7;
-    double segment_distance = 8;
-    int64 segment_index = 9;
-    string units = 10;
+    double distance = 6;
+    string route_id = 8;
+    double route_distance = 10;
+    int64 route_index = 12;
+    string track_id = 14;
+    double track_distance = 16;
+    int64 track_index = 18;
+    double segment_distance = 20;
+    int64 segment_index = 22;
+    string units = 24;
 }
 
 message Sensor {

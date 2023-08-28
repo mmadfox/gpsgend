@@ -20,7 +20,6 @@ var table = []code{
 	{Err: types.ErrInvalidMaxAmplitude, Code: CodeInvalidMaxAmplitude},
 	{Err: types.ErrInvalidName, Code: CodeInvalidName},
 	{Err: types.ErrInvalidID, Code: CodeInvalidID},
-
 	{Err: generator.ErrParamsEmpty, Code: CodeParamsEmpty},
 	{Err: generator.ErrTrackerIsAlreadyRunning, Code: CodeTrackerIsAlreadyRunning},
 	{Err: generator.ErrTrackerIsAlreadyStopped, Code: CodeTrackerIsAlreadyStopped},
@@ -41,4 +40,11 @@ var table = []code{
 	{Err: generator.ErrInvalidTrackerVersion, Code: CodeInvalidTrackerVersion},
 	{Err: generator.ErrLoadingTracker, Code: CodeLoadingTracker},
 	{Err: generator.ErrUnloadingTracker, Code: CodeUnloadingTracker},
+	{Err: generator.ErrSensorAlreadyExists, Code: CodeSensorAlreadyExists},
+	{Err: generator.ErrNoTracker, Code: CodeNoTracker},
+	{Err: generator.ErrInvalidParams, Code: CodeInvalidParams},
+	{Err: generator.ErrStorageInsert, Code: CodeStorageInsert},
+	{Err: generator.ErrStorageUpdate, Code: CodeStorageUpdate},
+	{Err: generator.ErrStorageDelete, Code: CodeStorageDelete},
+	{Err: generator.ErrStorageSearch, Code: CodeStorageSearch},
 }

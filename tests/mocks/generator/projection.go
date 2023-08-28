@@ -49,3 +49,18 @@ func (mr *MockQueryMockRecorder) SearchTrackers(ctx, f interface{}) *gomock.Call
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchTrackers", reflect.TypeOf((*MockQuery)(nil).SearchTrackers), ctx, f)
 }
+
+// Stats mocks base method.
+func (m *MockQuery) Stats(ctx context.Context) ([]generator.StatsItem, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Stats", ctx)
+	ret0, _ := ret[0].([]generator.StatsItem)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Stats indicates an expected call of Stats.
+func (mr *MockQueryMockRecorder) Stats(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Stats", reflect.TypeOf((*MockQuery)(nil).Stats), ctx)
+}

@@ -413,6 +413,7 @@ func (g *Generator) ToNextRoute(ctx context.Context, trackerID types.ID) (types.
 	next := proc.ToNextRoute()
 
 	if next {
+		proc.Update()
 		g.eventPub.PublishTrackerNavigatorJumped(ctx, trackerID)
 	}
 
@@ -434,6 +435,7 @@ func (g *Generator) ToPrevRoute(ctx context.Context, trackerID types.ID) (types.
 	next := proc.ToPrevRoute()
 
 	if next {
+		proc.Update()
 		g.eventPub.PublishTrackerNavigatorJumped(ctx, trackerID)
 	}
 
@@ -455,6 +457,7 @@ func (g *Generator) MoveToRoute(ctx context.Context, trackerID types.ID, routeIn
 	next := proc.MoveToRoute(routeIndex)
 
 	if next {
+		proc.Update()
 		g.eventPub.PublishTrackerNavigatorJumped(ctx, trackerID)
 	}
 
@@ -480,6 +483,7 @@ func (g *Generator) MoveToRouteByID(ctx context.Context, trackerID types.ID, rou
 	next := proc.MoveToRouteByID(routeID.String())
 
 	if next {
+		proc.Update()
 		g.eventPub.PublishTrackerNavigatorJumped(ctx, trackerID)
 	}
 
@@ -501,6 +505,7 @@ func (g *Generator) MoveToTrack(ctx context.Context, trackerID types.ID, routeIn
 	next := proc.MoveToTrack(routeIndex, trackIndex)
 
 	if next {
+		proc.Update()
 		g.eventPub.PublishTrackerNavigatorJumped(ctx, trackerID)
 	}
 
@@ -530,6 +535,7 @@ func (g *Generator) MoveToTrackByID(ctx context.Context, trackerID, routeID, tra
 	next := proc.MoveToTrackByID(routeID.String(), trackID.String())
 
 	if next {
+		proc.Update()
 		g.eventPub.PublishTrackerNavigatorJumped(ctx, trackerID)
 	}
 
@@ -551,6 +557,7 @@ func (g *Generator) MoveToSegment(ctx context.Context, trackerID types.ID, route
 	next := proc.MoveToSegment(routeIndex, trackIndex, segmentIndex)
 
 	if next {
+		proc.Update()
 		g.eventPub.PublishTrackerNavigatorJumped(ctx, trackerID)
 	}
 
@@ -707,6 +714,44 @@ func (g *Generator) ResumeTracker(ctx context.Context, trackerID types.ID) error
 	g.eventPub.PublishTrackerResumed(ctx, trackerID)
 
 	return nil
+}
+
+func (g *Generator) Stats(ctx context.Context) (item []StatsItem, err error) {
+	items, err := g.query.Stats(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	items = append(items, StatsItem{
+		Status: "Processing",
+		Total:  g.processes.NumDevices(),
+	})
+
+	return items, nil
+}
+
+func (g *Generator) Sync(ctx context.Context, trackerID types.ID) error {
+	if err := validateType(trackerID, "tracker.id"); err != nil {
+		return err
+	}
+
+	tracker, err := g.trackers.Find(ctx, trackerID)
+	if err != nil {
+		return err
+	}
+
+	if tracker.Status() == types.Paused {
+		return errTrackerOff(tracker)
+	}
+
+	_, ok := g.findProc(trackerID)
+	if !ok {
+		tracker.ResetStatus()
+	} else {
+		tracker.run()
+	}
+
+	return g.trackers.Update(ctx, tracker)
 }
 
 func (g *Generator) Run(ctx context.Context) error {

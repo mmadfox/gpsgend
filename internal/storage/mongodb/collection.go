@@ -25,4 +25,7 @@ type Collection interface {
 
 	BulkWrite(ctx context.Context, models []mongo.WriteModel,
 		opts ...*options.BulkWriteOptions) (*mongo.BulkWriteResult, error)
+
+	Aggregate(ctx context.Context, pipeline interface{},
+		opts ...*options.AggregateOptions) (*mongo.Cursor, error)
 }

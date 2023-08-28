@@ -11,7 +11,7 @@
             "mode": "auto",
             "cwd": "${workspaceRoot}",
             "program": "${workspaceRoot}/cmd/gpsgend/main.go",
-            "args": ["-config", "${workspaceRoot}/configs/configs.yaml"]
+            "args": ["-config", "${workspaceRoot}/configs/config.yaml"]
         }
     ]
 }

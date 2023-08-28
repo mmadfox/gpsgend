@@ -34,6 +34,23 @@ service GeneratorService {
     rpc Sensors(SensorsRequest) returns (SensorsResponse) {}
     rpc ShutdownTracker(ShutdownTrackerRequest) returns (ShutdownTrackerResponse) {}
     rpc ResumeTracker(ResumeTrackerRequest) returns (ResumeTrackerResponse) {}
+    rpc Stats(EmptyRequest) returns (StatsResponse) {}
+    rpc Sync(SyncRequest) returns (SyncResponse) {}
+}
+
+message SyncRequest {
+    string tracker_id = 1;
+}
+
+message SyncResponse {
+    Error error = 1;
+}
+
+message EmptyRequest {}
+
+message StatsResponse {
+    repeated StatsItem stats = 1;
+    Error error = 2;
 }
 
 message ResumeTrackerRequest {

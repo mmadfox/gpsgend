@@ -56,6 +56,12 @@ github.com/mattn/go-runewidth v0.0.14 h1:+xnbZSEeDbOIg5/mE6JF0w6n9duR1l3/WmbinWV
 github.com/mattn/go-runewidth v0.0.14/go.mod h1:Jdepj2loyihRzMpdS35Xk/zdY8IAYHsh153qUoGf23w=
 github.com/mmadfox/go-gpsgen v0.2.1-0.20230825141108-131f966738e3 h1:PqOHfrWC4LhzZVdglBrDoj3d1gx8OX8thJCn892PxhQ=
 github.com/mmadfox/go-gpsgen v0.2.1-0.20230825141108-131f966738e3/go.mod h1:7bpz8FPJh0zxtSqSkAtydRoZrjPXRa29/JT6n4DaKrU=
+github.com/mmadfox/go-gpsgen v0.2.1-0.20230828041653-438e00cae501 h1:mhPtoTQ7y5z9C25TXbmQ7KA5XTIjWBiY/b8+yZkqNGg=
+github.com/mmadfox/go-gpsgen v0.2.1-0.20230828041653-438e00cae501/go.mod h1:7bpz8FPJh0zxtSqSkAtydRoZrjPXRa29/JT6n4DaKrU=
+github.com/mmadfox/go-gpsgen v0.2.1-0.20230828042855-1aa4003e5c1c h1:EfU4LEoORoxMXbufaCTkfy7XKi6C72h4S/y8k3k7tCM=
+github.com/mmadfox/go-gpsgen v0.2.1-0.20230828042855-1aa4003e5c1c/go.mod h1:7bpz8FPJh0zxtSqSkAtydRoZrjPXRa29/JT6n4DaKrU=
+github.com/mmadfox/go-gpsgen v0.2.1-0.20230828053713-cbf921b70c7a h1:yJfm//MbkAktrDvO/IaqURxs4MCz0iQtJJyqVAWBPuM=
+github.com/mmadfox/go-gpsgen v0.2.1-0.20230828053713-cbf921b70c7a/go.mod h1:7bpz8FPJh0zxtSqSkAtydRoZrjPXRa29/JT6n4DaKrU=
 github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe h1:iruDEfMl2E6fbMZ9s0scYfZQ84/6SPL6zC8ACM2oIL0=
 github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe/go.mod h1:wL8QJuTMNUDYhXwkmfOly8iTdp5TEcJFWZD2D7SIkUc=
 github.com/oklog/run v1.1.0 h1:GEenZ1cK0+q0+wsJew9qUg/DyD8k3JzYsZAi5gYi2mA=

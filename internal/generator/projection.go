@@ -10,6 +10,14 @@ import (
 type Query interface {
 	// SearchTrackers searches for trackers based on the given filter criteria.
 	SearchTrackers(ctx context.Context, f Filter) (SearchResult, error)
+
+	// Stats returns generator statistics group by status.
+	Stats(ctx context.Context) ([]StatsItem, error)
+}
+
+type StatsItem struct {
+	Status string `bson:"status" json:"status"`
+	Total  int    `bson:"total" json:"total"`
 }
 
 // Filter defines filtering criteria for tracker search.
@@ -29,7 +37,7 @@ type SearchResult struct {
 
 // TrackerView provides a structured view of tracker information for display or transmission.
 type TrackerView struct {
-	ID       string `json:"id" bson:"tracker_id"`
+	ID       string `json:"trackerId" bson:"tracker_id"`
 	CustomID string `json:"customId" bson:"custom_id"`
 	Status   struct {
 		ID   int    `json:"id" bson:"id"`

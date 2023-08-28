@@ -102,3 +102,17 @@ func (mr *MockProcessesMockRecorder) Lookup(deviceID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Lookup", reflect.TypeOf((*MockProcesses)(nil).Lookup), deviceID)
 }
+
+// NumDevices mocks base method.
+func (m *MockProcesses) NumDevices() int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "NumDevices")
+	ret0, _ := ret[0].(int)
+	return ret0
+}
+
+// NumDevices indicates an expected call of NumDevices.
+func (mr *MockProcessesMockRecorder) NumDevices() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NumDevices", reflect.TypeOf((*MockProcesses)(nil).NumDevices))
+}

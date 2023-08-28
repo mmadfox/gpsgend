@@ -573,3 +573,32 @@ func (c *Client) ResumeTracker(ctx context.Context, trackerID string) error {
 
 	return nil
 }
+
+func (c *Client) Stats(ctx context.Context) ([]StatsItem, error) {
+	resp, err := c.generatorCli.Stats(ctx, new(gpsgendproto.EmptyRequest))
+	if err != nil {
+		return nil, toError(err)
+	}
+
+	if resp.Error != nil {
+		return nil, decodeError(resp.Error)
+	}
+
+	return DecodeStats(resp.Stats), nil
+}
+
+func (c *Client) Sync(ctx context.Context, trackerID string) error {
+	if err := validateID(trackerID, "tracker.id"); err != nil {
+		return err
+	}
+
+	resp, err := c.generatorCli.Sync(ctx, &gpsgendproto.SyncRequest{TrackerId: trackerID})
+	if err != nil {
+		return toError(err)
+	}
+	if resp.Error != nil {
+		return decodeError(resp.Error)
+	}
+
+	return nil
+}

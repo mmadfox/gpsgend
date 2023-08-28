@@ -36,4 +36,6 @@ type Service interface {
 	Sensors(ctx context.Context, trackerID types.ID) ([]*types.Sensor, error)
 	ShutdownTracker(ctx context.Context, trackerID types.ID) error
 	ResumeTracker(ctx context.Context, trackerID types.ID) error
+	Stats(ctx context.Context) ([]StatsItem, error)
+	Sync(ctx context.Context, trackerID types.ID) error
 }

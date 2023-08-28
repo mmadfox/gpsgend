@@ -20,6 +20,193 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type SyncRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	TrackerId string `protobuf:"bytes,1,opt,name=tracker_id,json=trackerId,proto3" json:"tracker_id,omitempty"`
+}
+
+func (x *SyncRequest) Reset() {
+	*x = SyncRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[0]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SyncRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SyncRequest) ProtoMessage() {}
+
+func (x *SyncRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[0]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SyncRequest.ProtoReflect.Descriptor instead.
+func (*SyncRequest) Descriptor() ([]byte, []int) {
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *SyncRequest) GetTrackerId() string {
+	if x != nil {
+		return x.TrackerId
+	}
+	return ""
+}
+
+type SyncResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Error *Error `protobuf:"bytes,1,opt,name=error,proto3" json:"error,omitempty"`
+}
+
+func (x *SyncResponse) Reset() {
+	*x = SyncResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SyncResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SyncResponse) ProtoMessage() {}
+
+func (x *SyncResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SyncResponse.ProtoReflect.Descriptor instead.
+func (*SyncResponse) Descriptor() ([]byte, []int) {
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *SyncResponse) GetError() *Error {
+	if x != nil {
+		return x.Error
+	}
+	return nil
+}
+
+type EmptyRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *EmptyRequest) Reset() {
+	*x = EmptyRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *EmptyRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EmptyRequest) ProtoMessage() {}
+
+func (x *EmptyRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EmptyRequest.ProtoReflect.Descriptor instead.
+func (*EmptyRequest) Descriptor() ([]byte, []int) {
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{2}
+}
+
+type StatsResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Stats []*StatsItem `protobuf:"bytes,1,rep,name=stats,proto3" json:"stats,omitempty"`
+	Error *Error       `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`
+}
+
+func (x *StatsResponse) Reset() {
+	*x = StatsResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *StatsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StatsResponse) ProtoMessage() {}
+
+func (x *StatsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StatsResponse.ProtoReflect.Descriptor instead.
+func (*StatsResponse) Descriptor() ([]byte, []int) {
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *StatsResponse) GetStats() []*StatsItem {
+	if x != nil {
+		return x.Stats
+	}
+	return nil
+}
+
+func (x *StatsResponse) GetError() *Error {
+	if x != nil {
+		return x.Error
+	}
+	return nil
+}
+
 type ResumeTrackerRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -31,7 +218,7 @@ type ResumeTrackerRequest struct {
 func (x *ResumeTrackerRequest) Reset() {
 	*x = ResumeTrackerRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[0]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -44,7 +231,7 @@ func (x *ResumeTrackerRequest) String() string {
 func (*ResumeTrackerRequest) ProtoMessage() {}
 
 func (x *ResumeTrackerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[0]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -57,7 +244,7 @@ func (x *ResumeTrackerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResumeTrackerRequest.ProtoReflect.Descriptor instead.
 func (*ResumeTrackerRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{0}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ResumeTrackerRequest) GetTrackerId() string {
@@ -78,7 +265,7 @@ type ResumeTrackerResponse struct {
 func (x *ResumeTrackerResponse) Reset() {
 	*x = ResumeTrackerResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[1]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -91,7 +278,7 @@ func (x *ResumeTrackerResponse) String() string {
 func (*ResumeTrackerResponse) ProtoMessage() {}
 
 func (x *ResumeTrackerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[1]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -104,7 +291,7 @@ func (x *ResumeTrackerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResumeTrackerResponse.ProtoReflect.Descriptor instead.
 func (*ResumeTrackerResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{1}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ResumeTrackerResponse) GetError() *Error {
@@ -125,7 +312,7 @@ type ShutdownTrackerRequest struct {
 func (x *ShutdownTrackerRequest) Reset() {
 	*x = ShutdownTrackerRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[2]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -138,7 +325,7 @@ func (x *ShutdownTrackerRequest) String() string {
 func (*ShutdownTrackerRequest) ProtoMessage() {}
 
 func (x *ShutdownTrackerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[2]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -151,7 +338,7 @@ func (x *ShutdownTrackerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ShutdownTrackerRequest.ProtoReflect.Descriptor instead.
 func (*ShutdownTrackerRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{2}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ShutdownTrackerRequest) GetTrackerId() string {
@@ -172,7 +359,7 @@ type ShutdownTrackerResponse struct {
 func (x *ShutdownTrackerResponse) Reset() {
 	*x = ShutdownTrackerResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[3]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -185,7 +372,7 @@ func (x *ShutdownTrackerResponse) String() string {
 func (*ShutdownTrackerResponse) ProtoMessage() {}
 
 func (x *ShutdownTrackerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[3]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -198,7 +385,7 @@ func (x *ShutdownTrackerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ShutdownTrackerResponse.ProtoReflect.Descriptor instead.
 func (*ShutdownTrackerResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{3}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ShutdownTrackerResponse) GetError() *Error {
@@ -219,7 +406,7 @@ type SensorsRequest struct {
 func (x *SensorsRequest) Reset() {
 	*x = SensorsRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[4]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -232,7 +419,7 @@ func (x *SensorsRequest) String() string {
 func (*SensorsRequest) ProtoMessage() {}
 
 func (x *SensorsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[4]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -245,7 +432,7 @@ func (x *SensorsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SensorsRequest.ProtoReflect.Descriptor instead.
 func (*SensorsRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{4}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *SensorsRequest) GetTrackerId() string {
@@ -267,7 +454,7 @@ type SensorsResponse struct {
 func (x *SensorsResponse) Reset() {
 	*x = SensorsResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[5]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -280,7 +467,7 @@ func (x *SensorsResponse) String() string {
 func (*SensorsResponse) ProtoMessage() {}
 
 func (x *SensorsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[5]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -293,7 +480,7 @@ func (x *SensorsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SensorsResponse.ProtoReflect.Descriptor instead.
 func (*SensorsResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{5}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *SensorsResponse) GetSensors() []*Sensor {
@@ -322,7 +509,7 @@ type RemoveSensorRequest struct {
 func (x *RemoveSensorRequest) Reset() {
 	*x = RemoveSensorRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[6]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -335,7 +522,7 @@ func (x *RemoveSensorRequest) String() string {
 func (*RemoveSensorRequest) ProtoMessage() {}
 
 func (x *RemoveSensorRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[6]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -348,7 +535,7 @@ func (x *RemoveSensorRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveSensorRequest.ProtoReflect.Descriptor instead.
 func (*RemoveSensorRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{6}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *RemoveSensorRequest) GetTrackerId() string {
@@ -376,7 +563,7 @@ type RemoveSensorResponse struct {
 func (x *RemoveSensorResponse) Reset() {
 	*x = RemoveSensorResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[7]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -389,7 +576,7 @@ func (x *RemoveSensorResponse) String() string {
 func (*RemoveSensorResponse) ProtoMessage() {}
 
 func (x *RemoveSensorResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[7]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -402,7 +589,7 @@ func (x *RemoveSensorResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveSensorResponse.ProtoReflect.Descriptor instead.
 func (*RemoveSensorResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{7}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *RemoveSensorResponse) GetError() *Error {
@@ -428,7 +615,7 @@ type AddSensorRequest struct {
 func (x *AddSensorRequest) Reset() {
 	*x = AddSensorRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[8]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -441,7 +628,7 @@ func (x *AddSensorRequest) String() string {
 func (*AddSensorRequest) ProtoMessage() {}
 
 func (x *AddSensorRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[8]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -454,7 +641,7 @@ func (x *AddSensorRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddSensorRequest.ProtoReflect.Descriptor instead.
 func (*AddSensorRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{8}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *AddSensorRequest) GetTrackerId() string {
@@ -511,7 +698,7 @@ type AddSensorResponse struct {
 func (x *AddSensorResponse) Reset() {
 	*x = AddSensorResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[9]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -524,7 +711,7 @@ func (x *AddSensorResponse) String() string {
 func (*AddSensorResponse) ProtoMessage() {}
 
 func (x *AddSensorResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[9]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -537,7 +724,7 @@ func (x *AddSensorResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddSensorResponse.ProtoReflect.Descriptor instead.
 func (*AddSensorResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{9}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *AddSensorResponse) GetSensorId() string {
@@ -568,7 +755,7 @@ type MoveToSegmentRequest struct {
 func (x *MoveToSegmentRequest) Reset() {
 	*x = MoveToSegmentRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[10]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[14]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -581,7 +768,7 @@ func (x *MoveToSegmentRequest) String() string {
 func (*MoveToSegmentRequest) ProtoMessage() {}
 
 func (x *MoveToSegmentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[10]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[14]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -594,7 +781,7 @@ func (x *MoveToSegmentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MoveToSegmentRequest.ProtoReflect.Descriptor instead.
 func (*MoveToSegmentRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{10}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *MoveToSegmentRequest) GetTrackerId() string {
@@ -638,7 +825,7 @@ type MoveToSegmentResponse struct {
 func (x *MoveToSegmentResponse) Reset() {
 	*x = MoveToSegmentResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[11]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[15]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -651,7 +838,7 @@ func (x *MoveToSegmentResponse) String() string {
 func (*MoveToSegmentResponse) ProtoMessage() {}
 
 func (x *MoveToSegmentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[11]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[15]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -664,7 +851,7 @@ func (x *MoveToSegmentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MoveToSegmentResponse.ProtoReflect.Descriptor instead.
 func (*MoveToSegmentResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{11}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *MoveToSegmentResponse) GetNavigator() *Navigator {
@@ -701,7 +888,7 @@ type MoveToTrackByIDRequest struct {
 func (x *MoveToTrackByIDRequest) Reset() {
 	*x = MoveToTrackByIDRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[12]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -714,7 +901,7 @@ func (x *MoveToTrackByIDRequest) String() string {
 func (*MoveToTrackByIDRequest) ProtoMessage() {}
 
 func (x *MoveToTrackByIDRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[12]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -727,7 +914,7 @@ func (x *MoveToTrackByIDRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MoveToTrackByIDRequest.ProtoReflect.Descriptor instead.
 func (*MoveToTrackByIDRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{12}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *MoveToTrackByIDRequest) GetTrackerId() string {
@@ -764,7 +951,7 @@ type MoveToTrackByIDResponse struct {
 func (x *MoveToTrackByIDResponse) Reset() {
 	*x = MoveToTrackByIDResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[13]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -777,7 +964,7 @@ func (x *MoveToTrackByIDResponse) String() string {
 func (*MoveToTrackByIDResponse) ProtoMessage() {}
 
 func (x *MoveToTrackByIDResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[13]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -790,7 +977,7 @@ func (x *MoveToTrackByIDResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MoveToTrackByIDResponse.ProtoReflect.Descriptor instead.
 func (*MoveToTrackByIDResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{13}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *MoveToTrackByIDResponse) GetNavigator() *Navigator {
@@ -827,7 +1014,7 @@ type MoveToTrackRequest struct {
 func (x *MoveToTrackRequest) Reset() {
 	*x = MoveToTrackRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[14]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[18]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -840,7 +1027,7 @@ func (x *MoveToTrackRequest) String() string {
 func (*MoveToTrackRequest) ProtoMessage() {}
 
 func (x *MoveToTrackRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[14]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[18]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -853,7 +1040,7 @@ func (x *MoveToTrackRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MoveToTrackRequest.ProtoReflect.Descriptor instead.
 func (*MoveToTrackRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{14}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *MoveToTrackRequest) GetTrackerId() string {
@@ -890,7 +1077,7 @@ type MoveToTrackResponse struct {
 func (x *MoveToTrackResponse) Reset() {
 	*x = MoveToTrackResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[15]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[19]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -903,7 +1090,7 @@ func (x *MoveToTrackResponse) String() string {
 func (*MoveToTrackResponse) ProtoMessage() {}
 
 func (x *MoveToTrackResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[15]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[19]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -916,7 +1103,7 @@ func (x *MoveToTrackResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MoveToTrackResponse.ProtoReflect.Descriptor instead.
 func (*MoveToTrackResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{15}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *MoveToTrackResponse) GetNavigator() *Navigator {
@@ -952,7 +1139,7 @@ type MoveToRouteByIDRequest struct {
 func (x *MoveToRouteByIDRequest) Reset() {
 	*x = MoveToRouteByIDRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[16]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[20]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -965,7 +1152,7 @@ func (x *MoveToRouteByIDRequest) String() string {
 func (*MoveToRouteByIDRequest) ProtoMessage() {}
 
 func (x *MoveToRouteByIDRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[16]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[20]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -978,7 +1165,7 @@ func (x *MoveToRouteByIDRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MoveToRouteByIDRequest.ProtoReflect.Descriptor instead.
 func (*MoveToRouteByIDRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{16}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *MoveToRouteByIDRequest) GetTrackerId() string {
@@ -1008,7 +1195,7 @@ type MoveToRouteByIDResponse struct {
 func (x *MoveToRouteByIDResponse) Reset() {
 	*x = MoveToRouteByIDResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[17]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[21]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1021,7 +1208,7 @@ func (x *MoveToRouteByIDResponse) String() string {
 func (*MoveToRouteByIDResponse) ProtoMessage() {}
 
 func (x *MoveToRouteByIDResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[17]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[21]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1034,7 +1221,7 @@ func (x *MoveToRouteByIDResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MoveToRouteByIDResponse.ProtoReflect.Descriptor instead.
 func (*MoveToRouteByIDResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{17}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *MoveToRouteByIDResponse) GetNavigator() *Navigator {
@@ -1070,7 +1257,7 @@ type MoveToRouteRequest struct {
 func (x *MoveToRouteRequest) Reset() {
 	*x = MoveToRouteRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[18]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[22]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1083,7 +1270,7 @@ func (x *MoveToRouteRequest) String() string {
 func (*MoveToRouteRequest) ProtoMessage() {}
 
 func (x *MoveToRouteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[18]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[22]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1096,7 +1283,7 @@ func (x *MoveToRouteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MoveToRouteRequest.ProtoReflect.Descriptor instead.
 func (*MoveToRouteRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{18}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *MoveToRouteRequest) GetTrackerId() string {
@@ -1126,7 +1313,7 @@ type MoveToRouteResponse struct {
 func (x *MoveToRouteResponse) Reset() {
 	*x = MoveToRouteResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[19]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[23]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1139,7 +1326,7 @@ func (x *MoveToRouteResponse) String() string {
 func (*MoveToRouteResponse) ProtoMessage() {}
 
 func (x *MoveToRouteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[19]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[23]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1152,7 +1339,7 @@ func (x *MoveToRouteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MoveToRouteResponse.ProtoReflect.Descriptor instead.
 func (*MoveToRouteResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{19}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *MoveToRouteResponse) GetNavigator() *Navigator {
@@ -1187,7 +1374,7 @@ type ToPrevRouteRequest struct {
 func (x *ToPrevRouteRequest) Reset() {
 	*x = ToPrevRouteRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[20]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[24]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1200,7 +1387,7 @@ func (x *ToPrevRouteRequest) String() string {
 func (*ToPrevRouteRequest) ProtoMessage() {}
 
 func (x *ToPrevRouteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[20]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[24]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1213,7 +1400,7 @@ func (x *ToPrevRouteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ToPrevRouteRequest.ProtoReflect.Descriptor instead.
 func (*ToPrevRouteRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{20}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *ToPrevRouteRequest) GetTrackerId() string {
@@ -1236,7 +1423,7 @@ type ToPrevRouteResponse struct {
 func (x *ToPrevRouteResponse) Reset() {
 	*x = ToPrevRouteResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[21]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[25]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1249,7 +1436,7 @@ func (x *ToPrevRouteResponse) String() string {
 func (*ToPrevRouteResponse) ProtoMessage() {}
 
 func (x *ToPrevRouteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[21]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[25]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1262,7 +1449,7 @@ func (x *ToPrevRouteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ToPrevRouteResponse.ProtoReflect.Descriptor instead.
 func (*ToPrevRouteResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{21}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *ToPrevRouteResponse) GetNavigator() *Navigator {
@@ -1297,7 +1484,7 @@ type ToNextRouteRequest struct {
 func (x *ToNextRouteRequest) Reset() {
 	*x = ToNextRouteRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[22]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[26]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1310,7 +1497,7 @@ func (x *ToNextRouteRequest) String() string {
 func (*ToNextRouteRequest) ProtoMessage() {}
 
 func (x *ToNextRouteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[22]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[26]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1323,7 +1510,7 @@ func (x *ToNextRouteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ToNextRouteRequest.ProtoReflect.Descriptor instead.
 func (*ToNextRouteRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{22}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *ToNextRouteRequest) GetTrackerId() string {
@@ -1346,7 +1533,7 @@ type ToNextRouteResponse struct {
 func (x *ToNextRouteResponse) Reset() {
 	*x = ToNextRouteResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[23]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[27]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1359,7 +1546,7 @@ func (x *ToNextRouteResponse) String() string {
 func (*ToNextRouteResponse) ProtoMessage() {}
 
 func (x *ToNextRouteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[23]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[27]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1372,7 +1559,7 @@ func (x *ToNextRouteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ToNextRouteResponse.ProtoReflect.Descriptor instead.
 func (*ToNextRouteResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{23}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *ToNextRouteResponse) GetNavigator() *Navigator {
@@ -1407,7 +1594,7 @@ type ResetNavigatorRequest struct {
 func (x *ResetNavigatorRequest) Reset() {
 	*x = ResetNavigatorRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[24]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[28]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1420,7 +1607,7 @@ func (x *ResetNavigatorRequest) String() string {
 func (*ResetNavigatorRequest) ProtoMessage() {}
 
 func (x *ResetNavigatorRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[24]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[28]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1433,7 +1620,7 @@ func (x *ResetNavigatorRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResetNavigatorRequest.ProtoReflect.Descriptor instead.
 func (*ResetNavigatorRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{24}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *ResetNavigatorRequest) GetTrackerId() string {
@@ -1454,7 +1641,7 @@ type ResetNavigatorResponse struct {
 func (x *ResetNavigatorResponse) Reset() {
 	*x = ResetNavigatorResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[25]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[29]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1467,7 +1654,7 @@ func (x *ResetNavigatorResponse) String() string {
 func (*ResetNavigatorResponse) ProtoMessage() {}
 
 func (x *ResetNavigatorResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[25]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[29]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1480,7 +1667,7 @@ func (x *ResetNavigatorResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResetNavigatorResponse.ProtoReflect.Descriptor instead.
 func (*ResetNavigatorResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{25}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *ResetNavigatorResponse) GetError() *Error {
@@ -1501,7 +1688,7 @@ type ResetRoutesRequest struct {
 func (x *ResetRoutesRequest) Reset() {
 	*x = ResetRoutesRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[26]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[30]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1514,7 +1701,7 @@ func (x *ResetRoutesRequest) String() string {
 func (*ResetRoutesRequest) ProtoMessage() {}
 
 func (x *ResetRoutesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[26]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[30]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1527,7 +1714,7 @@ func (x *ResetRoutesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResetRoutesRequest.ProtoReflect.Descriptor instead.
 func (*ResetRoutesRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{26}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *ResetRoutesRequest) GetTrackerId() string {
@@ -1549,7 +1736,7 @@ type ResetRoutesResponse struct {
 func (x *ResetRoutesResponse) Reset() {
 	*x = ResetRoutesResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[27]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[31]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1562,7 +1749,7 @@ func (x *ResetRoutesResponse) String() string {
 func (*ResetRoutesResponse) ProtoMessage() {}
 
 func (x *ResetRoutesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[27]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[31]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1575,7 +1762,7 @@ func (x *ResetRoutesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResetRoutesResponse.ProtoReflect.Descriptor instead.
 func (*ResetRoutesResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{27}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *ResetRoutesResponse) GetOk() bool {
@@ -1604,7 +1791,7 @@ type RouteByIDRequest struct {
 func (x *RouteByIDRequest) Reset() {
 	*x = RouteByIDRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[28]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[32]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1617,7 +1804,7 @@ func (x *RouteByIDRequest) String() string {
 func (*RouteByIDRequest) ProtoMessage() {}
 
 func (x *RouteByIDRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[28]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[32]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1630,7 +1817,7 @@ func (x *RouteByIDRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RouteByIDRequest.ProtoReflect.Descriptor instead.
 func (*RouteByIDRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{28}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *RouteByIDRequest) GetTrackerId() string {
@@ -1659,7 +1846,7 @@ type RouteByIDResponse struct {
 func (x *RouteByIDResponse) Reset() {
 	*x = RouteByIDResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[29]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[33]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1672,7 +1859,7 @@ func (x *RouteByIDResponse) String() string {
 func (*RouteByIDResponse) ProtoMessage() {}
 
 func (x *RouteByIDResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[29]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[33]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1685,7 +1872,7 @@ func (x *RouteByIDResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RouteByIDResponse.ProtoReflect.Descriptor instead.
 func (*RouteByIDResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{29}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *RouteByIDResponse) GetRoute() []byte {
@@ -1714,7 +1901,7 @@ type RouteAtRequest struct {
 func (x *RouteAtRequest) Reset() {
 	*x = RouteAtRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[30]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[34]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1727,7 +1914,7 @@ func (x *RouteAtRequest) String() string {
 func (*RouteAtRequest) ProtoMessage() {}
 
 func (x *RouteAtRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[30]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[34]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1740,7 +1927,7 @@ func (x *RouteAtRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RouteAtRequest.ProtoReflect.Descriptor instead.
 func (*RouteAtRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{30}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *RouteAtRequest) GetTrackerId() string {
@@ -1769,7 +1956,7 @@ type RouteAtResponse struct {
 func (x *RouteAtResponse) Reset() {
 	*x = RouteAtResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[31]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[35]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1782,7 +1969,7 @@ func (x *RouteAtResponse) String() string {
 func (*RouteAtResponse) ProtoMessage() {}
 
 func (x *RouteAtResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[31]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[35]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1795,7 +1982,7 @@ func (x *RouteAtResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RouteAtResponse.ProtoReflect.Descriptor instead.
 func (*RouteAtResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{31}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *RouteAtResponse) GetRoute() []byte {
@@ -1823,7 +2010,7 @@ type RoutesRequest struct {
 func (x *RoutesRequest) Reset() {
 	*x = RoutesRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[32]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[36]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1836,7 +2023,7 @@ func (x *RoutesRequest) String() string {
 func (*RoutesRequest) ProtoMessage() {}
 
 func (x *RoutesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[32]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[36]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1849,7 +2036,7 @@ func (x *RoutesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoutesRequest.ProtoReflect.Descriptor instead.
 func (*RoutesRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{32}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *RoutesRequest) GetTrackerId() string {
@@ -1871,7 +2058,7 @@ type RoutesResponse struct {
 func (x *RoutesResponse) Reset() {
 	*x = RoutesResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[33]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[37]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1884,7 +2071,7 @@ func (x *RoutesResponse) String() string {
 func (*RoutesResponse) ProtoMessage() {}
 
 func (x *RoutesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[33]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[37]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1897,7 +2084,7 @@ func (x *RoutesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoutesResponse.ProtoReflect.Descriptor instead.
 func (*RoutesResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{33}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *RoutesResponse) GetRoutes() []byte {
@@ -1926,7 +2113,7 @@ type RemoveRouteRequest struct {
 func (x *RemoveRouteRequest) Reset() {
 	*x = RemoveRouteRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[34]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[38]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1939,7 +2126,7 @@ func (x *RemoveRouteRequest) String() string {
 func (*RemoveRouteRequest) ProtoMessage() {}
 
 func (x *RemoveRouteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[34]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[38]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1952,7 +2139,7 @@ func (x *RemoveRouteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveRouteRequest.ProtoReflect.Descriptor instead.
 func (*RemoveRouteRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{34}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *RemoveRouteRequest) GetTrackerId() string {
@@ -1980,7 +2167,7 @@ type RemoveRouteResponse struct {
 func (x *RemoveRouteResponse) Reset() {
 	*x = RemoveRouteResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[35]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[39]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1993,7 +2180,7 @@ func (x *RemoveRouteResponse) String() string {
 func (*RemoveRouteResponse) ProtoMessage() {}
 
 func (x *RemoveRouteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[35]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[39]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2006,7 +2193,7 @@ func (x *RemoveRouteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveRouteResponse.ProtoReflect.Descriptor instead.
 func (*RemoveRouteResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{35}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *RemoveRouteResponse) GetError() *Error {
@@ -2028,7 +2215,7 @@ type AddRoutesRequest struct {
 func (x *AddRoutesRequest) Reset() {
 	*x = AddRoutesRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[36]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[40]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2041,7 +2228,7 @@ func (x *AddRoutesRequest) String() string {
 func (*AddRoutesRequest) ProtoMessage() {}
 
 func (x *AddRoutesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[36]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[40]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2054,7 +2241,7 @@ func (x *AddRoutesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddRoutesRequest.ProtoReflect.Descriptor instead.
 func (*AddRoutesRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{36}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *AddRoutesRequest) GetTrackerId() string {
@@ -2082,7 +2269,7 @@ type AddRoutesResponse struct {
 func (x *AddRoutesResponse) Reset() {
 	*x = AddRoutesResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[37]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[41]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2095,7 +2282,7 @@ func (x *AddRoutesResponse) String() string {
 func (*AddRoutesResponse) ProtoMessage() {}
 
 func (x *AddRoutesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[37]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[41]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2108,7 +2295,7 @@ func (x *AddRoutesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddRoutesResponse.ProtoReflect.Descriptor instead.
 func (*AddRoutesResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{37}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *AddRoutesResponse) GetError() *Error {
@@ -2129,7 +2316,7 @@ type TrackerStateRequest struct {
 func (x *TrackerStateRequest) Reset() {
 	*x = TrackerStateRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[38]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[42]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2142,7 +2329,7 @@ func (x *TrackerStateRequest) String() string {
 func (*TrackerStateRequest) ProtoMessage() {}
 
 func (x *TrackerStateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[38]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[42]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2155,7 +2342,7 @@ func (x *TrackerStateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TrackerStateRequest.ProtoReflect.Descriptor instead.
 func (*TrackerStateRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{38}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *TrackerStateRequest) GetTrackerId() string {
@@ -2177,7 +2364,7 @@ type TrackerStateResponse struct {
 func (x *TrackerStateResponse) Reset() {
 	*x = TrackerStateResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[39]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[43]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2190,7 +2377,7 @@ func (x *TrackerStateResponse) String() string {
 func (*TrackerStateResponse) ProtoMessage() {}
 
 func (x *TrackerStateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[39]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[43]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2203,7 +2390,7 @@ func (x *TrackerStateResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TrackerStateResponse.ProtoReflect.Descriptor instead.
 func (*TrackerStateResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{39}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *TrackerStateResponse) GetState() []byte {
@@ -2231,7 +2418,7 @@ type StopTrackerRequest struct {
 func (x *StopTrackerRequest) Reset() {
 	*x = StopTrackerRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[40]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[44]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2244,7 +2431,7 @@ func (x *StopTrackerRequest) String() string {
 func (*StopTrackerRequest) ProtoMessage() {}
 
 func (x *StopTrackerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[40]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[44]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2257,7 +2444,7 @@ func (x *StopTrackerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StopTrackerRequest.ProtoReflect.Descriptor instead.
 func (*StopTrackerRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{40}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *StopTrackerRequest) GetTrackerId() string {
@@ -2278,7 +2465,7 @@ type StopTrackerResponse struct {
 func (x *StopTrackerResponse) Reset() {
 	*x = StopTrackerResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[41]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[45]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2291,7 +2478,7 @@ func (x *StopTrackerResponse) String() string {
 func (*StopTrackerResponse) ProtoMessage() {}
 
 func (x *StopTrackerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[41]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[45]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2304,7 +2491,7 @@ func (x *StopTrackerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StopTrackerResponse.ProtoReflect.Descriptor instead.
 func (*StopTrackerResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{41}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *StopTrackerResponse) GetError() *Error {
@@ -2325,7 +2512,7 @@ type StartTrackerRequest struct {
 func (x *StartTrackerRequest) Reset() {
 	*x = StartTrackerRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[42]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[46]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2338,7 +2525,7 @@ func (x *StartTrackerRequest) String() string {
 func (*StartTrackerRequest) ProtoMessage() {}
 
 func (x *StartTrackerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[42]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[46]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2351,7 +2538,7 @@ func (x *StartTrackerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartTrackerRequest.ProtoReflect.Descriptor instead.
 func (*StartTrackerRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{42}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{46}
 }
 
 func (x *StartTrackerRequest) GetTrackerId() string {
@@ -2372,7 +2559,7 @@ type StartTrackerResponse struct {
 func (x *StartTrackerResponse) Reset() {
 	*x = StartTrackerResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[43]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[47]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2385,7 +2572,7 @@ func (x *StartTrackerResponse) String() string {
 func (*StartTrackerResponse) ProtoMessage() {}
 
 func (x *StartTrackerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[43]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[47]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2398,7 +2585,7 @@ func (x *StartTrackerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartTrackerResponse.ProtoReflect.Descriptor instead.
 func (*StartTrackerResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{43}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{47}
 }
 
 func (x *StartTrackerResponse) GetError() *Error {
@@ -2419,7 +2606,7 @@ type FindTrackerRequest struct {
 func (x *FindTrackerRequest) Reset() {
 	*x = FindTrackerRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[44]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[48]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2432,7 +2619,7 @@ func (x *FindTrackerRequest) String() string {
 func (*FindTrackerRequest) ProtoMessage() {}
 
 func (x *FindTrackerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[44]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[48]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2445,7 +2632,7 @@ func (x *FindTrackerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FindTrackerRequest.ProtoReflect.Descriptor instead.
 func (*FindTrackerRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{44}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{48}
 }
 
 func (x *FindTrackerRequest) GetTrackerId() string {
@@ -2467,7 +2654,7 @@ type FindTrackerResponse struct {
 func (x *FindTrackerResponse) Reset() {
 	*x = FindTrackerResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[45]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[49]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2480,7 +2667,7 @@ func (x *FindTrackerResponse) String() string {
 func (*FindTrackerResponse) ProtoMessage() {}
 
 func (x *FindTrackerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[45]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[49]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2493,7 +2680,7 @@ func (x *FindTrackerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FindTrackerResponse.ProtoReflect.Descriptor instead.
 func (*FindTrackerResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{45}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{49}
 }
 
 func (x *FindTrackerResponse) GetTracker() *Tracker {
@@ -2525,7 +2712,7 @@ type UpdateTrackerRequest struct {
 func (x *UpdateTrackerRequest) Reset() {
 	*x = UpdateTrackerRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[46]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[50]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2538,7 +2725,7 @@ func (x *UpdateTrackerRequest) String() string {
 func (*UpdateTrackerRequest) ProtoMessage() {}
 
 func (x *UpdateTrackerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[46]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[50]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2551,7 +2738,7 @@ func (x *UpdateTrackerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateTrackerRequest.ProtoReflect.Descriptor instead.
 func (*UpdateTrackerRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{46}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{50}
 }
 
 func (x *UpdateTrackerRequest) GetTrackerId() string {
@@ -2600,7 +2787,7 @@ type UpdateTrackerResponse struct {
 func (x *UpdateTrackerResponse) Reset() {
 	*x = UpdateTrackerResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[47]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[51]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2613,7 +2800,7 @@ func (x *UpdateTrackerResponse) String() string {
 func (*UpdateTrackerResponse) ProtoMessage() {}
 
 func (x *UpdateTrackerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[47]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[51]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2626,7 +2813,7 @@ func (x *UpdateTrackerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateTrackerResponse.ProtoReflect.Descriptor instead.
 func (*UpdateTrackerResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{47}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{51}
 }
 
 func (x *UpdateTrackerResponse) GetError() *Error {
@@ -2647,7 +2834,7 @@ type RemoveTrackerRequest struct {
 func (x *RemoveTrackerRequest) Reset() {
 	*x = RemoveTrackerRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[48]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[52]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2660,7 +2847,7 @@ func (x *RemoveTrackerRequest) String() string {
 func (*RemoveTrackerRequest) ProtoMessage() {}
 
 func (x *RemoveTrackerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[48]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[52]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2673,7 +2860,7 @@ func (x *RemoveTrackerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveTrackerRequest.ProtoReflect.Descriptor instead.
 func (*RemoveTrackerRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{48}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{52}
 }
 
 func (x *RemoveTrackerRequest) GetTrackerId() string {
@@ -2694,7 +2881,7 @@ type RemoveTrackerResponse struct {
 func (x *RemoveTrackerResponse) Reset() {
 	*x = RemoveTrackerResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[49]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[53]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2707,7 +2894,7 @@ func (x *RemoveTrackerResponse) String() string {
 func (*RemoveTrackerResponse) ProtoMessage() {}
 
 func (x *RemoveTrackerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[49]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[53]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2720,7 +2907,7 @@ func (x *RemoveTrackerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveTrackerResponse.ProtoReflect.Descriptor instead.
 func (*RemoveTrackerResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{49}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{53}
 }
 
 func (x *RemoveTrackerResponse) GetError() *Error {
@@ -2741,7 +2928,7 @@ type SearchTrackersRequest struct {
 func (x *SearchTrackersRequest) Reset() {
 	*x = SearchTrackersRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[50]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[54]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2754,7 +2941,7 @@ func (x *SearchTrackersRequest) String() string {
 func (*SearchTrackersRequest) ProtoMessage() {}
 
 func (x *SearchTrackersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[50]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[54]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2767,7 +2954,7 @@ func (x *SearchTrackersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SearchTrackersRequest.ProtoReflect.Descriptor instead.
 func (*SearchTrackersRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{50}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{54}
 }
 
 func (x *SearchTrackersRequest) GetFilter() *Filter {
@@ -2790,7 +2977,7 @@ type SearchTrackersResponse struct {
 func (x *SearchTrackersResponse) Reset() {
 	*x = SearchTrackersResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[51]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[55]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2803,7 +2990,7 @@ func (x *SearchTrackersResponse) String() string {
 func (*SearchTrackersResponse) ProtoMessage() {}
 
 func (x *SearchTrackersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[51]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[55]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2816,7 +3003,7 @@ func (x *SearchTrackersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SearchTrackersResponse.ProtoReflect.Descriptor instead.
 func (*SearchTrackersResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{51}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{55}
 }
 
 func (x *SearchTrackersResponse) GetTrackers() []*Tracker {
@@ -2860,7 +3047,7 @@ type NewTrackerRequest struct {
 func (x *NewTrackerRequest) Reset() {
 	*x = NewTrackerRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[52]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[56]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2873,7 +3060,7 @@ func (x *NewTrackerRequest) String() string {
 func (*NewTrackerRequest) ProtoMessage() {}
 
 func (x *NewTrackerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[52]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[56]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2886,7 +3073,7 @@ func (x *NewTrackerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NewTrackerRequest.ProtoReflect.Descriptor instead.
 func (*NewTrackerRequest) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{52}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{56}
 }
 
 func (x *NewTrackerRequest) GetModel() string {
@@ -2971,7 +3158,7 @@ type NewTrackerResponse struct {
 func (x *NewTrackerResponse) Reset() {
 	*x = NewTrackerResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[53]
+		mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[57]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2984,7 +3171,7 @@ func (x *NewTrackerResponse) String() string {
 func (*NewTrackerResponse) ProtoMessage() {}
 
 func (x *NewTrackerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[53]
+	mi := &file_proto_gpsgend_v1_generator_service_proto_msgTypes[57]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2997,7 +3184,7 @@ func (x *NewTrackerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NewTrackerResponse.ProtoReflect.Descriptor instead.
 func (*NewTrackerResponse) Descriptor() ([]byte, []int) {
-	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{53}
+	return file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP(), []int{57}
 }
 
 func (x *NewTrackerResponse) GetTracker() *Tracker {
@@ -3022,7 +3209,22 @@ var file_proto_gpsgend_v1_generator_service_proto_rawDesc = []byte{
 	0x76, 0x69, 0x63, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x10, 0x70, 0x72, 0x6f, 0x74,
 	0x6f, 0x2e, 0x67, 0x70, 0x73, 0x67, 0x65, 0x6e, 0x64, 0x2e, 0x76, 0x31, 0x1a, 0x1c, 0x70, 0x72,
 	0x6f, 0x74, 0x6f, 0x2f, 0x67, 0x70, 0x73, 0x67, 0x65, 0x6e, 0x64, 0x2f, 0x76, 0x31, 0x2f, 0x74,
-	0x79, 0x70, 0x65, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x35, 0x0a, 0x14, 0x52, 0x65,
+	0x79, 0x70, 0x65, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x2c, 0x0a, 0x0b, 0x53, 0x79,
+	0x6e, 0x63, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1d, 0x0a, 0x0a, 0x74, 0x72, 0x61,
+	0x63, 0x6b, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x74,
+	0x72, 0x61, 0x63, 0x6b, 0x65, 0x72, 0x49, 0x64, 0x22, 0x3d, 0x0a, 0x0c, 0x53, 0x79, 0x6e, 0x63,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x2d, 0x0a, 0x05, 0x65, 0x72, 0x72, 0x6f,
+	0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x17, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e,
+	0x67, 0x70, 0x73, 0x67, 0x65, 0x6e, 0x64, 0x2e, 0x76, 0x31, 0x2e, 0x45, 0x72, 0x72, 0x6f, 0x72,
+	0x52, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x22, 0x0e, 0x0a, 0x0c, 0x45, 0x6d, 0x70, 0x74, 0x79,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x71, 0x0a, 0x0d, 0x53, 0x74, 0x61, 0x74, 0x73,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x31, 0x0a, 0x05, 0x73, 0x74, 0x61, 0x74,
+	0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x1b, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e,
+	0x67, 0x70, 0x73, 0x67, 0x65, 0x6e, 0x64, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x74, 0x61, 0x74, 0x73,
+	0x49, 0x74, 0x65, 0x6d, 0x52, 0x05, 0x73, 0x74, 0x61, 0x74, 0x73, 0x12, 0x2d, 0x0a, 0x05, 0x65,
+	0x72, 0x72, 0x6f, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x17, 0x2e, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x2e, 0x67, 0x70, 0x73, 0x67, 0x65, 0x6e, 0x64, 0x2e, 0x76, 0x31, 0x2e, 0x45, 0x72,
+	0x72, 0x6f, 0x72, 0x52, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x22, 0x35, 0x0a, 0x14, 0x52, 0x65,
 	0x73, 0x75, 0x6d, 0x65, 0x54, 0x72, 0x61, 0x63, 0x6b, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65,
 	0x73, 0x74, 0x12, 0x1d, 0x0a, 0x0a, 0x74, 0x72, 0x61, 0x63, 0x6b, 0x65, 0x72, 0x5f, 0x69, 0x64,
 	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x74, 0x72, 0x61, 0x63, 0x6b, 0x65, 0x72, 0x49,
@@ -3348,8 +3550,8 @@ var file_proto_gpsgend_v1_generator_service_proto_rawDesc = []byte{
 	0x72, 0x61, 0x63, 0x6b, 0x65, 0x72, 0x52, 0x07, 0x74, 0x72, 0x61, 0x63, 0x6b, 0x65, 0x72, 0x12,
 	0x2d, 0x0a, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x17,
 	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x67, 0x70, 0x73, 0x67, 0x65, 0x6e, 0x64, 0x2e, 0x76,
-	0x31, 0x2e, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x52, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x32, 0x97,
-	0x14, 0x0a, 0x10, 0x47, 0x65, 0x6e, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x53, 0x65, 0x72, 0x76,
+	0x31, 0x2e, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x52, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x32, 0xac,
+	0x15, 0x0a, 0x10, 0x47, 0x65, 0x6e, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x53, 0x65, 0x72, 0x76,
 	0x69, 0x63, 0x65, 0x12, 0x59, 0x0a, 0x0a, 0x4e, 0x65, 0x77, 0x54, 0x72, 0x61, 0x63, 0x6b, 0x65,
 	0x72, 0x12, 0x23, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x67, 0x70, 0x73, 0x67, 0x65, 0x6e,
 	0x64, 0x2e, 0x76, 0x31, 0x2e, 0x4e, 0x65, 0x77, 0x54, 0x72, 0x61, 0x63, 0x6b, 0x65, 0x72, 0x52,
@@ -3510,10 +3712,19 @@ var file_proto_gpsgend_v1_generator_service_proto_rawDesc = []byte{
 	0x72, 0x61, 0x63, 0x6b, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x27, 0x2e,
 	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x67, 0x70, 0x73, 0x67, 0x65, 0x6e, 0x64, 0x2e, 0x76, 0x31,
 	0x2e, 0x52, 0x65, 0x73, 0x75, 0x6d, 0x65, 0x54, 0x72, 0x61, 0x63, 0x6b, 0x65, 0x72, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x1f, 0x5a, 0x1d, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x2f, 0x67, 0x70, 0x73, 0x67, 0x65, 0x6e, 0x64, 0x2f, 0x76, 0x31, 0x3b, 0x67, 0x70, 0x73,
-	0x67, 0x65, 0x6e, 0x64, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x33,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x4a, 0x0a, 0x05, 0x53, 0x74, 0x61, 0x74,
+	0x73, 0x12, 0x1e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x67, 0x70, 0x73, 0x67, 0x65, 0x6e,
+	0x64, 0x2e, 0x76, 0x31, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x1a, 0x1f, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x67, 0x70, 0x73, 0x67, 0x65, 0x6e,
+	0x64, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x74, 0x61, 0x74, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x22, 0x00, 0x12, 0x47, 0x0a, 0x04, 0x53, 0x79, 0x6e, 0x63, 0x12, 0x1d, 0x2e, 0x70,
+	0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x67, 0x70, 0x73, 0x67, 0x65, 0x6e, 0x64, 0x2e, 0x76, 0x31, 0x2e,
+	0x53, 0x79, 0x6e, 0x63, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1e, 0x2e, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x2e, 0x67, 0x70, 0x73, 0x67, 0x65, 0x6e, 0x64, 0x2e, 0x76, 0x31, 0x2e, 0x53,
+	0x79, 0x6e, 0x63, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x1f, 0x5a,
+	0x1d, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x67, 0x70, 0x73, 0x67, 0x65, 0x6e, 0x64, 0x2f, 0x76,
+	0x31, 0x3b, 0x67, 0x70, 0x73, 0x67, 0x65, 0x6e, 0x64, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x06,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -3528,175 +3739,187 @@ func file_proto_gpsgend_v1_generator_service_proto_rawDescGZIP() []byte {
 	return file_proto_gpsgend_v1_generator_service_proto_rawDescData
 }
 
-var file_proto_gpsgend_v1_generator_service_proto_msgTypes = make([]protoimpl.MessageInfo, 54)
+var file_proto_gpsgend_v1_generator_service_proto_msgTypes = make([]protoimpl.MessageInfo, 58)
 var file_proto_gpsgend_v1_generator_service_proto_goTypes = []interface{}{
-	(*ResumeTrackerRequest)(nil),    // 0: proto.gpsgend.v1.ResumeTrackerRequest
-	(*ResumeTrackerResponse)(nil),   // 1: proto.gpsgend.v1.ResumeTrackerResponse
-	(*ShutdownTrackerRequest)(nil),  // 2: proto.gpsgend.v1.ShutdownTrackerRequest
-	(*ShutdownTrackerResponse)(nil), // 3: proto.gpsgend.v1.ShutdownTrackerResponse
-	(*SensorsRequest)(nil),          // 4: proto.gpsgend.v1.SensorsRequest
-	(*SensorsResponse)(nil),         // 5: proto.gpsgend.v1.SensorsResponse
-	(*RemoveSensorRequest)(nil),     // 6: proto.gpsgend.v1.RemoveSensorRequest
-	(*RemoveSensorResponse)(nil),    // 7: proto.gpsgend.v1.RemoveSensorResponse
-	(*AddSensorRequest)(nil),        // 8: proto.gpsgend.v1.AddSensorRequest
-	(*AddSensorResponse)(nil),       // 9: proto.gpsgend.v1.AddSensorResponse
-	(*MoveToSegmentRequest)(nil),    // 10: proto.gpsgend.v1.MoveToSegmentRequest
-	(*MoveToSegmentResponse)(nil),   // 11: proto.gpsgend.v1.MoveToSegmentResponse
-	(*MoveToTrackByIDRequest)(nil),  // 12: proto.gpsgend.v1.MoveToTrackByIDRequest
-	(*MoveToTrackByIDResponse)(nil), // 13: proto.gpsgend.v1.MoveToTrackByIDResponse
-	(*MoveToTrackRequest)(nil),      // 14: proto.gpsgend.v1.MoveToTrackRequest
-	(*MoveToTrackResponse)(nil),     // 15: proto.gpsgend.v1.MoveToTrackResponse
-	(*MoveToRouteByIDRequest)(nil),  // 16: proto.gpsgend.v1.MoveToRouteByIDRequest
-	(*MoveToRouteByIDResponse)(nil), // 17: proto.gpsgend.v1.MoveToRouteByIDResponse
-	(*MoveToRouteRequest)(nil),      // 18: proto.gpsgend.v1.MoveToRouteRequest
-	(*MoveToRouteResponse)(nil),     // 19: proto.gpsgend.v1.MoveToRouteResponse
-	(*ToPrevRouteRequest)(nil),      // 20: proto.gpsgend.v1.ToPrevRouteRequest
-	(*ToPrevRouteResponse)(nil),     // 21: proto.gpsgend.v1.ToPrevRouteResponse
-	(*ToNextRouteRequest)(nil),      // 22: proto.gpsgend.v1.ToNextRouteRequest
-	(*ToNextRouteResponse)(nil),     // 23: proto.gpsgend.v1.ToNextRouteResponse
-	(*ResetNavigatorRequest)(nil),   // 24: proto.gpsgend.v1.ResetNavigatorRequest
-	(*ResetNavigatorResponse)(nil),  // 25: proto.gpsgend.v1.ResetNavigatorResponse
-	(*ResetRoutesRequest)(nil),      // 26: proto.gpsgend.v1.ResetRoutesRequest
-	(*ResetRoutesResponse)(nil),     // 27: proto.gpsgend.v1.ResetRoutesResponse
-	(*RouteByIDRequest)(nil),        // 28: proto.gpsgend.v1.RouteByIDRequest
-	(*RouteByIDResponse)(nil),       // 29: proto.gpsgend.v1.RouteByIDResponse
-	(*RouteAtRequest)(nil),          // 30: proto.gpsgend.v1.RouteAtRequest
-	(*RouteAtResponse)(nil),         // 31: proto.gpsgend.v1.RouteAtResponse
-	(*RoutesRequest)(nil),           // 32: proto.gpsgend.v1.RoutesRequest
-	(*RoutesResponse)(nil),          // 33: proto.gpsgend.v1.RoutesResponse
-	(*RemoveRouteRequest)(nil),      // 34: proto.gpsgend.v1.RemoveRouteRequest
-	(*RemoveRouteResponse)(nil),     // 35: proto.gpsgend.v1.RemoveRouteResponse
-	(*AddRoutesRequest)(nil),        // 36: proto.gpsgend.v1.AddRoutesRequest
-	(*AddRoutesResponse)(nil),       // 37: proto.gpsgend.v1.AddRoutesResponse
-	(*TrackerStateRequest)(nil),     // 38: proto.gpsgend.v1.TrackerStateRequest
-	(*TrackerStateResponse)(nil),    // 39: proto.gpsgend.v1.TrackerStateResponse
-	(*StopTrackerRequest)(nil),      // 40: proto.gpsgend.v1.StopTrackerRequest
-	(*StopTrackerResponse)(nil),     // 41: proto.gpsgend.v1.StopTrackerResponse
-	(*StartTrackerRequest)(nil),     // 42: proto.gpsgend.v1.StartTrackerRequest
-	(*StartTrackerResponse)(nil),    // 43: proto.gpsgend.v1.StartTrackerResponse
-	(*FindTrackerRequest)(nil),      // 44: proto.gpsgend.v1.FindTrackerRequest
-	(*FindTrackerResponse)(nil),     // 45: proto.gpsgend.v1.FindTrackerResponse
-	(*UpdateTrackerRequest)(nil),    // 46: proto.gpsgend.v1.UpdateTrackerRequest
-	(*UpdateTrackerResponse)(nil),   // 47: proto.gpsgend.v1.UpdateTrackerResponse
-	(*RemoveTrackerRequest)(nil),    // 48: proto.gpsgend.v1.RemoveTrackerRequest
-	(*RemoveTrackerResponse)(nil),   // 49: proto.gpsgend.v1.RemoveTrackerResponse
-	(*SearchTrackersRequest)(nil),   // 50: proto.gpsgend.v1.SearchTrackersRequest
-	(*SearchTrackersResponse)(nil),  // 51: proto.gpsgend.v1.SearchTrackersResponse
-	(*NewTrackerRequest)(nil),       // 52: proto.gpsgend.v1.NewTrackerRequest
-	(*NewTrackerResponse)(nil),      // 53: proto.gpsgend.v1.NewTrackerResponse
-	(*Error)(nil),                   // 54: proto.gpsgend.v1.Error
-	(*Sensor)(nil),                  // 55: proto.gpsgend.v1.Sensor
-	(*Navigator)(nil),               // 56: proto.gpsgend.v1.Navigator
-	(*Tracker)(nil),                 // 57: proto.gpsgend.v1.Tracker
-	(*Filter)(nil),                  // 58: proto.gpsgend.v1.Filter
-	(*Offline)(nil),                 // 59: proto.gpsgend.v1.Offline
-	(*Elevation)(nil),               // 60: proto.gpsgend.v1.Elevation
-	(*Battery)(nil),                 // 61: proto.gpsgend.v1.Battery
-	(*Speed)(nil),                   // 62: proto.gpsgend.v1.Speed
+	(*SyncRequest)(nil),             // 0: proto.gpsgend.v1.SyncRequest
+	(*SyncResponse)(nil),            // 1: proto.gpsgend.v1.SyncResponse
+	(*EmptyRequest)(nil),            // 2: proto.gpsgend.v1.EmptyRequest
+	(*StatsResponse)(nil),           // 3: proto.gpsgend.v1.StatsResponse
+	(*ResumeTrackerRequest)(nil),    // 4: proto.gpsgend.v1.ResumeTrackerRequest
+	(*ResumeTrackerResponse)(nil),   // 5: proto.gpsgend.v1.ResumeTrackerResponse
+	(*ShutdownTrackerRequest)(nil),  // 6: proto.gpsgend.v1.ShutdownTrackerRequest
+	(*ShutdownTrackerResponse)(nil), // 7: proto.gpsgend.v1.ShutdownTrackerResponse
+	(*SensorsRequest)(nil),          // 8: proto.gpsgend.v1.SensorsRequest
+	(*SensorsResponse)(nil),         // 9: proto.gpsgend.v1.SensorsResponse
+	(*RemoveSensorRequest)(nil),     // 10: proto.gpsgend.v1.RemoveSensorRequest
+	(*RemoveSensorResponse)(nil),    // 11: proto.gpsgend.v1.RemoveSensorResponse
+	(*AddSensorRequest)(nil),        // 12: proto.gpsgend.v1.AddSensorRequest
+	(*AddSensorResponse)(nil),       // 13: proto.gpsgend.v1.AddSensorResponse
+	(*MoveToSegmentRequest)(nil),    // 14: proto.gpsgend.v1.MoveToSegmentRequest
+	(*MoveToSegmentResponse)(nil),   // 15: proto.gpsgend.v1.MoveToSegmentResponse
+	(*MoveToTrackByIDRequest)(nil),  // 16: proto.gpsgend.v1.MoveToTrackByIDRequest
+	(*MoveToTrackByIDResponse)(nil), // 17: proto.gpsgend.v1.MoveToTrackByIDResponse
+	(*MoveToTrackRequest)(nil),      // 18: proto.gpsgend.v1.MoveToTrackRequest
+	(*MoveToTrackResponse)(nil),     // 19: proto.gpsgend.v1.MoveToTrackResponse
+	(*MoveToRouteByIDRequest)(nil),  // 20: proto.gpsgend.v1.MoveToRouteByIDRequest
+	(*MoveToRouteByIDResponse)(nil), // 21: proto.gpsgend.v1.MoveToRouteByIDResponse
+	(*MoveToRouteRequest)(nil),      // 22: proto.gpsgend.v1.MoveToRouteRequest
+	(*MoveToRouteResponse)(nil),     // 23: proto.gpsgend.v1.MoveToRouteResponse
+	(*ToPrevRouteRequest)(nil),      // 24: proto.gpsgend.v1.ToPrevRouteRequest
+	(*ToPrevRouteResponse)(nil),     // 25: proto.gpsgend.v1.ToPrevRouteResponse
+	(*ToNextRouteRequest)(nil),      // 26: proto.gpsgend.v1.ToNextRouteRequest
+	(*ToNextRouteResponse)(nil),     // 27: proto.gpsgend.v1.ToNextRouteResponse
+	(*ResetNavigatorRequest)(nil),   // 28: proto.gpsgend.v1.ResetNavigatorRequest
+	(*ResetNavigatorResponse)(nil),  // 29: proto.gpsgend.v1.ResetNavigatorResponse
+	(*ResetRoutesRequest)(nil),      // 30: proto.gpsgend.v1.ResetRoutesRequest
+	(*ResetRoutesResponse)(nil),     // 31: proto.gpsgend.v1.ResetRoutesResponse
+	(*RouteByIDRequest)(nil),        // 32: proto.gpsgend.v1.RouteByIDRequest
+	(*RouteByIDResponse)(nil),       // 33: proto.gpsgend.v1.RouteByIDResponse
+	(*RouteAtRequest)(nil),          // 34: proto.gpsgend.v1.RouteAtRequest
+	(*RouteAtResponse)(nil),         // 35: proto.gpsgend.v1.RouteAtResponse
+	(*RoutesRequest)(nil),           // 36: proto.gpsgend.v1.RoutesRequest
+	(*RoutesResponse)(nil),          // 37: proto.gpsgend.v1.RoutesResponse
+	(*RemoveRouteRequest)(nil),      // 38: proto.gpsgend.v1.RemoveRouteRequest
+	(*RemoveRouteResponse)(nil),     // 39: proto.gpsgend.v1.RemoveRouteResponse
+	(*AddRoutesRequest)(nil),        // 40: proto.gpsgend.v1.AddRoutesRequest
+	(*AddRoutesResponse)(nil),       // 41: proto.gpsgend.v1.AddRoutesResponse
+	(*TrackerStateRequest)(nil),     // 42: proto.gpsgend.v1.TrackerStateRequest
+	(*TrackerStateResponse)(nil),    // 43: proto.gpsgend.v1.TrackerStateResponse
+	(*StopTrackerRequest)(nil),      // 44: proto.gpsgend.v1.StopTrackerRequest
+	(*StopTrackerResponse)(nil),     // 45: proto.gpsgend.v1.StopTrackerResponse
+	(*StartTrackerRequest)(nil),     // 46: proto.gpsgend.v1.StartTrackerRequest
+	(*StartTrackerResponse)(nil),    // 47: proto.gpsgend.v1.StartTrackerResponse
+	(*FindTrackerRequest)(nil),      // 48: proto.gpsgend.v1.FindTrackerRequest
+	(*FindTrackerResponse)(nil),     // 49: proto.gpsgend.v1.FindTrackerResponse
+	(*UpdateTrackerRequest)(nil),    // 50: proto.gpsgend.v1.UpdateTrackerRequest
+	(*UpdateTrackerResponse)(nil),   // 51: proto.gpsgend.v1.UpdateTrackerResponse
+	(*RemoveTrackerRequest)(nil),    // 52: proto.gpsgend.v1.RemoveTrackerRequest
+	(*RemoveTrackerResponse)(nil),   // 53: proto.gpsgend.v1.RemoveTrackerResponse
+	(*SearchTrackersRequest)(nil),   // 54: proto.gpsgend.v1.SearchTrackersRequest
+	(*SearchTrackersResponse)(nil),  // 55: proto.gpsgend.v1.SearchTrackersResponse
+	(*NewTrackerRequest)(nil),       // 56: proto.gpsgend.v1.NewTrackerRequest
+	(*NewTrackerResponse)(nil),      // 57: proto.gpsgend.v1.NewTrackerResponse
+	(*Error)(nil),                   // 58: proto.gpsgend.v1.Error
+	(*StatsItem)(nil),               // 59: proto.gpsgend.v1.StatsItem
+	(*Sensor)(nil),                  // 60: proto.gpsgend.v1.Sensor
+	(*Navigator)(nil),               // 61: proto.gpsgend.v1.Navigator
+	(*Tracker)(nil),                 // 62: proto.gpsgend.v1.Tracker
+	(*Filter)(nil),                  // 63: proto.gpsgend.v1.Filter
+	(*Offline)(nil),                 // 64: proto.gpsgend.v1.Offline
+	(*Elevation)(nil),               // 65: proto.gpsgend.v1.Elevation
+	(*Battery)(nil),                 // 66: proto.gpsgend.v1.Battery
+	(*Speed)(nil),                   // 67: proto.gpsgend.v1.Speed
 }
 var file_proto_gpsgend_v1_generator_service_proto_depIdxs = []int32{
-	54, // 0: proto.gpsgend.v1.ResumeTrackerResponse.error:type_name -> proto.gpsgend.v1.Error
-	54, // 1: proto.gpsgend.v1.ShutdownTrackerResponse.error:type_name -> proto.gpsgend.v1.Error
-	55, // 2: proto.gpsgend.v1.SensorsResponse.sensors:type_name -> proto.gpsgend.v1.Sensor
-	54, // 3: proto.gpsgend.v1.SensorsResponse.error:type_name -> proto.gpsgend.v1.Error
-	54, // 4: proto.gpsgend.v1.RemoveSensorResponse.error:type_name -> proto.gpsgend.v1.Error
-	54, // 5: proto.gpsgend.v1.AddSensorResponse.error:type_name -> proto.gpsgend.v1.Error
-	56, // 6: proto.gpsgend.v1.MoveToSegmentResponse.navigator:type_name -> proto.gpsgend.v1.Navigator
-	54, // 7: proto.gpsgend.v1.MoveToSegmentResponse.error:type_name -> proto.gpsgend.v1.Error
-	56, // 8: proto.gpsgend.v1.MoveToTrackByIDResponse.navigator:type_name -> proto.gpsgend.v1.Navigator
-	54, // 9: proto.gpsgend.v1.MoveToTrackByIDResponse.error:type_name -> proto.gpsgend.v1.Error
-	56, // 10: proto.gpsgend.v1.MoveToTrackResponse.navigator:type_name -> proto.gpsgend.v1.Navigator
-	54, // 11: proto.gpsgend.v1.MoveToTrackResponse.error:type_name -> proto.gpsgend.v1.Error
-	56, // 12: proto.gpsgend.v1.MoveToRouteByIDResponse.navigator:type_name -> proto.gpsgend.v1.Navigator
-	54, // 13: proto.gpsgend.v1.MoveToRouteByIDResponse.error:type_name -> proto.gpsgend.v1.Error
-	56, // 14: proto.gpsgend.v1.MoveToRouteResponse.navigator:type_name -> proto.gpsgend.v1.Navigator
-	54, // 15: proto.gpsgend.v1.MoveToRouteResponse.error:type_name -> proto.gpsgend.v1.Error
-	56, // 16: proto.gpsgend.v1.ToPrevRouteResponse.navigator:type_name -> proto.gpsgend.v1.Navigator
-	54, // 17: proto.gpsgend.v1.ToPrevRouteResponse.error:type_name -> proto.gpsgend.v1.Error
-	56, // 18: proto.gpsgend.v1.ToNextRouteResponse.navigator:type_name -> proto.gpsgend.v1.Navigator
-	54, // 19: proto.gpsgend.v1.ToNextRouteResponse.error:type_name -> proto.gpsgend.v1.Error
-	54, // 20: proto.gpsgend.v1.ResetNavigatorResponse.error:type_name -> proto.gpsgend.v1.Error
-	54, // 21: proto.gpsgend.v1.ResetRoutesResponse.error:type_name -> proto.gpsgend.v1.Error
-	54, // 22: proto.gpsgend.v1.RouteByIDResponse.error:type_name -> proto.gpsgend.v1.Error
-	54, // 23: proto.gpsgend.v1.RouteAtResponse.error:type_name -> proto.gpsgend.v1.Error
-	54, // 24: proto.gpsgend.v1.RoutesResponse.error:type_name -> proto.gpsgend.v1.Error
-	54, // 25: proto.gpsgend.v1.RemoveRouteResponse.error:type_name -> proto.gpsgend.v1.Error
-	54, // 26: proto.gpsgend.v1.AddRoutesResponse.error:type_name -> proto.gpsgend.v1.Error
-	54, // 27: proto.gpsgend.v1.TrackerStateResponse.error:type_name -> proto.gpsgend.v1.Error
-	54, // 28: proto.gpsgend.v1.StopTrackerResponse.error:type_name -> proto.gpsgend.v1.Error
-	54, // 29: proto.gpsgend.v1.StartTrackerResponse.error:type_name -> proto.gpsgend.v1.Error
-	57, // 30: proto.gpsgend.v1.FindTrackerResponse.tracker:type_name -> proto.gpsgend.v1.Tracker
-	54, // 31: proto.gpsgend.v1.FindTrackerResponse.error:type_name -> proto.gpsgend.v1.Error
-	54, // 32: proto.gpsgend.v1.UpdateTrackerResponse.error:type_name -> proto.gpsgend.v1.Error
-	54, // 33: proto.gpsgend.v1.RemoveTrackerResponse.error:type_name -> proto.gpsgend.v1.Error
-	58, // 34: proto.gpsgend.v1.SearchTrackersRequest.filter:type_name -> proto.gpsgend.v1.Filter
-	57, // 35: proto.gpsgend.v1.SearchTrackersResponse.trackers:type_name -> proto.gpsgend.v1.Tracker
-	54, // 36: proto.gpsgend.v1.SearchTrackersResponse.error:type_name -> proto.gpsgend.v1.Error
-	59, // 37: proto.gpsgend.v1.NewTrackerRequest.offline:type_name -> proto.gpsgend.v1.Offline
-	60, // 38: proto.gpsgend.v1.NewTrackerRequest.elevation:type_name -> proto.gpsgend.v1.Elevation
-	61, // 39: proto.gpsgend.v1.NewTrackerRequest.battery:type_name -> proto.gpsgend.v1.Battery
-	62, // 40: proto.gpsgend.v1.NewTrackerRequest.speed:type_name -> proto.gpsgend.v1.Speed
-	57, // 41: proto.gpsgend.v1.NewTrackerResponse.tracker:type_name -> proto.gpsgend.v1.Tracker
-	54, // 42: proto.gpsgend.v1.NewTrackerResponse.error:type_name -> proto.gpsgend.v1.Error
-	52, // 43: proto.gpsgend.v1.GeneratorService.NewTracker:input_type -> proto.gpsgend.v1.NewTrackerRequest
-	50, // 44: proto.gpsgend.v1.GeneratorService.SearchTrackers:input_type -> proto.gpsgend.v1.SearchTrackersRequest
-	48, // 45: proto.gpsgend.v1.GeneratorService.RemoveTracker:input_type -> proto.gpsgend.v1.RemoveTrackerRequest
-	46, // 46: proto.gpsgend.v1.GeneratorService.UpdateTracker:input_type -> proto.gpsgend.v1.UpdateTrackerRequest
-	44, // 47: proto.gpsgend.v1.GeneratorService.FindTracker:input_type -> proto.gpsgend.v1.FindTrackerRequest
-	42, // 48: proto.gpsgend.v1.GeneratorService.StartTracker:input_type -> proto.gpsgend.v1.StartTrackerRequest
-	40, // 49: proto.gpsgend.v1.GeneratorService.StopTracker:input_type -> proto.gpsgend.v1.StopTrackerRequest
-	38, // 50: proto.gpsgend.v1.GeneratorService.TrackerState:input_type -> proto.gpsgend.v1.TrackerStateRequest
-	36, // 51: proto.gpsgend.v1.GeneratorService.AddRoutes:input_type -> proto.gpsgend.v1.AddRoutesRequest
-	34, // 52: proto.gpsgend.v1.GeneratorService.RemoveRoute:input_type -> proto.gpsgend.v1.RemoveRouteRequest
-	32, // 53: proto.gpsgend.v1.GeneratorService.Routes:input_type -> proto.gpsgend.v1.RoutesRequest
-	30, // 54: proto.gpsgend.v1.GeneratorService.RouteAt:input_type -> proto.gpsgend.v1.RouteAtRequest
-	28, // 55: proto.gpsgend.v1.GeneratorService.RouteByID:input_type -> proto.gpsgend.v1.RouteByIDRequest
-	26, // 56: proto.gpsgend.v1.GeneratorService.ResetRoutes:input_type -> proto.gpsgend.v1.ResetRoutesRequest
-	24, // 57: proto.gpsgend.v1.GeneratorService.ResetNavigator:input_type -> proto.gpsgend.v1.ResetNavigatorRequest
-	22, // 58: proto.gpsgend.v1.GeneratorService.ToNextRoute:input_type -> proto.gpsgend.v1.ToNextRouteRequest
-	20, // 59: proto.gpsgend.v1.GeneratorService.ToPrevRoute:input_type -> proto.gpsgend.v1.ToPrevRouteRequest
-	18, // 60: proto.gpsgend.v1.GeneratorService.MoveToRoute:input_type -> proto.gpsgend.v1.MoveToRouteRequest
-	16, // 61: proto.gpsgend.v1.GeneratorService.MoveToRouteByID:input_type -> proto.gpsgend.v1.MoveToRouteByIDRequest
-	14, // 62: proto.gpsgend.v1.GeneratorService.MoveToTrack:input_type -> proto.gpsgend.v1.MoveToTrackRequest
-	12, // 63: proto.gpsgend.v1.GeneratorService.MoveToTrackByID:input_type -> proto.gpsgend.v1.MoveToTrackByIDRequest
-	10, // 64: proto.gpsgend.v1.GeneratorService.MoveToSegment:input_type -> proto.gpsgend.v1.MoveToSegmentRequest
-	8,  // 65: proto.gpsgend.v1.GeneratorService.AddSensor:input_type -> proto.gpsgend.v1.AddSensorRequest
-	6,  // 66: proto.gpsgend.v1.GeneratorService.RemoveSensor:input_type -> proto.gpsgend.v1.RemoveSensorRequest
-	4,  // 67: proto.gpsgend.v1.GeneratorService.Sensors:input_type -> proto.gpsgend.v1.SensorsRequest
-	2,  // 68: proto.gpsgend.v1.GeneratorService.ShutdownTracker:input_type -> proto.gpsgend.v1.ShutdownTrackerRequest
-	0,  // 69: proto.gpsgend.v1.GeneratorService.ResumeTracker:input_type -> proto.gpsgend.v1.ResumeTrackerRequest
-	53, // 70: proto.gpsgend.v1.GeneratorService.NewTracker:output_type -> proto.gpsgend.v1.NewTrackerResponse
-	51, // 71: proto.gpsgend.v1.GeneratorService.SearchTrackers:output_type -> proto.gpsgend.v1.SearchTrackersResponse
-	49, // 72: proto.gpsgend.v1.GeneratorService.RemoveTracker:output_type -> proto.gpsgend.v1.RemoveTrackerResponse
-	47, // 73: proto.gpsgend.v1.GeneratorService.UpdateTracker:output_type -> proto.gpsgend.v1.UpdateTrackerResponse
-	45, // 74: proto.gpsgend.v1.GeneratorService.FindTracker:output_type -> proto.gpsgend.v1.FindTrackerResponse
-	43, // 75: proto.gpsgend.v1.GeneratorService.StartTracker:output_type -> proto.gpsgend.v1.StartTrackerResponse
-	41, // 76: proto.gpsgend.v1.GeneratorService.StopTracker:output_type -> proto.gpsgend.v1.StopTrackerResponse
-	39, // 77: proto.gpsgend.v1.GeneratorService.TrackerState:output_type -> proto.gpsgend.v1.TrackerStateResponse
-	37, // 78: proto.gpsgend.v1.GeneratorService.AddRoutes:output_type -> proto.gpsgend.v1.AddRoutesResponse
-	35, // 79: proto.gpsgend.v1.GeneratorService.RemoveRoute:output_type -> proto.gpsgend.v1.RemoveRouteResponse
-	33, // 80: proto.gpsgend.v1.GeneratorService.Routes:output_type -> proto.gpsgend.v1.RoutesResponse
-	31, // 81: proto.gpsgend.v1.GeneratorService.RouteAt:output_type -> proto.gpsgend.v1.RouteAtResponse
-	29, // 82: proto.gpsgend.v1.GeneratorService.RouteByID:output_type -> proto.gpsgend.v1.RouteByIDResponse
-	27, // 83: proto.gpsgend.v1.GeneratorService.ResetRoutes:output_type -> proto.gpsgend.v1.ResetRoutesResponse
-	25, // 84: proto.gpsgend.v1.GeneratorService.ResetNavigator:output_type -> proto.gpsgend.v1.ResetNavigatorResponse
-	23, // 85: proto.gpsgend.v1.GeneratorService.ToNextRoute:output_type -> proto.gpsgend.v1.ToNextRouteResponse
-	21, // 86: proto.gpsgend.v1.GeneratorService.ToPrevRoute:output_type -> proto.gpsgend.v1.ToPrevRouteResponse
-	19, // 87: proto.gpsgend.v1.GeneratorService.MoveToRoute:output_type -> proto.gpsgend.v1.MoveToRouteResponse
-	17, // 88: proto.gpsgend.v1.GeneratorService.MoveToRouteByID:output_type -> proto.gpsgend.v1.MoveToRouteByIDResponse
-	15, // 89: proto.gpsgend.v1.GeneratorService.MoveToTrack:output_type -> proto.gpsgend.v1.MoveToTrackResponse
-	13, // 90: proto.gpsgend.v1.GeneratorService.MoveToTrackByID:output_type -> proto.gpsgend.v1.MoveToTrackByIDResponse
-	11, // 91: proto.gpsgend.v1.GeneratorService.MoveToSegment:output_type -> proto.gpsgend.v1.MoveToSegmentResponse
-	9,  // 92: proto.gpsgend.v1.GeneratorService.AddSensor:output_type -> proto.gpsgend.v1.AddSensorResponse
-	7,  // 93: proto.gpsgend.v1.GeneratorService.RemoveSensor:output_type -> proto.gpsgend.v1.RemoveSensorResponse
-	5,  // 94: proto.gpsgend.v1.GeneratorService.Sensors:output_type -> proto.gpsgend.v1.SensorsResponse
-	3,  // 95: proto.gpsgend.v1.GeneratorService.ShutdownTracker:output_type -> proto.gpsgend.v1.ShutdownTrackerResponse
-	1,  // 96: proto.gpsgend.v1.GeneratorService.ResumeTracker:output_type -> proto.gpsgend.v1.ResumeTrackerResponse
-	70, // [70:97] is the sub-list for method output_type
-	43, // [43:70] is the sub-list for method input_type
-	43, // [43:43] is the sub-list for extension type_name
-	43, // [43:43] is the sub-list for extension extendee
-	0,  // [0:43] is the sub-list for field type_name
+	58, // 0: proto.gpsgend.v1.SyncResponse.error:type_name -> proto.gpsgend.v1.Error
+	59, // 1: proto.gpsgend.v1.StatsResponse.stats:type_name -> proto.gpsgend.v1.StatsItem
+	58, // 2: proto.gpsgend.v1.StatsResponse.error:type_name -> proto.gpsgend.v1.Error
+	58, // 3: proto.gpsgend.v1.ResumeTrackerResponse.error:type_name -> proto.gpsgend.v1.Error
+	58, // 4: proto.gpsgend.v1.ShutdownTrackerResponse.error:type_name -> proto.gpsgend.v1.Error
+	60, // 5: proto.gpsgend.v1.SensorsResponse.sensors:type_name -> proto.gpsgend.v1.Sensor
+	58, // 6: proto.gpsgend.v1.SensorsResponse.error:type_name -> proto.gpsgend.v1.Error
+	58, // 7: proto.gpsgend.v1.RemoveSensorResponse.error:type_name -> proto.gpsgend.v1.Error
+	58, // 8: proto.gpsgend.v1.AddSensorResponse.error:type_name -> proto.gpsgend.v1.Error
+	61, // 9: proto.gpsgend.v1.MoveToSegmentResponse.navigator:type_name -> proto.gpsgend.v1.Navigator
+	58, // 10: proto.gpsgend.v1.MoveToSegmentResponse.error:type_name -> proto.gpsgend.v1.Error
+	61, // 11: proto.gpsgend.v1.MoveToTrackByIDResponse.navigator:type_name -> proto.gpsgend.v1.Navigator
+	58, // 12: proto.gpsgend.v1.MoveToTrackByIDResponse.error:type_name -> proto.gpsgend.v1.Error
+	61, // 13: proto.gpsgend.v1.MoveToTrackResponse.navigator:type_name -> proto.gpsgend.v1.Navigator
+	58, // 14: proto.gpsgend.v1.MoveToTrackResponse.error:type_name -> proto.gpsgend.v1.Error
+	61, // 15: proto.gpsgend.v1.MoveToRouteByIDResponse.navigator:type_name -> proto.gpsgend.v1.Navigator
+	58, // 16: proto.gpsgend.v1.MoveToRouteByIDResponse.error:type_name -> proto.gpsgend.v1.Error
+	61, // 17: proto.gpsgend.v1.MoveToRouteResponse.navigator:type_name -> proto.gpsgend.v1.Navigator
+	58, // 18: proto.gpsgend.v1.MoveToRouteResponse.error:type_name -> proto.gpsgend.v1.Error
+	61, // 19: proto.gpsgend.v1.ToPrevRouteResponse.navigator:type_name -> proto.gpsgend.v1.Navigator
+	58, // 20: proto.gpsgend.v1.ToPrevRouteResponse.error:type_name -> proto.gpsgend.v1.Error
+	61, // 21: proto.gpsgend.v1.ToNextRouteResponse.navigator:type_name -> proto.gpsgend.v1.Navigator
+	58, // 22: proto.gpsgend.v1.ToNextRouteResponse.error:type_name -> proto.gpsgend.v1.Error
+	58, // 23: proto.gpsgend.v1.ResetNavigatorResponse.error:type_name -> proto.gpsgend.v1.Error
+	58, // 24: proto.gpsgend.v1.ResetRoutesResponse.error:type_name -> proto.gpsgend.v1.Error
+	58, // 25: proto.gpsgend.v1.RouteByIDResponse.error:type_name -> proto.gpsgend.v1.Error
+	58, // 26: proto.gpsgend.v1.RouteAtResponse.error:type_name -> proto.gpsgend.v1.Error
+	58, // 27: proto.gpsgend.v1.RoutesResponse.error:type_name -> proto.gpsgend.v1.Error
+	58, // 28: proto.gpsgend.v1.RemoveRouteResponse.error:type_name -> proto.gpsgend.v1.Error
+	58, // 29: proto.gpsgend.v1.AddRoutesResponse.error:type_name -> proto.gpsgend.v1.Error
+	58, // 30: proto.gpsgend.v1.TrackerStateResponse.error:type_name -> proto.gpsgend.v1.Error
+	58, // 31: proto.gpsgend.v1.StopTrackerResponse.error:type_name -> proto.gpsgend.v1.Error
+	58, // 32: proto.gpsgend.v1.StartTrackerResponse.error:type_name -> proto.gpsgend.v1.Error
+	62, // 33: proto.gpsgend.v1.FindTrackerResponse.tracker:type_name -> proto.gpsgend.v1.Tracker
+	58, // 34: proto.gpsgend.v1.FindTrackerResponse.error:type_name -> proto.gpsgend.v1.Error
+	58, // 35: proto.gpsgend.v1.UpdateTrackerResponse.error:type_name -> proto.gpsgend.v1.Error
+	58, // 36: proto.gpsgend.v1.RemoveTrackerResponse.error:type_name -> proto.gpsgend.v1.Error
+	63, // 37: proto.gpsgend.v1.SearchTrackersRequest.filter:type_name -> proto.gpsgend.v1.Filter
+	62, // 38: proto.gpsgend.v1.SearchTrackersResponse.trackers:type_name -> proto.gpsgend.v1.Tracker
+	58, // 39: proto.gpsgend.v1.SearchTrackersResponse.error:type_name -> proto.gpsgend.v1.Error
+	64, // 40: proto.gpsgend.v1.NewTrackerRequest.offline:type_name -> proto.gpsgend.v1.Offline
+	65, // 41: proto.gpsgend.v1.NewTrackerRequest.elevation:type_name -> proto.gpsgend.v1.Elevation
+	66, // 42: proto.gpsgend.v1.NewTrackerRequest.battery:type_name -> proto.gpsgend.v1.Battery
+	67, // 43: proto.gpsgend.v1.NewTrackerRequest.speed:type_name -> proto.gpsgend.v1.Speed
+	62, // 44: proto.gpsgend.v1.NewTrackerResponse.tracker:type_name -> proto.gpsgend.v1.Tracker
+	58, // 45: proto.gpsgend.v1.NewTrackerResponse.error:type_name -> proto.gpsgend.v1.Error
+	56, // 46: proto.gpsgend.v1.GeneratorService.NewTracker:input_type -> proto.gpsgend.v1.NewTrackerRequest
+	54, // 47: proto.gpsgend.v1.GeneratorService.SearchTrackers:input_type -> proto.gpsgend.v1.SearchTrackersRequest
+	52, // 48: proto.gpsgend.v1.GeneratorService.RemoveTracker:input_type -> proto.gpsgend.v1.RemoveTrackerRequest
+	50, // 49: proto.gpsgend.v1.GeneratorService.UpdateTracker:input_type -> proto.gpsgend.v1.UpdateTrackerRequest
+	48, // 50: proto.gpsgend.v1.GeneratorService.FindTracker:input_type -> proto.gpsgend.v1.FindTrackerRequest
+	46, // 51: proto.gpsgend.v1.GeneratorService.StartTracker:input_type -> proto.gpsgend.v1.StartTrackerRequest
+	44, // 52: proto.gpsgend.v1.GeneratorService.StopTracker:input_type -> proto.gpsgend.v1.StopTrackerRequest
+	42, // 53: proto.gpsgend.v1.GeneratorService.TrackerState:input_type -> proto.gpsgend.v1.TrackerStateRequest
+	40, // 54: proto.gpsgend.v1.GeneratorService.AddRoutes:input_type -> proto.gpsgend.v1.AddRoutesRequest
+	38, // 55: proto.gpsgend.v1.GeneratorService.RemoveRoute:input_type -> proto.gpsgend.v1.RemoveRouteRequest
+	36, // 56: proto.gpsgend.v1.GeneratorService.Routes:input_type -> proto.gpsgend.v1.RoutesRequest
+	34, // 57: proto.gpsgend.v1.GeneratorService.RouteAt:input_type -> proto.gpsgend.v1.RouteAtRequest
+	32, // 58: proto.gpsgend.v1.GeneratorService.RouteByID:input_type -> proto.gpsgend.v1.RouteByIDRequest
+	30, // 59: proto.gpsgend.v1.GeneratorService.ResetRoutes:input_type -> proto.gpsgend.v1.ResetRoutesRequest
+	28, // 60: proto.gpsgend.v1.GeneratorService.ResetNavigator:input_type -> proto.gpsgend.v1.ResetNavigatorRequest
+	26, // 61: proto.gpsgend.v1.GeneratorService.ToNextRoute:input_type -> proto.gpsgend.v1.ToNextRouteRequest
+	24, // 62: proto.gpsgend.v1.GeneratorService.ToPrevRoute:input_type -> proto.gpsgend.v1.ToPrevRouteRequest
+	22, // 63: proto.gpsgend.v1.GeneratorService.MoveToRoute:input_type -> proto.gpsgend.v1.MoveToRouteRequest
+	20, // 64: proto.gpsgend.v1.GeneratorService.MoveToRouteByID:input_type -> proto.gpsgend.v1.MoveToRouteByIDRequest
+	18, // 65: proto.gpsgend.v1.GeneratorService.MoveToTrack:input_type -> proto.gpsgend.v1.MoveToTrackRequest
+	16, // 66: proto.gpsgend.v1.GeneratorService.MoveToTrackByID:input_type -> proto.gpsgend.v1.MoveToTrackByIDRequest
+	14, // 67: proto.gpsgend.v1.GeneratorService.MoveToSegment:input_type -> proto.gpsgend.v1.MoveToSegmentRequest
+	12, // 68: proto.gpsgend.v1.GeneratorService.AddSensor:input_type -> proto.gpsgend.v1.AddSensorRequest
+	10, // 69: proto.gpsgend.v1.GeneratorService.RemoveSensor:input_type -> proto.gpsgend.v1.RemoveSensorRequest
+	8,  // 70: proto.gpsgend.v1.GeneratorService.Sensors:input_type -> proto.gpsgend.v1.SensorsRequest
+	6,  // 71: proto.gpsgend.v1.GeneratorService.ShutdownTracker:input_type -> proto.gpsgend.v1.ShutdownTrackerRequest
+	4,  // 72: proto.gpsgend.v1.GeneratorService.ResumeTracker:input_type -> proto.gpsgend.v1.ResumeTrackerRequest
+	2,  // 73: proto.gpsgend.v1.GeneratorService.Stats:input_type -> proto.gpsgend.v1.EmptyRequest
+	0,  // 74: proto.gpsgend.v1.GeneratorService.Sync:input_type -> proto.gpsgend.v1.SyncRequest
+	57, // 75: proto.gpsgend.v1.GeneratorService.NewTracker:output_type -> proto.gpsgend.v1.NewTrackerResponse
+	55, // 76: proto.gpsgend.v1.GeneratorService.SearchTrackers:output_type -> proto.gpsgend.v1.SearchTrackersResponse
+	53, // 77: proto.gpsgend.v1.GeneratorService.RemoveTracker:output_type -> proto.gpsgend.v1.RemoveTrackerResponse
+	51, // 78: proto.gpsgend.v1.GeneratorService.UpdateTracker:output_type -> proto.gpsgend.v1.UpdateTrackerResponse
+	49, // 79: proto.gpsgend.v1.GeneratorService.FindTracker:output_type -> proto.gpsgend.v1.FindTrackerResponse
+	47, // 80: proto.gpsgend.v1.GeneratorService.StartTracker:output_type -> proto.gpsgend.v1.StartTrackerResponse
+	45, // 81: proto.gpsgend.v1.GeneratorService.StopTracker:output_type -> proto.gpsgend.v1.StopTrackerResponse
+	43, // 82: proto.gpsgend.v1.GeneratorService.TrackerState:output_type -> proto.gpsgend.v1.TrackerStateResponse
+	41, // 83: proto.gpsgend.v1.GeneratorService.AddRoutes:output_type -> proto.gpsgend.v1.AddRoutesResponse
+	39, // 84: proto.gpsgend.v1.GeneratorService.RemoveRoute:output_type -> proto.gpsgend.v1.RemoveRouteResponse
+	37, // 85: proto.gpsgend.v1.GeneratorService.Routes:output_type -> proto.gpsgend.v1.RoutesResponse
+	35, // 86: proto.gpsgend.v1.GeneratorService.RouteAt:output_type -> proto.gpsgend.v1.RouteAtResponse
+	33, // 87: proto.gpsgend.v1.GeneratorService.RouteByID:output_type -> proto.gpsgend.v1.RouteByIDResponse
+	31, // 88: proto.gpsgend.v1.GeneratorService.ResetRoutes:output_type -> proto.gpsgend.v1.ResetRoutesResponse
+	29, // 89: proto.gpsgend.v1.GeneratorService.ResetNavigator:output_type -> proto.gpsgend.v1.ResetNavigatorResponse
+	27, // 90: proto.gpsgend.v1.GeneratorService.ToNextRoute:output_type -> proto.gpsgend.v1.ToNextRouteResponse
+	25, // 91: proto.gpsgend.v1.GeneratorService.ToPrevRoute:output_type -> proto.gpsgend.v1.ToPrevRouteResponse
+	23, // 92: proto.gpsgend.v1.GeneratorService.MoveToRoute:output_type -> proto.gpsgend.v1.MoveToRouteResponse
+	21, // 93: proto.gpsgend.v1.GeneratorService.MoveToRouteByID:output_type -> proto.gpsgend.v1.MoveToRouteByIDResponse
+	19, // 94: proto.gpsgend.v1.GeneratorService.MoveToTrack:output_type -> proto.gpsgend.v1.MoveToTrackResponse
+	17, // 95: proto.gpsgend.v1.GeneratorService.MoveToTrackByID:output_type -> proto.gpsgend.v1.MoveToTrackByIDResponse
+	15, // 96: proto.gpsgend.v1.GeneratorService.MoveToSegment:output_type -> proto.gpsgend.v1.MoveToSegmentResponse
+	13, // 97: proto.gpsgend.v1.GeneratorService.AddSensor:output_type -> proto.gpsgend.v1.AddSensorResponse
+	11, // 98: proto.gpsgend.v1.GeneratorService.RemoveSensor:output_type -> proto.gpsgend.v1.RemoveSensorResponse
+	9,  // 99: proto.gpsgend.v1.GeneratorService.Sensors:output_type -> proto.gpsgend.v1.SensorsResponse
+	7,  // 100: proto.gpsgend.v1.GeneratorService.ShutdownTracker:output_type -> proto.gpsgend.v1.ShutdownTrackerResponse
+	5,  // 101: proto.gpsgend.v1.GeneratorService.ResumeTracker:output_type -> proto.gpsgend.v1.ResumeTrackerResponse
+	3,  // 102: proto.gpsgend.v1.GeneratorService.Stats:output_type -> proto.gpsgend.v1.StatsResponse
+	1,  // 103: proto.gpsgend.v1.GeneratorService.Sync:output_type -> proto.gpsgend.v1.SyncResponse
+	75, // [75:104] is the sub-list for method output_type
+	46, // [46:75] is the sub-list for method input_type
+	46, // [46:46] is the sub-list for extension type_name
+	46, // [46:46] is the sub-list for extension extendee
+	0,  // [0:46] is the sub-list for field type_name
 }
 
 func init() { file_proto_gpsgend_v1_generator_service_proto_init() }
@@ -3707,7 +3930,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 	file_proto_gpsgend_v1_types_proto_init()
 	if !protoimpl.UnsafeEnabled {
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ResumeTrackerRequest); i {
+			switch v := v.(*SyncRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3719,7 +3942,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ResumeTrackerResponse); i {
+			switch v := v.(*SyncResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3731,7 +3954,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ShutdownTrackerRequest); i {
+			switch v := v.(*EmptyRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3743,7 +3966,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ShutdownTrackerResponse); i {
+			switch v := v.(*StatsResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3755,7 +3978,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SensorsRequest); i {
+			switch v := v.(*ResumeTrackerRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3767,7 +3990,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SensorsResponse); i {
+			switch v := v.(*ResumeTrackerResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3779,7 +4002,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RemoveSensorRequest); i {
+			switch v := v.(*ShutdownTrackerRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3791,7 +4014,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RemoveSensorResponse); i {
+			switch v := v.(*ShutdownTrackerResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3803,7 +4026,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AddSensorRequest); i {
+			switch v := v.(*SensorsRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3815,7 +4038,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AddSensorResponse); i {
+			switch v := v.(*SensorsResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3827,7 +4050,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MoveToSegmentRequest); i {
+			switch v := v.(*RemoveSensorRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3839,7 +4062,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MoveToSegmentResponse); i {
+			switch v := v.(*RemoveSensorResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3851,7 +4074,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MoveToTrackByIDRequest); i {
+			switch v := v.(*AddSensorRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3863,7 +4086,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MoveToTrackByIDResponse); i {
+			switch v := v.(*AddSensorResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3875,7 +4098,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MoveToTrackRequest); i {
+			switch v := v.(*MoveToSegmentRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3887,7 +4110,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MoveToTrackResponse); i {
+			switch v := v.(*MoveToSegmentResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3899,7 +4122,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MoveToRouteByIDRequest); i {
+			switch v := v.(*MoveToTrackByIDRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3911,7 +4134,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MoveToRouteByIDResponse); i {
+			switch v := v.(*MoveToTrackByIDResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3923,7 +4146,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MoveToRouteRequest); i {
+			switch v := v.(*MoveToTrackRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3935,7 +4158,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MoveToRouteResponse); i {
+			switch v := v.(*MoveToTrackResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3947,7 +4170,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ToPrevRouteRequest); i {
+			switch v := v.(*MoveToRouteByIDRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3959,7 +4182,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ToPrevRouteResponse); i {
+			switch v := v.(*MoveToRouteByIDResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3971,7 +4194,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ToNextRouteRequest); i {
+			switch v := v.(*MoveToRouteRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3983,7 +4206,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ToNextRouteResponse); i {
+			switch v := v.(*MoveToRouteResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3995,7 +4218,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[24].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ResetNavigatorRequest); i {
+			switch v := v.(*ToPrevRouteRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4007,7 +4230,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[25].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ResetNavigatorResponse); i {
+			switch v := v.(*ToPrevRouteResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4019,7 +4242,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[26].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ResetRoutesRequest); i {
+			switch v := v.(*ToNextRouteRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4031,7 +4254,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[27].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ResetRoutesResponse); i {
+			switch v := v.(*ToNextRouteResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4043,7 +4266,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[28].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RouteByIDRequest); i {
+			switch v := v.(*ResetNavigatorRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4055,7 +4278,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[29].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RouteByIDResponse); i {
+			switch v := v.(*ResetNavigatorResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4067,7 +4290,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[30].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RouteAtRequest); i {
+			switch v := v.(*ResetRoutesRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4079,7 +4302,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[31].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RouteAtResponse); i {
+			switch v := v.(*ResetRoutesResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4091,7 +4314,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[32].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoutesRequest); i {
+			switch v := v.(*RouteByIDRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4103,7 +4326,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[33].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoutesResponse); i {
+			switch v := v.(*RouteByIDResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4115,7 +4338,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[34].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RemoveRouteRequest); i {
+			switch v := v.(*RouteAtRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4127,7 +4350,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[35].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RemoveRouteResponse); i {
+			switch v := v.(*RouteAtResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4139,7 +4362,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[36].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AddRoutesRequest); i {
+			switch v := v.(*RoutesRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4151,7 +4374,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[37].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AddRoutesResponse); i {
+			switch v := v.(*RoutesResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4163,7 +4386,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[38].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*TrackerStateRequest); i {
+			switch v := v.(*RemoveRouteRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4175,7 +4398,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[39].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*TrackerStateResponse); i {
+			switch v := v.(*RemoveRouteResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4187,7 +4410,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[40].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*StopTrackerRequest); i {
+			switch v := v.(*AddRoutesRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4199,7 +4422,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[41].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*StopTrackerResponse); i {
+			switch v := v.(*AddRoutesResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4211,7 +4434,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[42].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*StartTrackerRequest); i {
+			switch v := v.(*TrackerStateRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4223,7 +4446,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[43].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*StartTrackerResponse); i {
+			switch v := v.(*TrackerStateResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4235,7 +4458,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[44].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*FindTrackerRequest); i {
+			switch v := v.(*StopTrackerRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4247,7 +4470,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[45].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*FindTrackerResponse); i {
+			switch v := v.(*StopTrackerResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4259,7 +4482,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[46].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*UpdateTrackerRequest); i {
+			switch v := v.(*StartTrackerRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4271,7 +4494,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[47].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*UpdateTrackerResponse); i {
+			switch v := v.(*StartTrackerResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4283,7 +4506,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[48].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RemoveTrackerRequest); i {
+			switch v := v.(*FindTrackerRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4295,7 +4518,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[49].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RemoveTrackerResponse); i {
+			switch v := v.(*FindTrackerResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4307,7 +4530,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[50].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SearchTrackersRequest); i {
+			switch v := v.(*UpdateTrackerRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4319,7 +4542,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[51].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SearchTrackersResponse); i {
+			switch v := v.(*UpdateTrackerResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4331,7 +4554,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[52].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*NewTrackerRequest); i {
+			switch v := v.(*RemoveTrackerRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4343,6 +4566,54 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			}
 		}
 		file_proto_gpsgend_v1_generator_service_proto_msgTypes[53].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RemoveTrackerResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_proto_gpsgend_v1_generator_service_proto_msgTypes[54].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SearchTrackersRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_proto_gpsgend_v1_generator_service_proto_msgTypes[55].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SearchTrackersResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_proto_gpsgend_v1_generator_service_proto_msgTypes[56].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*NewTrackerRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_proto_gpsgend_v1_generator_service_proto_msgTypes[57].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*NewTrackerResponse); i {
 			case 0:
 				return &v.state
@@ -4361,7 +4632,7 @@ func file_proto_gpsgend_v1_generator_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_proto_gpsgend_v1_generator_service_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   54,
+			NumMessages:   58,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

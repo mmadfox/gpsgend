@@ -129,12 +129,26 @@ func navigator2model(n *types.Navigator) *gpsgendproto.Navigator {
 		Lon:             n.Lon,
 		Lat:             n.Lat,
 		Distance:        n.Distance,
+		RouteId:         n.RouteID,
 		RouteDistance:   n.RouteDistance,
 		RouteIndex:      int64(n.RouteIndex),
+		TrackId:         n.TrackID,
 		TrackDistance:   n.TrackDistance,
 		TrackIndex:      int64(n.TrackIndex),
 		SegmentDistance: n.SegmentDistance,
 		SegmentIndex:    int64(n.SegmentIndex),
 		Units:           "meters",
 	}
+}
+
+func stats2model(stats []generator.StatsItem) []*gpsgendproto.StatsItem {
+	items := make([]*gpsgendproto.StatsItem, len(stats))
+	for i := 0; i < len(stats); i++ {
+		item := stats[i]
+		items[i] = &gpsgendproto.StatsItem{
+			Status: item.Status,
+			Total:  int64(item.Total),
+		}
+	}
+	return items
 }

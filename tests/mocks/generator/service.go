@@ -364,6 +364,21 @@ func (mr *MockServiceMockRecorder) StartTracker(ctx, trackerID interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StartTracker", reflect.TypeOf((*MockService)(nil).StartTracker), ctx, trackerID)
 }
 
+// Stats mocks base method.
+func (m *MockService) Stats(ctx context.Context) ([]generator.StatsItem, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Stats", ctx)
+	ret0, _ := ret[0].([]generator.StatsItem)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Stats indicates an expected call of Stats.
+func (mr *MockServiceMockRecorder) Stats(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Stats", reflect.TypeOf((*MockService)(nil).Stats), ctx)
+}
+
 // StopTracker mocks base method.
 func (m *MockService) StopTracker(ctx context.Context, trackerID types.ID) error {
 	m.ctrl.T.Helper()

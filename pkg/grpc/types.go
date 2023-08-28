@@ -66,13 +66,20 @@ type Navigator struct {
 	Lon             float64
 	Lat             float64
 	Distance        float64
+	RouteiD         string
 	RouteDistance   float64
 	RouteIndex      int
+	TrackID         string
 	TrackDistance   float64
 	TrackIndex      int
 	SegmentDistance float64
 	SegmentIndex    int
 	Units           string
+}
+
+type StatsItem struct {
+	Status string
+	Total  int
 }
 
 type SearchResult struct {

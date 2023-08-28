@@ -32,13 +32,26 @@ func DecodeNavigator(m *gpsgendproto.Navigator) *Navigator {
 		Lon:             m.Lon,
 		Lat:             m.Lat,
 		Distance:        m.Distance,
+		RouteiD:         m.RouteId,
 		RouteDistance:   m.RouteDistance,
 		RouteIndex:      int(m.RouteIndex),
+		TrackID:         m.TrackId,
 		TrackDistance:   m.TrackDistance,
 		TrackIndex:      int(m.TrackIndex),
 		SegmentDistance: m.SegmentDistance,
 		SegmentIndex:    int(m.SegmentIndex),
 	}
+}
+
+func DecodeStats(m []*gpsgendproto.StatsItem) []StatsItem {
+	items := make([]StatsItem, len(m))
+	for i := 0; i < len(m); i++ {
+		items[i] = StatsItem{
+			Status: m[i].Status,
+			Total:  int(m[i].Total),
+		}
+	}
+	return items
 }
 
 func DecodeTracker(m *gpsgendproto.Tracker) (*Tracker, error) {

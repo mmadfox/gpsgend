@@ -46,6 +46,8 @@ const (
 	GeneratorService_Sensors_FullMethodName         = "/proto.gpsgend.v1.GeneratorService/Sensors"
 	GeneratorService_ShutdownTracker_FullMethodName = "/proto.gpsgend.v1.GeneratorService/ShutdownTracker"
 	GeneratorService_ResumeTracker_FullMethodName   = "/proto.gpsgend.v1.GeneratorService/ResumeTracker"
+	GeneratorService_Stats_FullMethodName           = "/proto.gpsgend.v1.GeneratorService/Stats"
+	GeneratorService_Sync_FullMethodName            = "/proto.gpsgend.v1.GeneratorService/Sync"
 )
 
 // GeneratorServiceClient is the client API for GeneratorService service.
@@ -79,6 +81,8 @@ type GeneratorServiceClient interface {
 	Sensors(ctx context.Context, in *SensorsRequest, opts ...grpc.CallOption) (*SensorsResponse, error)
 	ShutdownTracker(ctx context.Context, in *ShutdownTrackerRequest, opts ...grpc.CallOption) (*ShutdownTrackerResponse, error)
 	ResumeTracker(ctx context.Context, in *ResumeTrackerRequest, opts ...grpc.CallOption) (*ResumeTrackerResponse, error)
+	Stats(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*StatsResponse, error)
+	Sync(ctx context.Context, in *SyncRequest, opts ...grpc.CallOption) (*SyncResponse, error)
 }
 
 type generatorServiceClient struct {
@@ -332,6 +336,24 @@ func (c *generatorServiceClient) ResumeTracker(ctx context.Context, in *ResumeTr
 	return out, nil
 }
 
+func (c *generatorServiceClient) Stats(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*StatsResponse, error) {
+	out := new(StatsResponse)
+	err := c.cc.Invoke(ctx, GeneratorService_Stats_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *generatorServiceClient) Sync(ctx context.Context, in *SyncRequest, opts ...grpc.CallOption) (*SyncResponse, error) {
+	out := new(SyncResponse)
+	err := c.cc.Invoke(ctx, GeneratorService_Sync_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GeneratorServiceServer is the server API for GeneratorService service.
 // All implementations must embed UnimplementedGeneratorServiceServer
 // for forward compatibility
@@ -363,6 +385,8 @@ type GeneratorServiceServer interface {
 	Sensors(context.Context, *SensorsRequest) (*SensorsResponse, error)
 	ShutdownTracker(context.Context, *ShutdownTrackerRequest) (*ShutdownTrackerResponse, error)
 	ResumeTracker(context.Context, *ResumeTrackerRequest) (*ResumeTrackerResponse, error)
+	Stats(context.Context, *EmptyRequest) (*StatsResponse, error)
+	Sync(context.Context, *SyncRequest) (*SyncResponse, error)
 	mustEmbedUnimplementedGeneratorServiceServer()
 }
 
@@ -450,6 +474,12 @@ func (UnimplementedGeneratorServiceServer) ShutdownTracker(context.Context, *Shu
 }
 func (UnimplementedGeneratorServiceServer) ResumeTracker(context.Context, *ResumeTrackerRequest) (*ResumeTrackerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ResumeTracker not implemented")
+}
+func (UnimplementedGeneratorServiceServer) Stats(context.Context, *EmptyRequest) (*StatsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Stats not implemented")
+}
+func (UnimplementedGeneratorServiceServer) Sync(context.Context, *SyncRequest) (*SyncResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Sync not implemented")
 }
 func (UnimplementedGeneratorServiceServer) mustEmbedUnimplementedGeneratorServiceServer() {}
 
@@ -950,6 +980,42 @@ func _GeneratorService_ResumeTracker_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GeneratorService_Stats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmptyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GeneratorServiceServer).Stats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GeneratorService_Stats_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GeneratorServiceServer).Stats(ctx, req.(*EmptyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GeneratorService_Sync_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SyncRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GeneratorServiceServer).Sync(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GeneratorService_Sync_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GeneratorServiceServer).Sync(ctx, req.(*SyncRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GeneratorService_ServiceDesc is the grpc.ServiceDesc for GeneratorService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1064,6 +1130,14 @@ var GeneratorService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ResumeTracker",
 			Handler:    _GeneratorService_ResumeTracker_Handler,
+		},
+		{
+			MethodName: "Stats",
+			Handler:    _GeneratorService_Stats_Handler,
+		},
+		{
+			MethodName: "Sync",
+			Handler:    _GeneratorService_Sync_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

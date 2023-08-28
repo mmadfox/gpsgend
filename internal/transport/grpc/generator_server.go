@@ -416,3 +416,25 @@ func (s *GeneratorServer) ResumeTracker(ctx context.Context, req *gpsgendproto.R
 
 	return encodeResumeTrackerResponse()
 }
+
+func (s *GeneratorServer) Stats(ctx context.Context, req *gpsgendproto.EmptyRequest) (*gpsgendproto.StatsResponse, error) {
+	statsItems, err := s.generator.Stats(ctx)
+	if err != nil {
+		return encodeStatsErrorResponse(err)
+	}
+
+	return encodeStatsResponse(statsItems)
+}
+
+func (s *GeneratorServer) Sync(ctx context.Context, req *gpsgendproto.SyncRequest) (*gpsgendproto.SyncResponse, error) {
+	trackerID, err := types.ParseID(req.TrackerId)
+	if err != nil {
+		return encodeSyncErrorResponse(err)
+	}
+
+	if err := s.generator.Sync(ctx, trackerID); err != nil {
+		return encodeSyncErrorResponse(err)
+	}
+
+	return encodeSyncResponse()
+}
