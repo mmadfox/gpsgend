@@ -151,5 +151,8 @@ func (b *Broker) doWork() {
 }
 
 func (b *Broker) send(event *gpsgendproto.Event) {
+	if event.Kind == gpsgendproto.Event_TRACKER_CHANGED && b.hub.NumClients() == 0 {
+		return
+	}
 	b.out <- event
 }

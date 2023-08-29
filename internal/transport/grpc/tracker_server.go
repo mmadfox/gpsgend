@@ -2,6 +2,7 @@ package grpc
 
 import (
 	context "context"
+	"log/slog"
 	"sync"
 
 	"github.com/google/uuid"
@@ -12,12 +13,14 @@ type TrackerServer struct {
 	gpsgendproto.UnimplementedTrackerServiceServer
 
 	broker Broker
+	logger *slog.Logger 
 }
 
-func NewTrackServer(b Broker) *TrackerServer {
+func NewTrackServer(b Broker, logger *slog.Logger) *TrackerServer {
 	return &TrackerServer{
 		UnimplementedTrackerServiceServer: gpsgendproto.UnimplementedTrackerServiceServer{},
 		broker:                            b,
+		logger: logger,
 	}
 }
 
@@ -33,10 +36,13 @@ func (s *TrackerServer) Subscribe(
 	cli := newClient()
 	s.broker.RegisterClient(cid, cli)
 
+	s.logger.Info("client connected", "id", cid)
+
 	defer func() {
 		s.broker.Unregister(cid)
 		cli.Close()
 		close(cli.out)
+		s.logger.Info("client disconnected", "id", cid)
 	}()
 
 	resp := new(gpsgendproto.SubscribeResponse)

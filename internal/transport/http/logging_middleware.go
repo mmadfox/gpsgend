@@ -37,7 +37,7 @@ func LoggingMiddleware(logger *slog.Logger) fiber.Handler {
 		case c.Response().StatusCode() >= http.StatusInternalServerError:
 			logger.LogAttrs(ctx, slog.LevelError, err.Error(), attributes...)
 		default:
-			logger.LogAttrs(ctx, slog.LevelInfo, "Incoming request", attributes...)
+			logger.LogAttrs(ctx, slog.LevelInfo, "incoming request", attributes...)
 		}
 
 		if err != nil {

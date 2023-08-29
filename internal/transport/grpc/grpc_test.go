@@ -2,6 +2,7 @@ package grpc_test
 
 import (
 	"errors"
+	"log/slog"
 	"net"
 	"strconv"
 	"time"
@@ -53,7 +54,7 @@ func setup() (*conns, func()) {
 	con.listener = lis
 	grpcServer := grpc.NewServer([]grpc.ServerOption{}...)
 
-	con.trackerServer = transportgrpc.NewTrackServer(con.broker)
+	con.trackerServer = transportgrpc.NewTrackServer(con.broker, slog.Default())
 	gpsgendproto.RegisterTrackerServiceServer(grpcServer, con.trackerServer)
 
 	go func() {

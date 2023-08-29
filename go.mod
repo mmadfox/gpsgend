@@ -12,7 +12,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.0
 	github.com/lucasb-eyer/go-colorful v1.2.0
-	github.com/mmadfox/go-gpsgen v0.2.1-0.20230828053713-cbf921b70c7a
+	github.com/mmadfox/go-gpsgen v0.2.1-0.20230829074906-5bfa16bf7759
 	github.com/oklog/run v1.1.0
 	github.com/stretchr/testify v1.8.4
 	github.com/valyala/fasthttp v1.48.0

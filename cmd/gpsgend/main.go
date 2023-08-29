@@ -54,7 +54,7 @@ func main() {
 	// storage
 	mongoConn, err := setupMongodb(ctx, conf.Storage.Mongodb.URI)
 	if err != nil {
-		logger.Error("Failed to connect to mongodb", "err", err)
+		logger.Error("failed to connect to mongodb", "err", err)
 		os.Exit(1)
 	}
 
@@ -73,7 +73,7 @@ func main() {
 	}()
 
 	processes.OnError(func(err error) {
-		logger.Error("GPS data generation error", "err", err)
+		logger.Error("gps data generation error", "err", err)
 	})
 	processes.OnPacket(func(b []byte) {
 		eventBroker.PublishTrackerChanged(ctx, b)
@@ -93,7 +93,7 @@ func main() {
 
 	// bootstrap processes
 	if err := gen.Run(ctx); err != nil {
-		logger.Error("Failed to bootstrap generator service", "err", err)
+		logger.Error("failed to bootstrap generator service", "err", err)
 		os.Exit(1)
 	}
 
@@ -102,11 +102,11 @@ func main() {
 		grpcAddr := conf.Transport.GRPC.Listen
 		grpcListener, err := net.Listen("tcp", grpcAddr)
 		if err != nil {
-			logger.Error("Failed to listen to address", "addr", grpcAddr, "err", err)
+			logger.Error("failed to listen to address", "addr", grpcAddr, "err", err)
 			os.Exit(1)
 		}
 		g.Add(func() error {
-			logger.Info("gRPC server is running", "addr", grpcAddr)
+			logger.Info("grpc server is running", "addr", grpcAddr)
 
 			opts := []logging.Option{
 				logging.WithLogOnEvents(logging.StartCall, logging.FinishCall),
@@ -118,35 +118,38 @@ func main() {
 						transportgrpc.InterceptorLogger(logger), opts...),
 				),
 			}...)
-			trackerServer := transportgrpc.NewTrackServer(eventBroker)
+			trackerServer := transportgrpc.NewTrackServer(
+				eventBroker, 
+				slog.With("transport", "grpc-stream"),
+			)
 			generatorServer := transportgrpc.NewGeneratorServer(svc)
 			gpsgendproto.RegisterTrackerServiceServer(baseServer, trackerServer)
 			gpsgendproto.RegisterGeneratorServiceServer(baseServer, generatorServer)
 			return baseServer.Serve(grpcListener)
 		}, func(error) {
-			logger.Info("gRPC server stopped")
+			logger.Info("grpc server stopped")
 			grpcListener.Close()
 		})
 	}
 	{
 		httpAddr := conf.Transport.HTTP.Listen
-		httpServer := transporthttp.New(httpAddr, svc, logger)
+		httpServer := transporthttp.New(httpAddr, svc, logger.With("transport", "http"))
 		g.Add(func() error {
-			logger.Info("HTTP server is running", "addr", httpAddr)
+			logger.Info("http server is running", "addr", httpAddr)
 			return httpServer.Listen()
 		}, func(error) {
-			logger.Info("HTTP server stopped")
+			logger.Info("http server stopped")
 			httpServer.Close()
 		})
 	}
 	{
 		wsAddr := conf.Transport.Websocket.Listen
-		wsServer := transportws.New(wsAddr, eventBroker, logger)
+		wsServer := transportws.New(wsAddr, eventBroker, logger.With("transport", "ws"))
 		g.Add(func() error {
-			logger.Info("Websocket server is running", "addr", wsAddr)
+			logger.Info("websocket server is running", "addr", wsAddr)
 			return wsServer.Listen()
 		}, func(error) {
-			logger.Info("Websocket server stopped")
+			logger.Info("websocket server stopped")
 			wsServer.Close()
 		})
 	}
@@ -155,7 +158,7 @@ func main() {
 		g.Add(func() error {
 			c := make(chan os.Signal, 1)
 			signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
-			logger.Info("Geodata generator is running")
+			logger.Info("geodata generator is running")
 			select {
 			case <-c:
 				return nil
@@ -164,25 +167,25 @@ func main() {
 			}
 		}, func(error) {
 			gen.Close(ctx)
-			logger.Info("Bootstrapper stopped")
+			logger.Info("bootstrapper stopped")
 
 			processes.Close()
-			logger.Info("GPS data generator stopped")
+			logger.Info("gps data generator stopped")
 
 			eventBroker.Close()
-			logger.Info("Event broker stopped")
+			logger.Info("event broker stopped")
 
 			mongoConn.Disconnect(ctx)
-			logger.Info("MongoDB stopped")
+			logger.Info("mongoDB stopped")
 
 			close(cancelInterrupt)
 		})
 	}
 
 	if err := g.Run(); err != nil {
-		logger.Error("Exit", "err", err)
+		logger.Error("exit", "err", err)
 	} else {
-		logger.Info("Exit OK")
+		logger.Info("exit ok")
 	}
 }
 
@@ -224,7 +227,7 @@ func setupStorage(
 	mongoBootstraper := storagemongo.NewBootstraper(col)
 	mongoQuery := storagemongo.NewQuery(col)
 	if err := storagemongo.EnsureIndexes(ctx, col); err != nil {
-		logger.Error("Failed to create indexes in mongo", "err", err)
+		logger.Error("failed to create indexes in mongo", "err", err)
 		os.Exit(1)
 	}
 	return monogoStorage, mongoQuery, mongoBootstraper

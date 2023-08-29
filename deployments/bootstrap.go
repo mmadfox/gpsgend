@@ -34,7 +34,7 @@ func main() {
 	ctx := context.Background()
 	defer conn.Close()
 
-	for i := 0; i < 350; i++ {
+	for i := 0; i < 1000; i++ {
 		opts := tranportgrpc.NewAddTrackerOptions()
 		opts.CustomID = uuid.NewString()
 		opts.Descr = "Descr-" + random.String(16)

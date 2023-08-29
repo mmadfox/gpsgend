@@ -6,14 +6,14 @@ logger:
 
 generator:
   flushInterval: 3s
-  packetSize: 256
-  numWorker: 4  
+  packetSize: 8192
+  numWorker: 4
 
 eventBroker:
   history:
-    enable: true 
-    queueCapacity: 16        # circular queue capacity for events
-    timePeriod: 60s          # send history for a period to a new client 
+    enable: true
+    queueCapacity: 16 # circular queue capacity for events
+    timePeriod: 60s # send history for a period to a new client
 
 transport:
   http:
@@ -23,8 +23,8 @@ transport:
   websocket:
     listen: 0.0.0.0:15025
 
-storage:    
+storage:
   mongodb:
     uri: mongodb://mongodb:27017
-    collectionName: trackers 
+    collectionName: trackers
     databaseName: gpsgend

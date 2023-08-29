@@ -58,7 +58,8 @@ func New(
 
 	app.Get("/gpsgend/ws", websocket.New(func(c *websocket.Conn) {
 		ticker := time.NewTicker(pingPeriod)
-
+  
+		
 		var cid uuid.UUID
 		rid, ok := c.Locals("requestid").(string)
 		if ok {
@@ -66,6 +67,13 @@ func New(
 		} else {
 			cid = uuid.New()
 		}
+
+		logger.Info("client connected", "id", cid)
+
+		defer func() {
+           logger.Info("client closed", "id", cid) 
+		}()
+
 
 		cli := newClient()
 		broker.RegisterClient(cid, cli)

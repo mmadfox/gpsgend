@@ -97,3 +97,9 @@ func (h *hub) Unregister(cid uuid.UUID) error {
 
 	return nil
 }
+
+func (h *hub) NumClients() int {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	return len(h.clients)
+}
