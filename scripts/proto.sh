@@ -10,3 +10,6 @@ docker run --rm -v $rootPath:$rootPath -w $rootPath github.com/mmadfox/gpsgend/p
   proto/gpsgend/v1/generator_service.proto                                                   \
   proto/gpsgend/v1/tracker_service.proto                                                     \
   proto/gpsgend/v1/events.proto
+
+# TODO: add to docker-protoc  with all dependencies
+# protoc proto/gpsgend/v1/events.proto  --ts_out=./gen 
