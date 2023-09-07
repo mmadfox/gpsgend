@@ -1,7 +1,12 @@
 
+.PHONY: docker-gpsgend-random
+docker-gpsgend-random:
+	@docker build -t gpsgend-random:latest -f \
+	    ./docker/gpsgend-random.dockerfile  .
+
 .PHONY: docker-gpsgend
 docker-gpsgend:
-	@docker build -t github.com/mmadfox/gpsgend/mock:latest -f \
+	@docker build -t gpsgend:latest -f \
 	    ./docker/gpsgend.dockerfile  .
 
 .PHONY: docker-mock

@@ -5,7 +5,7 @@ logger:
   level: info # info, warn, debug, error
 
 generator:
-  flushInterval: 3s
+  flushInterval: 1s
   packetSize: 8192
   numWorker: 4
 

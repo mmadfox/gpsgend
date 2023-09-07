@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/mmadfox/go-gpsgen"
 	"github.com/mmadfox/go-gpsgen/random"
-	tranportgrpc "github.com/mmadfox/gpsgend/pkg/grpc"
+	transportgrpc "github.com/mmadfox/gpsgend/pkg/grpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -19,7 +19,7 @@ func main() {
 
 	time.Sleep(5 * time.Second)
 
-	conn, err := grpc.Dial("gpsgend:15015", []grpc.DialOption{
+	conn, err := grpc.Dial("0.0.0.0:15015", []grpc.DialOption{
 		grpc.WithTransportCredentials(
 			insecure.NewCredentials(),
 		),
@@ -30,12 +30,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	cli := tranportgrpc.New(conn)
+	cli := transportgrpc.New(conn)
 	ctx := context.Background()
 	defer conn.Close()
 
 	for i := 0; i < 1000; i++ {
-		opts := tranportgrpc.NewAddTrackerOptions()
+		opts := transportgrpc.NewAddTrackerOptions()
 		opts.CustomID = uuid.NewString()
 		opts.Descr = "Descr-" + random.String(16)
 		tracker, err := cli.AddTracker(ctx, opts)
@@ -43,7 +43,13 @@ func main() {
 			panic(err)
 		}
 
-		route := gpsgen.RandomRouteForNewYork()
+		var route *gpsgen.Route
+		if i < 500 {
+			route = gpsgen.RandomRouteForNewYork()
+		} else {
+			route = gpsgen.RandomRouteForMoscow()
+		}
+
 		if err := cli.AddRoutes(ctx, tracker.ID, route); err != nil {
 			panic(err)
 		}

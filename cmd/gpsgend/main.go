@@ -50,6 +50,7 @@ func main() {
 
 	ctx := context.Background()
 	logger := setupLogger(conf)
+    logger.Info("starting...")
 
 	// storage
 	mongoConn, err := setupMongodb(ctx, conf.Storage.Mongodb.URI)
@@ -208,7 +209,14 @@ func setupMongodb(ctx context.Context, uri string) (*mongo.Client, error) {
 	opts := options.Client().ApplyURI(uri)
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	return mongo.Connect(ctx, opts)
+	conn, err := mongo.Connect(ctx, opts)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to mongodb: %w", err)
+	}
+	if err := conn.Ping(ctx, nil); err != nil {
+		return nil, err
+	}
+	return conn, nil
 }
 
 func setupStorage(
