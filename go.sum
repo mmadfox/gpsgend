@@ -66,6 +66,8 @@ github.com/mmadfox/go-gpsgen v0.2.1-0.20230829031950-fd487aa4e5f1 h1:eLf1aeqypzM
 github.com/mmadfox/go-gpsgen v0.2.1-0.20230829031950-fd487aa4e5f1/go.mod h1:7bpz8FPJh0zxtSqSkAtydRoZrjPXRa29/JT6n4DaKrU=
 github.com/mmadfox/go-gpsgen v0.2.1-0.20230829074906-5bfa16bf7759 h1:/JDh/gnWtp/xYc2ANZNY0H33Fmh6wpv2p/UaXKIrw70=
 github.com/mmadfox/go-gpsgen v0.2.1-0.20230829074906-5bfa16bf7759/go.mod h1:7bpz8FPJh0zxtSqSkAtydRoZrjPXRa29/JT6n4DaKrU=
+github.com/mmadfox/go-gpsgen v0.2.1-0.20230908002859-d061a6959fdb h1:bEd8ApqLZPk0FZm3++X4/5KysXPUPBUjiYXgjIAbFHg=
+github.com/mmadfox/go-gpsgen v0.2.1-0.20230908002859-d061a6959fdb/go.mod h1:7bpz8FPJh0zxtSqSkAtydRoZrjPXRa29/JT6n4DaKrU=
 github.com/mmcloughlin/spherand v0.0.0-20200201191112-cd5c4c9261aa h1:TvwT7HaVPt7b6TROnyaJYwXOx4Z3PlV6U/DmCHwfVtM=
 github.com/mmcloughlin/spherand v0.0.0-20200201191112-cd5c4c9261aa/go.mod h1:JRhAhQ3xUk4MScyThO4kvxffoYBpameNk2DTisOPli0=
 github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe h1:iruDEfMl2E6fbMZ9s0scYfZQ84/6SPL6zC8ACM2oIL0=
