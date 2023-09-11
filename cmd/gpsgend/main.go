@@ -16,7 +16,7 @@ import (
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/mmadfox/go-gpsgen"
-	config "github.com/mmadfox/gpsgend/configs"
+	config "github.com/mmadfox/gpsgend/config"
 	gpsgendproto "github.com/mmadfox/gpsgend/gen/proto/gpsgend/v1"
 	"github.com/mmadfox/gpsgend/internal/broker"
 	"github.com/mmadfox/gpsgend/internal/generator"
@@ -50,7 +50,6 @@ func main() {
 
 	ctx := context.Background()
 	logger := setupLogger(conf)
-    logger.Info("starting...")
 
 	// storage
 	mongoConn, err := setupMongodb(ctx, conf.Storage.Mongodb.URI)
@@ -103,11 +102,11 @@ func main() {
 		grpcAddr := conf.Transport.GRPC.Listen
 		grpcListener, err := net.Listen("tcp", grpcAddr)
 		if err != nil {
-			logger.Error("failed to listen to address", "addr", grpcAddr, "err", err)
+			logger.Error("failed to listen to address", "listen", grpcAddr, "err", err)
 			os.Exit(1)
 		}
 		g.Add(func() error {
-			logger.Info("grpc server is running", "addr", grpcAddr)
+			logger.Info("grpc server is running", "listen", grpcAddr)
 
 			opts := []logging.Option{
 				logging.WithLogOnEvents(logging.StartCall, logging.FinishCall),
@@ -120,7 +119,7 @@ func main() {
 				),
 			}...)
 			trackerServer := transportgrpc.NewTrackServer(
-				eventBroker, 
+				eventBroker,
 				slog.With("transport", "grpc-stream"),
 			)
 			generatorServer := transportgrpc.NewGeneratorServer(svc)
@@ -136,7 +135,7 @@ func main() {
 		httpAddr := conf.Transport.HTTP.Listen
 		httpServer := transporthttp.New(httpAddr, svc, logger.With("transport", "http"))
 		g.Add(func() error {
-			logger.Info("http server is running", "addr", httpAddr)
+			logger.Info("http server is running", "listen", httpAddr)
 			return httpServer.Listen()
 		}, func(error) {
 			logger.Info("http server stopped")
@@ -147,7 +146,7 @@ func main() {
 		wsAddr := conf.Transport.Websocket.Listen
 		wsServer := transportws.New(wsAddr, eventBroker, logger.With("transport", "ws"))
 		g.Add(func() error {
-			logger.Info("websocket server is running", "addr", wsAddr)
+			logger.Info("websocket server is running", "listen", wsAddr)
 			return wsServer.Listen()
 		}, func(error) {
 			logger.Info("websocket server stopped")

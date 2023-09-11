@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"sync/atomic"
 	"time"
 
 	"github.com/mmadfox/go-gpsgen"
@@ -21,6 +22,8 @@ const waitStream = 3 * time.Second
 func (c *Client) Unwatch(ctx context.Context) error {
 	req := gpsgendproto.UnsubscribeRequest{ClientId: c.id.String()}
 
+	atomic.StoreUint32(&c.watch, 0)
+
 	resp, err := c.trackerCli.Unsubscribe(ctx, &req)
 	if err != nil {
 		return toError(err)
@@ -36,11 +39,17 @@ func (c *Client) Watch(ctx context.Context, w Watcher) error {
 	var stream gpsgendproto.TrackerService_SubscribeClient
 	var err error
 
+	atomic.StoreUint32(&c.watch, 1)
+
 	for {
 		select {
 		case <-ctx.Done():
 			return nil
 		default:
+		}
+
+		if c.isUnwatch() {
+			return nil
 		}
 
 		if stream == nil {
@@ -57,6 +66,9 @@ func (c *Client) Watch(ctx context.Context, w Watcher) error {
 
 		resp, err := stream.Recv()
 		if err != nil {
+			if c.isUnwatch() {
+				return nil
+			}
 			stream = nil
 			if stop := w.OnError(err); stop {
 				return err
@@ -95,4 +107,8 @@ func (c *Client) subscribe(ctx context.Context) (gpsgendproto.TrackerService_Sub
 	return c.trackerCli.Subscribe(ctx, &gpsgendproto.SubscribeRequest{
 		ClientId: c.id.String(),
 	})
+}
+
+func (c *Client) isUnwatch() bool {
+	return atomic.LoadUint32(&c.watch) == 0
 }

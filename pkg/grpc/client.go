@@ -15,6 +15,7 @@ type Client struct {
 	id           uuid.UUID
 	generatorCli gpsgendproto.GeneratorServiceClient
 	trackerCli   gpsgendproto.TrackerServiceClient
+	watch        uint32
 }
 
 func New(conn *grpc.ClientConn) *Client {
